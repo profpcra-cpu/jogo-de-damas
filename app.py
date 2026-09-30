@@ -1,18 +1,8 @@
-"""
-Jogo de Damas - Regras Brasileiras
-----------------------------------
-Aplicação Streamlit que implementa o jogo de damas segundo as regras
-brasileiras (peças comuns capturam para frente e para trás; damas
-movem-se livremente por várias casas nas diagonais).
-
-Autor: (refatoração profissional)
-"""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Optional
+from typing import Optional, List, Tuple
 
 import streamlit as st
 
@@ -77,6 +67,10 @@ class EstadoJogo:
     tabuleiro: list[list[int]] = field(default_factory=list)
     turno: Jogador = Jogador.VERMELHO
     selecionada: Optional[Posicao] = None
+    vencedor: Optional[Jogador] = None
+    historico: list[str] = field(default_factory=list)
+    capturadas_vermelho: int = 0
+    capturadas_branco: int = 0
 
 
 # ============================================================
@@ -140,7 +134,6 @@ class RegrasDamas:
         dr, dc = destino
         peca_origem = tabuleiro[sr][sc]
 
-        # Sanidade básica
         if not RegrasDamas.dentro_do_tabuleiro(dr, dc):
             return False, None
         if tabuleiro[dr][dc] != Peca.VAZIO:
@@ -220,7 +213,7 @@ class RegrasDamas:
             return True, None
         if len(adversarias_no_caminho) == 1:
             return True, adversarias_no_caminho[0]
-        return False, None  # não pode saltar duas peças
+        return False, None
 
     @staticmethod
     def promover_se_aplicavel(
@@ -254,12 +247,31 @@ class RegrasDamas:
             tabuleiro[cr][cc] = Peca.VAZIO
 
     @staticmethod
+    def verificar_vencedor(tabuleiro: list[list[int]]) -> Optional[Jogador]:
+        """Verifica se algum jogador ficou sem peças no tabuleiro."""
+        tem_vermelho = False
+        tem_branco = False
+
+        for linha in tabuleiro:
+            for peca in linha:
+                if peca in PECAS_DO_JOGADOR[Jogador.VERMELHO]:
+                    tem_vermelho = True
+                elif peca in PECAS_DO_JOGADOR[Jogador.BRANCO]:
+                    tem_branco = True
+
+        if not tem_vermelho:
+            return Jogador.BRANCO
+        if not tem_branco:
+            return Jogador.VERMELHO
+        return None
+
+    @staticmethod
     def alternar_turno(jogador: Jogador) -> Jogador:
         return Jogador.BRANCO if jogador == Jogador.VERMELHO else Jogador.VERMELHO
 
 
 # ============================================================
-# ESTADO DA SESSÃO
+# ESTADO DA SESSÃO E INTERAÇÃO
 # ============================================================
 
 def inicializar_estado() -> None:
@@ -269,6 +281,10 @@ def inicializar_estado() -> None:
             tabuleiro=RegrasDamas.criar_tabuleiro_inicial(),
             turno=Jogador.VERMELHO,
             selecionada=None,
+            vencedor=None,
+            historico=["🎮 Partida iniciada. Vez do Jogador Vermelho."],
+            capturadas_vermelho=0,
+            capturadas_branco=0,
         )
 
 
@@ -277,42 +293,63 @@ def reiniciar_jogo() -> None:
         tabuleiro=RegrasDamas.criar_tabuleiro_inicial(),
         turno=Jogador.VERMELHO,
         selecionada=None,
+        vencedor=None,
+        historico=["🔄 Partida reiniciada. Vez do Jogador Vermelho."],
+        capturadas_vermelho=0,
+        capturadas_branco=0,
     )
     st.rerun()
 
 
-# ============================================================
-# LÓGICA DE INTERAÇÃO
-# ============================================================
-
 def tratar_clique(estado: EstadoJogo, linha: int, coluna: int) -> None:
     """Processa o clique do usuário em uma casa do tabuleiro."""
+    if estado.vencedor is not None:
+        return
+
     tabuleiro = estado.tabuleiro
     peca = tabuleiro[linha][coluna]
-    jogador = estado.turno
+    jog = estado.turno
 
     # Caso 1: nada selecionado -> tenta selecionar peça própria
     if estado.selecionada is None:
-        if RegrasDamas.pertence_ao_jogador(peca, jogador):
+        if RegrasDamas.pertence_ao_jogador(peca, jog):
             estado.selecionada = (linha, coluna)
             st.rerun()
         return
 
     origem = estado.selecionada
     valido, capturada = RegrasDamas.validar_movimento(
-        tabuleiro, origem, (linha, coluna), jogador
+        tabuleiro, origem, (linha, coluna), jog
     )
 
     if valido:
         RegrasDamas.aplicar_movimento(tabuleiro, origem, (linha, coluna), capturada)
-        RegrasDamas.promover_se_aplicavel(tabuleiro, (linha, coluna), jogador)
-        estado.turno = RegrasDamas.alternar_turno(jogador)
+        RegrasDamas.promover_se_aplicavel(tabuleiro, (linha, coluna), jog)
+
+        # Atualizar contagem de capturas
+        if capturada is not None:
+            if jog == Jogador.VERMELHO:
+                estado.capturadas_vermelho += 1
+            else:
+                estado.capturadas_branco += 1
+
+        # Verificar vencedor
+        vencedor = RegrasDamas.verificar_vencedor(tabuleiro)
+        if vencedor is not None:
+            estado.vencedor = vencedor
+            nome_venc = "Vermelho" if vencedor == Jogador.VERMELHO else "Branco"
+            estado.historico.insert(0, f"🏆 Fim de jogo! Jogador {nome_venc} venceu!")
+        else:
+            estado.turno = RegrasDamas.alternar_turno(jog)
+            proximo_nome = "Vermelho" if estado.turno == Jogador.VERMELHO else "Branco"
+            estado.historico.insert(0, f"➡️ Movimento de {origem} para {(linha, coluna)}. Turno de {proximo_nome}.")
+
         estado.selecionada = None
         st.rerun()
         return
 
-    # Movimento inválido: selecionar outra peça própria ou desmarcar
-    if RegrasDamas.pertence_ao_jogador(peca, jogador):
+    # Movimento inválido ou troca de seleção
+    if RegrasDamas.pertence_ao_jogador(peca, jog):
         estado.selecionada = (linha, coluna)
     else:
         estado.selecionada = None
@@ -320,22 +357,73 @@ def tratar_clique(estado: EstadoJogo, linha: int, coluna: int) -> None:
 
 
 # ============================================================
-# INTERFACE (UI)
+# INTERFACE (UI) COM DESIGN MODERNO
 # ============================================================
 
 def aplicar_estilos_customizados() -> None:
-    """Aplica estilos CSS para melhorar a apresentação visual do tabuleiro."""
+    """Injeta CSS customizado para transformar a estética do aplicativo."""
     st.markdown(
         """
         <style>
+            .stApp {
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                color: #f8fafc;
+            }
+            .main-title {
+                font-size: 2.5rem;
+                font-weight: 800;
+                background: linear-gradient(90deg, #ef4444 0%, #f97316 50%, #ffffff 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                text-align: center;
+                margin-bottom: 0px;
+            }
+            .sub-title {
+                text-align: center;
+                color: #94a3b8;
+                font-size: 1.1rem;
+                margin-bottom: 2rem;
+            }
+            /* Board Button Styling */
             .stButton button {
-                height: 55px;
-                font-size: 26px !important;
-                border-radius: 8px;
-                transition: all 0.2s ease-in-out;
+                height: 60px !important;
+                width: 100% !important;
+                font-size: 28px !important;
+                border-radius: 10px !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             }
             .stButton button:hover {
-                transform: scale(1.03);
+                transform: translateY(-2px);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+                border-color: rgba(255, 255, 255, 0.3) !important;
+            }
+            /* Stats Card */
+            .stat-card {
+                background: rgba(30, 41, 59, 0.7);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                padding: 1rem;
+                border-radius: 12px;
+                text-align: center;
+                backdrop-filter: blur(8px);
+            }
+            .winner-banner {
+                background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+                padding: 1.5rem;
+                border-radius: 12px;
+                text-align: center;
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: white;
+                margin-bottom: 1.5rem;
+                box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.02); }
+                100% { transform: scale(1); }
             }
         </style>
         """,
@@ -344,35 +432,34 @@ def aplicar_estilos_customizados() -> None:
 
 
 def renderizar_cabecalho(estado: EstadoJogo) -> None:
-    st.markdown("<h1 style='text-align: center;'>🔴 Jogo de Damas ⚪</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: gray;'>Regras Brasileiras</p>", unsafe_allow_html=True)
-    st.markdown("---")
+    st.markdown("<h1 class='main-title'>JOGO DE DAMAS</h1>", unsafe_allow_html=True)
+    st.markdown("<div class='sub-title'>Edição Brasileira Profissional • Movimentos Diagonais e Capturas Retroativas</div>", unsafe_allow_html=True)
 
-    col_status, col_acao = st.columns([2, 1])
-
-    with col_status:
-        nome_turno = "🔴 Vermelho (1)" if estado.turno == Jogador.VERMELHO else "⚪ Branco (2)"
-        st.info(f"**Turno de:** {nome_turno}")
-
-    with col_acao:
-        if st.button("🔄 Reiniciar Jogo", use_container_width=True):
-            reiniciar_jogo()
+    if estado.vencedor is not None:
+        nome_venc = "🔴 Vermelho" if estado.vencedor == Jogador.VERMELHO else "⚪ Branco"
+        st.markdown(
+            f"<div class='winner-banner'>🎉 VITÓRIA DO JOGADOR {nome_venc}! 🎉</div>",
+            unsafe_allow_html=True,
+        )
 
 
 def renderizar_tabuleiro(estado: EstadoJogo) -> None:
-    for linha in range(TAMANHO_TABULEIRO):
-        colunas = st.columns(TAMANHO_TABULEIRO)
-        for coluna in range(TAMANHO_TABULEIRO):
-            with colunas[coluna]:
-                if RegrasDamas.casa_jogavel(linha, coluna):
-                    _renderizar_casa_jogavel(estado, linha, coluna)
-                else:
-                    st.button(
-                        "",
-                        key=f"empty_{linha}_{coluna}",
-                        disabled=True,
-                        use_container_width=True,
-                    )
+    col_centro_esq, col_tab, col_centro_dir = st.columns([1, 6, 1])
+
+    with col_tab:
+        for linha in range(TAMANHO_TABULEIRO):
+            colunas = st.columns(TAMANHO_TABULEIRO)
+            for coluna in range(TAMANHO_TABULEIRO):
+                with colunas[coluna]:
+                    if RegrasDamas.casa_jogavel(linha, coluna):
+                        _renderizar_casa_jogavel(estado, linha, coluna)
+                    else:
+                        st.button(
+                            "",
+                            key=f"empty_{linha}_{coluna}",
+                            disabled=True,
+                            use_container_width=True,
+                        )
 
 
 def _renderizar_casa_jogavel(estado: EstadoJogo, linha: int, coluna: int) -> None:
@@ -380,7 +467,12 @@ def _renderizar_casa_jogavel(estado: EstadoJogo, linha: int, coluna: int) -> Non
     selecionada = estado.selecionada == (linha, coluna)
 
     label = SIMBOLOS.get(Peca(peca), "")
-    btn_type = "primary" if selecionada else "secondary"
+    
+    # Customizar cor do botão dependendo se está selecionado
+    if selecionada:
+        btn_type = "primary"
+    else:
+        btn_type = "secondary"
 
     if st.button(
         label if label else "•",
@@ -391,31 +483,81 @@ def _renderizar_casa_jogavel(estado: EstadoJogo, linha: int, coluna: int) -> Non
         tratar_clique(estado, linha, coluna)
 
 
+def renderizar_barra_lateral(estado: EstadoJogo) -> None:
+    with st.sidebar:
+        st.markdown("### ⚙️ Painel de Controle")
+        
+        if st.button("🔄 Reiniciar Partida", use_container_width=True, type="primary"):
+            reiniciar_jogo()
+
+        st.markdown("---")
+        
+        # Turno Atual Badge
+        st.markdown("#### ⏱️ Turno Atual")
+        if estado.turno == Jogador.VERMELHO:
+            st.markdown(
+                "<div style='background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; color: #f87171;'>🔴 Jogador Vermelho</div>",
+                unsafe_allow_html=True,
+            )
+        else:
+            st.markdown(
+                "<div style='background: rgba(255, 255, 255, 0.1); border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; color: #f8fafc;'>⚪ Jogador Branco</div>",
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("---")
+
+        # Placar / Capturas
+        st.markdown("#### 📊 Estatísticas")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown(
+                f"<div class='stat-card'><small>🔴 Vermelho</small><br><b>Capturas:</b> {estado.capturadas_vermelho}</div>",
+                unsafe_allow_html=True,
+            )
+        with col2:
+            st.markdown(
+                f"<div class='stat-card'><small>⚪ Branco</small><br><b>Capturas:</b> {estado.capturadas_branco}</div>",
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("---")
+
+        # Histórico de jogadas
+        st.markdown("#### 📜 Histórico Recente")
+        historico_container = st.container(height=250)
+        with historico_container:
+            for evento in estado.historico[:15]:
+                st.caption(evento)
+
+
 def renderizar_rodape() -> None:
     st.markdown("---")
     st.markdown(
-        "🎯 **Regras Brasileiras Aplicadas:** Peças comuns avançam para frente "
-        "e capturam para trás/frente. Damas movimentam-se livremente por várias "
-        "casas nas diagonais. Clique na peça para selecionar e na casa de destino "
-        "para jogar."
+        "<div style='text-align: center; color: #64748b; font-size: 0.9rem;'>"
+        "🎯 <b>Regras Brasileiras:</b> Peças comuns avançam para frente e capturam para trás/frente. "
+        "Damas movimentam-se livremente por várias casas nas diagonais."
+        "</div>",
+        unsafe_allow_html=True,
     )
 
 
 # ============================================================
-# PONTO DE ENTRADA
+# PONTO DE ENTRADA PRINCIPAL
 # ============================================================
 
 def main() -> None:
     st.set_page_config(
         page_title="Jogo de Damas - Regras Brasileiras",
         page_icon="🔴",
-        layout="centered",
+        layout="wide",
     )
 
     aplicar_estilos_customizados()
     inicializar_estado()
     estado: EstadoJogo = st.session_state.estado
 
+    renderizar_barra_lateral(estado)
     renderizar_cabecalho(estado)
     renderizar_tabuleiro(estado)
     renderizar_rodape()
