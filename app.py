@@ -55,7 +55,7 @@ SIMBOLOS = {
     Peca.BRANCA: "⚪",
     Peca.DAMA_VERMELHA: "🔴👑",
     Peca.DAMA_BRANCA: "⚪👑",
-    Peca.VAZIO: "·",
+    Peca.VAZIO: "",
 }
 
 DIRECAO_FRENTE = {
@@ -323,14 +323,35 @@ def tratar_clique(estado: EstadoJogo, linha: int, coluna: int) -> None:
 # INTERFACE (UI)
 # ============================================================
 
+def aplicar_estilos_customizados() -> None:
+    """Aplica estilos CSS para melhorar a apresentação visual do tabuleiro."""
+    st.markdown(
+        """
+        <style>
+            .stButton button {
+                height: 55px;
+                font-size: 26px !important;
+                border-radius: 8px;
+                transition: all 0.2s ease-in-out;
+            }
+            .stButton button:hover {
+                transform: scale(1.03);
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def renderizar_cabecalho(estado: EstadoJogo) -> None:
-    st.title("🔴 Jogo de Damas - Regras Brasileiras ⚪")
+    st.markdown("<h1 style='text-align: center;'>🔴 Jogo de Damas ⚪</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: gray;'>Regras Brasileiras</p>", unsafe_allow_html=True)
     st.markdown("---")
 
     col_status, col_acao = st.columns([2, 1])
 
     with col_status:
-        nome_turno = "Vermelho (1)" if estado.turno == Jogador.VERMELHO else "Branco (2)"
+        nome_turno = "🔴 Vermelho (1)" if estado.turno == Jogador.VERMELHO else "⚪ Branco (2)"
         st.info(f"**Turno de:** {nome_turno}")
 
     with col_acao:
@@ -339,8 +360,6 @@ def renderizar_cabecalho(estado: EstadoJogo) -> None:
 
 
 def renderizar_tabuleiro(estado: EstadoJogo) -> None:
-    tabuleiro = estado.tabuleiro
-
     for linha in range(TAMANHO_TABULEIRO):
         colunas = st.columns(TAMANHO_TABULEIRO)
         for coluna in range(TAMANHO_TABULEIRO):
@@ -349,7 +368,7 @@ def renderizar_tabuleiro(estado: EstadoJogo) -> None:
                     _renderizar_casa_jogavel(estado, linha, coluna)
                 else:
                     st.button(
-                        " ",
+                        "",
                         key=f"empty_{linha}_{coluna}",
                         disabled=True,
                         use_container_width=True,
@@ -360,11 +379,11 @@ def _renderizar_casa_jogavel(estado: EstadoJogo, linha: int, coluna: int) -> Non
     peca = estado.tabuleiro[linha][coluna]
     selecionada = estado.selecionada == (linha, coluna)
 
-    label = SIMBOLOS.get(Peca(peca), "·")
+    label = SIMBOLOS.get(Peca(peca), "")
     btn_type = "primary" if selecionada else "secondary"
 
     if st.button(
-        label,
+        label if label else "•",
         key=f"cell_{linha}_{coluna}",
         type=btn_type,
         use_container_width=True,
@@ -393,6 +412,7 @@ def main() -> None:
         layout="centered",
     )
 
+    aplicar_estilos_customizados()
     inicializar_estado()
     estado: EstadoJogo = st.session_state.estado
 
