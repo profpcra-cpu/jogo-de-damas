@@ -40,7 +40,7 @@ st.markdown("---")
 col_status1, col_status2, col_status3 = st.columns(3)
 with col_status1:
     turno_nome = "Vermelho (1)" if st.session_state.turno == 1 else "Branco (2)"
-    st.info(**Turno de:** {turno_nome})
+    st.info(f"Turno de: {turno_nome}")
 with col_status2:
     if st.button("🔄 Reiniciar Jogo"):
         st.session_state.tabuleiro = inicializar_tabuleiro()
