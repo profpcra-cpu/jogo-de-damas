@@ -2,7 +2,7 @@
 Jogo de Damas - Regras Brasileiras
 ----------------------------------
 Aplicação Streamlit profissional com interface moderna, painel lateral,
-histórico de jogadas e deteção automática de vitória.
+histórico de jogadas, deteção automática de vitória e CSS otimizado para o tabuleiro.
 """
 
 from __future__ import annotations
@@ -256,11 +256,9 @@ def tratar_clique(estado: EstadoJogo, linha: int, coluna: int) -> None:
             else:
                 estado.capturas_branco += 1
 
-        # Registar histórico simples
         jog_str = "Vermelho" if jogador == Jogador.VERMELHO else "Branco"
         estado.historico.append(f"{jog_str}: {origem} ➔ {(linha, coluna)}")
 
-        # Verificar se há vencedor
         vencedor = RegrasDamas.verificar_vencedor(tabuleiro)
         if vencedor:
             estado.vencedor = vencedor
@@ -278,31 +276,45 @@ def tratar_clique(estado: EstadoJogo, linha: int, coluna: int) -> None:
 
 
 # ============================================================
-# INTERFACE (UI) COM ESTILIZAÇÃO CSS
+# INTERFACE (UI) COM ESTILIZAÇÃO CSS CORRIGIDA
 # ============================================================
 
 def aplicar_estilos_css() -> None:
     st.markdown("""
         <style>
-        .stButton button {
-            width: 100%;
-            height: 60px;
-            font-size: 24px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.2s ease-in-out;
+        /* Força os botões do tabuleiro a terem proporção quadrada e aspeto elegante */
+        div.row-widget.stButton > button {
+            width: 100% !important;
+            aspect-ratio: 1 / 1 !important;
+            height: auto !important;
+            font-size: 28px !important;
+            border-radius: 6px !important;
+            padding: 0px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.15s ease-in-out;
         }
-        .stButton button:hover {
-            transform: scale(1.02);
-            border-color: #ff4b4b;
+        div.row-widget.stButton > button:hover {
+            transform: scale(1.05);
+            border-color: #ff4b4b !important;
+        }
+        /* Estilo para casas vazias do tabuleiro (não jogáveis) */
+        div.row-widget.stButton > button:disabled {
+            background-color: #f0f2f6 !important;
+            border: none !important;
+            box-shadow: none !important;
+            opacity: 0.4;
         }
         .stat-card {
-            background-color: #1e1e1e;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #333;
+            background-color: #262730;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #41424C;
             text-align: center;
             margin-bottom: 10px;
+            color: #ffffff;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -335,7 +347,7 @@ def renderizar_barra_lateral(estado: EstadoJogo) -> None:
             reiniciar_jogo()
 
         st.markdown("### 📜 Histórico de Jogadas")
-        historico_container = st.container(height=200)
+        historico_container = st.container(height=220)
         with historico_container:
             if not estado.historico:
                 st.caption("Ainda sem jogadas efetuadas.")
@@ -346,20 +358,25 @@ def renderizar_barra_lateral(estado: EstadoJogo) -> None:
 
 def renderizar_tabuleiro(estado: EstadoJogo) -> None:
     tabuleiro = estado.tabuleiro
-    for linha in range(TAMANHO_TABULEIRO):
-        cols = st.columns(TAMANHO_TABULEIRO)
-        for coluna in range(TAMANHO_TABULEIRO):
-            with cols[coluna]:
-                if (linha + coluna) % 2 == 1:
-                    peca = tabuleiro[linha][coluna]
-                    selecionada = estado.selecionada == (linha, coluna)
-                    label = SIMBOLOS.get(Peca(peca), "")
-                    btn_type = "primary" if selecionada else "secondary"
+    
+    # Centraliza o tabuleiro usando colunas nas margens
+    _, col_centro, _ = st.columns([1, 4, 1])
+    
+    with col_centro:
+        for linha in range(TAMANHO_TABULEIRO):
+            cols = st.columns(TAMANHO_TABULEIRO)
+            for coluna in range(TAMANHO_TABULEIRO):
+                with cols[coluna]:
+                    if (linha + coluna) % 2 == 1:
+                        peca = tabuleiro[linha][coluna]
+                        selecionada = estado.selecionada == (linha, coluna)
+                        label = SIMBOLOS.get(Peca(peca), "")
+                        btn_type = "primary" if selecionada else "secondary"
 
-                    if st.button(label, key=f"cell_{linha}_{coluna}", type=btn_type):
-                        tratar_clique(estado, linha, coluna)
-                else:
-                    st.button(" ", key=f"empty_{linha}_{coluna}", disabled=True)
+                        if st.button(label, key=f"cell_{linha}_{coluna}", type=btn_type):
+                            tratar_clique(estado, linha, coluna)
+                    else:
+                        st.button(" ", key=f"empty_{linha}_{coluna}", disabled=True)
 
 
 def main() -> None:
@@ -375,7 +392,8 @@ def main() -> None:
 
     renderizar_barra_lateral(estado)
 
-    st.title("🔴 Jogo de Damas - Regras Brasileiras ⚪")
+    st.markdown("<h1 style='text-align: center;'>🔴 Jogo de Damas - Regras Brasileiras ⚪</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: gray;'>Peças comuns capturam para frente e para trás. Damas movem-se livremente nas diagonais.</p>", unsafe_allow_html=True)
     st.markdown("---")
 
     renderizar_tabuleiro(estado)
