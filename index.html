@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Damas Brasileira Online</title>
+  
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text-color: #f8fafc;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --border: #334155;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin: 8px 0 12px 0;
+      font-size: 1.5rem;
+      color: #818cf8;
+      text-align: center;
+    }
+
+    .lobby-panel {
+      width: 100%;
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #0f172a;
+      color: var(--text-color);
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .stats-panel {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      background: var(--card-bg);
+      padding: 10px 16px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      box-sizing: border-box;
+      font-size: 0.85rem;
+      border: 1px solid var(--border);
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .stat-value {
+      font-weight: bold;
+      color: #38bdf8;
+      font-size: 1.05rem;
+    }
+
+    button {
+      flex: 1;
+      padding: 11px;
+      font-size: 0.9rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text-color);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    button.primary {
+      background-color: var(--accent);
+      color: white;
+      border: none;
+    }
+
+    button.primary:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      width: 100%;
+      aspect-ratio: 1;
+      background-color: #0f172a;
+      border: 3px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .cell.dark { background-color: #334155; }
+    .cell.light { background-color: #cbd5e1; }
+    .cell.selected { background-color: #4f46e5 !important; }
+
+    .cell.highlight::after {
+      content: '';
+      width: 16px;
+      height: 16px;
+      background-color: rgba(34, 197, 94, 0.8);
+      border-radius: 50%;
+      position: absolute;
+    }
+
+    .piece {
+      width: 75%;
+      height: 75%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      font-weight: bold;
+    }
+
+    .piece.white {
+      background: radial-gradient(circle at 30% 30%, #ffffff, #cbd5e1);
+      color: #0f172a;
+      border: 2px solid #94a3b8;
+    }
+
+    .piece.black {
+      background: radial-gradient(circle at 30% 30%, #475569, #0f172a);
+      color: #f8fafc;
+      border: 2px solid #1e293b;
+    }
+
+    .piece.dama::after {
+      content: '👑';
+      font-size: 1rem;
+    }
+
+    #status-msg {
+      font-weight: bold;
+      min-height: 24px;
+      text-align: center;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+  </style>
+
+  <!-- Bibliotecas Firebase via Compat CDN -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+  <div class="container">
+    <h1>👑 Damas Online</h1>
+
+    <!-- Lobby / Criação de Salas -->
+    <div id="lobby" class="lobby-panel">
+      <div style="font-weight: bold; text-align: center; color: #38bdf8;">Modo Multijogador Online</div>
+      <button class="primary" onclick="criarSala()">Criar Nova Sala</button>
+      <div style="display: flex; gap: 8px; margin-top: 5px;">
+        <input type="text" id="room-code-input" placeholder="Código da Sala" style="text-transform: uppercase;">
+        <button onclick="entrarSala()">Entrar</button>
+      </div>
+    </div>
+
+    <!-- Painel de Status do Jogo -->
+    <div id="game-info" class="stats-panel" style="display: none;">
+      <div class="stat-item">
+        <span>👤 És</span>
+        <span id="my-role" class="stat-value">-</span>
+      </div>
+      <div class="stat-item">
+        <span>🎯 Vez de</span>
+        <span id="turn-indicator" class="stat-value">-</span>
+      </div>
+      <div class="stat-item">
+        <span>🔑 Sala</span>
+        <span id="room-display" class="stat-value" style="font-size: 0.85rem;">-</span>
+      </div>
+    </div>
+
+    <!-- Tabuleiro 8x8 -->
+    <div id="board" class="board" style="display: none;"></div>
+
+    <div id="status-msg"></div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyANhOHKGajy5rR7lOjFlhPXHKFOfDoyyAY",
+      authDomain: "damas-brasileiras-e07ea.firebaseapp.com",
+      databaseURL: "https://damas-brasileiras-e07ea-default-rtdb.firebaseio.com",
+      projectId: "damas-brasileiras-e07ea",
+      storageBucket: "damas-brasileiras-e07ea.firebasestorage.app",
+      messagingSenderId: "1059294949823",
+      appId: "1:1059294949823:web:313f861ff51e135082310a",
+      measurementId: "G-DREX69JL1M"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let currentRoom = null;
+    let myRole = null; 
+    let gameState = null;
+    let selectedPiece = null;
+    let validMoves = [];
+
+    function criarSala() {
+      const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      currentRoom = roomCode;
+      myRole = 'white';
+
+      const initialBoard = criarTabuleiroInicial();
+      
+      const gameData = {
+        board: initialBoard,
+        turn: 'white',
+        status: 'A aguardar adversário...'
+      };
+
+      db.ref('salas/' + roomCode).set(gameData).then(() => {
+        iniciarInterfaceJogo(roomCode);
+        escutarMudancasSala(roomCode);
+      });
+    }
+
+    function entrarSala() {
+      const code = document.getElementById('room-code-input').value.trim().toUpperCase();
+      if (!code) {
+        alert('Insira o código da sala!');
+        return;
+      }
+
+      db.ref('salas/' + code).once('value').then((snapshot) => {
+        if (snapshot.exists()) {
+          currentRoom = code;
+          myRole = 'black'; 
+          iniciarInterfaceJogo(code);
+          escutarMudancasSala(code);
+          db.ref('salas/' + code + '/status').set('Partida a decorrer!');
+        } else {
+          alert('Sala não encontrada!');
+        }
+      });
+    }
+
+    function criarTabuleiroInicial() {
+      let b = Array(8).fill(null).map(() => Array(8).fill(null));
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 8; c++) {
+          if ((r + c) % 2 === 1) b[r][c] = { player: 'black', dama: false };
+        }
+      }
+      for (let r = 5; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          if ((r + c) % 2 === 1) b[r][c] = { player: 'white', dama: false };
+        }
+      }
+      return b;
+    }
+
+    function iniciarInterfaceJogo(code) {
+      document.getElementById('lobby').style.display = 'none';
+      document.getElementById('game-info').style.display = 'flex';
+      document.getElementById('board').style.display = 'grid';
+      document.getElementById('room-display').innerText = code;
+      document.getElementById('my-role').innerText = myRole === 'white' ? 'Brancas (⚪)' : 'Pretas (⚫)';
+    }
+
+    function escutarMudancasSala(code) {
+      db.ref('salas/' + code).on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          gameState = data;
+          renderizar();
+        }
+      });
+    }
+
+    function renderizar() {
+      if (!gameState) return;
+      const boardEl = document.getElementById('board');
+      boardEl.innerHTML = '';
+
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const cell = document.createElement('div');
+          cell.className = `cell ${(r + c) % 2 === 1 ? 'dark' : 'light'}`;
+
+          const piece = gameState.board[r][c];
+          if (piece) {
+            const pieceEl = document.createElement('div');
+            pieceEl.className = `piece ${piece.player} ${piece.dama ? 'dama' : ''}`;
+            cell.appendChild(pieceEl);
+          }
+
+          if (selectedPiece && selectedPiece.r === r && selectedPiece.c === c) {
+            cell.classList.add('selected');
+          }
+
+          if (validMoves.some(m => m.r === r && m.c === c)) {
+            cell.classList.add('highlight');
+          }
+
+          cell.addEventListener('click', () => clicarCasa(r, c));
+          boardEl.appendChild(cell);
+        }
+      }
+
+      document.getElementById('turn-indicator').innerText = gameState.turn === 'white' ? 'Brancas' : 'Pretas';
+      document.getElementById('status-msg').innerText = gameState.status || '';
+    }
+
+    function clicarCasa(r, c) {
+      if (!gameState || gameState.turn !== myRole) {
+        return; 
+      }
+
+      const piece = gameState.board[r][c];
+      const move = validMoves.find(m => m.r === r && m.c === c);
+
+      if (move) {
+        executarMovimento(move);
+        return;
+      }
+
+      if (piece && piece.player === myRole) {
+        selectedPiece = { r, c };
+        validMoves = calcularMovimentos(r, c);
+        renderizar();
+        return;
+      }
+
+      selectedPiece = null;
+      validMoves = [];
+      renderizar();
+    }
+
+    function calcularMovimentos(r, c) {
+      const piece = gameState.board[r][c];
+      let moves = [];
+      let directions = piece.dama ? [[-1, -1], [-1, 1], [1, -1], [1, 1]] : (piece.player === 'white' ? [[-1, -1], [-1, 1]] : [[1, -1], [1, 1]]);
+
+      directions.forEach(([dr, dc]) => {
+        let nr = r + dr;
+        let nc = c + dc;
+        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+          if (!gameState.board[nr][nc]) {
+            moves.push({ r: nr, c: nc, jump: null });
+          } else if (gameState.board[nr][nc].player !== piece.player) {
+            let jumpR = nr + dr;
+            let jumpC = nc + dc;
+            if (jumpR >= 0 && jumpR < 8 && jumpC >= 0 && jumpC < 8 && !gameState.board[jumpR][jumpC]) {
+              moves.push({ r: jumpR, c: jumpC, jump: { r: nr, c: nc } });
+            }
+          }
+        }
+      });
+      return moves;
+    }
+
+    function executarMovimento(move) {
+      let newBoard = JSON.parse(JSON.stringify(gameState.board));
+      const fromR = selectedPiece.r;
+      const fromC = selectedPiece.c;
+
+      newBoard[move.r][move.c] = newBoard[fromR][fromC];
+      newBoard[fromR][fromC] = null;
+
+      if (move.jump) {
+        newBoard[move.jump.r][move.jump.c] = null;
+      }
+
+      if (newBoard[move.r][move.c].player === 'white' && move.r === 0) newBoard[move.r][move.c].dama = true;
+      if (newBoard[move.r][move.c].player === 'black' && move.r === 7) newBoard[move.r][move.c].dama = true;
+
+      const nextTurn = gameState.turn === 'white' ? 'black' : 'white';
+
+      db.ref('salas/' + currentRoom).update({
+        board: newBoard,
+        turn: nextTurn
+      });
+
+      selectedPiece = null;
+      validMoves = [];
+    }
+  </script>
+</body>
+</html>
+```[cite: 3]
+
+---
+
+### Orientação sobre os Novos Ficheiros e GitHub
+
+Para organizar o seu repositório atual e pôr a aplicação online em minutos, siga estas orientações:
+
+1. **Estrutura de Ficheiros Limpa:**
+   * Apague ou retire os ficheiros antigos de Python (`app.py`, etc.).
+   * Na raiz do repositório, deve existir apenas o ficheiro **`index.html`** (com este nome exato e em minúsculas). Como o HTML já traz todo o CSS e JavaScript embutidos, não precisa de gerir múltiplos ficheiros separados, facilitando imenso o alojamento.
+
+2. **Substituição no Repositório:**
+   * Faça o *commit* e *push* do novo ficheiro `index.html` para a branch principal do seu repositório no GitHub:
+     ```bash
+     git add index.html
+     git commit -m "Atualizando para versão web online multijogador com Firebase"
+     git push origin main
+     ```
+
+3. **Publicação Gratuita (GitHub Pages):**
+   * Vá ao seu repositório no site do GitHub.
+   * Clique em **Settings** (Definições) > **Pages** (no menu esquerdo).
+   * Em **Branch**, selecione a sua ramificação (`main` / `master`) e deixe na pasta `/ (root)`. Clique em **Save**.
+   * O GitHub fornecerá um link público. Sempre que aceder a esse link (ou partilhá-lo com um amigo), a aplicação abrirá diretamente no navegador, permitindo criar salas e jogar em tempo real de forma fluida.
