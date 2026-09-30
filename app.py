@@ -1,25 +1,3 @@
-"""
-JOGO DE DAMAS — REGRAS BRASILEIRAS
-===================================
-
-Aplicação Streamlit para jogo de damas segundo as regras brasileiras.
-
-Características:
-- Tabuleiro 8x8.
-- Peças comuns movimentam-se uma casa para frente.
-- Peças comuns capturam para frente e para trás.
-- Damas movimentam-se livremente pelas diagonais.
-- Captura obrigatória.
-- Capturas múltiplas.
-- Promoção para dama.
-- Verificação automática de fim de jogo.
-- Histórico das jogadas.
-- Destaque da peça selecionada.
-- Destaque das jogadas legais.
-- Interface separada do motor de regras.
-
-Autor: refatoração profissional
-"""
 
 from __future__ import annotations
 
