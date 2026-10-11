@@ -46,14 +46,15 @@
             --t-base: 0.25s ease;
             --t-slow: 0.4s ease;
 
-            /* Tabuleiro oficial (tema dark — madeira escura) */
+            /* Tabuleiro (tema dark — madeira escura) */
             --board-frame-1: #4a2f1e;
             --board-frame-2: #2a1810;
             --board-light: #e8d4a8;
             --board-light-2: #dcc398;
             --board-dark: #8b5a2b;
             --board-dark-2: #7a4a20;
-            --board-coord: rgba(232, 212, 168, 0.85);
+            --board-coord: rgba(232, 212, 168, 0.9);
+            --board-coord-edge: #fbbf24;
         }
 
         [data-theme="light"] {
@@ -74,14 +75,14 @@
 
             --shadow-card: 0 20px 60px -20px rgba(30, 41, 59, 0.28);
 
-            /* Tabuleiro oficial (tema light — madeira clara) */
             --board-frame-1: #5a3a22;
             --board-frame-2: #3a2418;
             --board-light: #f0e0c0;
             --board-light-2: #e6d0a8;
             --board-dark: #a06a3a;
             --board-dark-2: #8b5a2b;
-            --board-coord: rgba(240, 224, 192, 0.9);
+            --board-coord: rgba(240, 224, 192, 0.95);
+            --board-coord-edge: #fbbf24;
         }
 
         *, *::before, *::after { box-sizing: border-box; }
@@ -242,13 +243,14 @@
         #turno-status { color: var(--c-amber); }
 
         /* ═══════════════════════════════════════════════════════
-           TABULEIRO OFICIAL — moldura, coordenadas, casas, peças
+           TABULEIRO — moldura + réguas de coordenadas
            ═══════════════════════════════════════════════════════ */
         .board-wrapper {
             position: relative;
             width: 100%;
             aspect-ratio: 1 / 1;
-            padding: 26px;                     /* espaço para as coordenadas */
+            /* Espaço para as réguas: 22px de cada lado */
+            padding: 22px;
             background: linear-gradient(145deg, var(--board-frame-1) 0%, var(--board-frame-2) 100%);
             border-radius: 12px;
             box-shadow:
@@ -260,30 +262,99 @@
             user-select: none;
         }
 
-        /* Coordenadas a-h / 1-8 */
-        .board-labels {
+        /* ─── Réguas (faixas de coordenadas) ─── */
+        .board-ruler {
             position: absolute;
-            inset: 0;
-            pointer-events: none;
             font-family: 'JetBrains Mono', ui-monospace, monospace;
             font-size: 11px;
             font-weight: 700;
             color: var(--board-coord);
             letter-spacing: 0.5px;
-            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
+            pointer-events: none;
+            user-select: none;
+            z-index: 2;
         }
-        .board-labels.top    { top: 4px;    left: 26px;  right: 26px;  display: grid; grid-template-columns: repeat(8, 1fr); }
-        .board-labels.bottom { bottom: 4px; left: 26px;  right: 26px;  display: grid; grid-template-columns: repeat(8, 1fr); }
-        .board-labels.left   { left: 4px;   top: 26px;   bottom: 26px; display: grid; grid-template-rows: repeat(8, 1fr); }
-        .board-labels.right  { right: 4px;  top: 26px;   bottom: 26px; display: grid; grid-template-rows: repeat(8, 1fr); }
 
-        .board-labels .coord {
+        .board-ruler-top {
+            top: 0;
+            left: 22px;
+            right: 22px;
+            height: 22px;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            align-items: center;
+        }
+        .board-ruler-bottom {
+            bottom: 0;
+            left: 22px;
+            right: 22px;
+            height: 22px;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            align-items: center;
+        }
+        .board-ruler-left {
+            top: 22px;
+            bottom: 22px;
+            left: 0;
+            width: 22px;
+            display: grid;
+            grid-template-rows: repeat(8, 1fr);
+            align-items: center;
+        }
+        .board-ruler-right {
+            top: 22px;
+            bottom: 22px;
+            right: 0;
+            width: 22px;
+            display: grid;
+            grid-template-rows: repeat(8, 1fr);
+            align-items: center;
+        }
+
+        .board-ruler .coord {
             display: flex;
             align-items: center;
             justify-content: center;
-            opacity: 0.85;
+            width: 100%;
+            height: 100%;
+            text-shadow:
+                0 1px 1px rgba(0, 0, 0, 0.9),
+                0 0 3px rgba(0, 0, 0, 0.6);
         }
 
+        /* Destaque: casas das pontas (a, h, 8, 1) em âmbar */
+        .board-ruler .coord.edge {
+            font-weight: 800;
+            color: var(--board-coord-edge);
+        }
+
+        /* Linhas separadoras subtis entre régua e tabuleiro */
+        .board-ruler-top::after,
+        .board-ruler-bottom::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(0,0,0,0.4), transparent);
+        }
+        .board-ruler-top::after { bottom: 0; }
+        .board-ruler-bottom::after { top: 0; }
+
+        .board-ruler-left::after,
+        .board-ruler-right::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4), transparent);
+        }
+        .board-ruler-left::after  { right: 0; }
+        .board-ruler-right::after { left: 0; }
+
+        /* Grelha do tabuleiro */
         .checkers-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
@@ -307,12 +378,10 @@
             user-select: none;
             transition: filter 0.15s ease, box-shadow 0.15s ease;
         }
-        /* Casas claras — madeira bege */
         .square.light {
             background-color: var(--board-light);
             background-image: linear-gradient(135deg, var(--board-light-2) 0%, var(--board-light) 60%, var(--board-light-2) 100%);
         }
-        /* Casas escuras — madeira marrom */
         .square.dark {
             background-color: var(--board-dark);
             background-image: linear-gradient(135deg, var(--board-dark-2) 0%, var(--board-dark) 60%, var(--board-dark-2) 100%);
@@ -335,7 +404,7 @@
             outline-offset: -3px;
         }
 
-        /* ═══ PEÇAS — discos com relevo, anel decorativo e sombra ═══ */
+        /* ─── Peças ─── */
         .piece {
             width: 80%;
             height: 80%;
@@ -349,7 +418,6 @@
             position: relative;
         }
 
-        /* Peças brancas — plástico/madeira clara */
         .piece.white {
             background:
                 radial-gradient(circle at 32% 28%, #ffffff 0%, #f5ede0 35%, #cdb896 75%, #a08768 100%);
@@ -363,7 +431,6 @@
                 0 5px 10px rgba(0, 0, 0, 0.55);
         }
 
-        /* Peças vermelhas — vermelho escuro profundo */
         .piece.red {
             background:
                 radial-gradient(circle at 32% 28%, #dc2626 0%, #991b1b 40%, #6b0f0f 80%, #450808 100%);
@@ -377,7 +444,6 @@
                 0 5px 10px rgba(0, 0, 0, 0.6);
         }
 
-        /* Dama — coroa dourada sobre a peça */
         .piece.king::after {
             content: "♛";
             font-size: 17px;
@@ -461,7 +527,7 @@
 
         .hidden { display: none !important; }
 
-        /* ========== MODAL / TOAST ========== */
+        /* ═══════════ MODAIS / TOAST ═══════════ */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -537,7 +603,6 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* Painel de erro */
         #__erro_painel {
             position: fixed;
             bottom: 12px; left: 12px; right: 12px;
@@ -570,7 +635,6 @@
             box-shadow: none;
         }
 
-        /* Modal Sobre */
         .readme-overlay {
             position: fixed;
             inset: 0;
@@ -671,10 +735,10 @@
         .readme-content hr { border: none; border-top: 1px solid var(--border-color); margin: 18px 0; }
 
         @media (max-width: 480px) {
-            .board-wrapper { padding: 22px; }
-            .board-labels.top, .board-labels.bottom { left: 22px; right: 22px; }
-            .board-labels.left, .board-labels.right { top: 22px; bottom: 22px; }
-            .board-labels { font-size: 10px; }
+            .board-wrapper { padding: 20px; }
+            .board-ruler-top, .board-ruler-bottom { left: 20px; right: 20px; height: 20px; }
+            .board-ruler-left, .board-ruler-right { top: 20px; bottom: 20px; width: 20px; }
+            .board-ruler { font-size: 10px; }
             .readme-card { max-height: 94vh; border-radius: 14px; }
             .readme-content { padding: 16px; font-size: 13.5px; }
             .readme-header { padding: 12px 16px; }
@@ -734,12 +798,12 @@
 
             <p class="instructions" id="info-instrucao">Toque em sua peça e depois na casa de destino válida.</p>
 
-            <!-- TABULEIRO OFICIAL com coordenadas -->
+            <!-- TABULEIRO com réguas de coordenadas -->
             <div class="board-wrapper">
-                <div class="board-labels top"    id="labels-top"></div>
-                <div class="board-labels bottom" id="labels-bottom"></div>
-                <div class="board-labels left"   id="labels-left"></div>
-                <div class="board-labels right"  id="labels-right"></div>
+                <div class="board-ruler board-ruler-top"    id="labels-top"    aria-hidden="true"></div>
+                <div class="board-ruler board-ruler-bottom" id="labels-bottom" aria-hidden="true"></div>
+                <div class="board-ruler board-ruler-left"   id="labels-left"   aria-hidden="true"></div>
+                <div class="board-ruler board-ruler-right"  id="labels-right"  aria-hidden="true"></div>
 
                 <div class="checkers-grid" id="checkers-board" role="grid" aria-label="Tabuleiro de damas"></div>
             </div>
@@ -1392,7 +1456,7 @@
             window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
         });
 
-        /* ═══════════════ COORDENADAS DO TABULEIRO ═══════════════ */
+        /* ═══════════════ COORDENADAS ═══════════════ */
         function gerarCoordenadas() {
             const colunas = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
             const linhas  = ['8', '7', '6', '5', '4', '3', '2', '1'];
@@ -1407,10 +1471,24 @@
             const right  = document.getElementById('labels-right');
             if (!top || !bottom || !left || !right) return;
 
-            top.innerHTML    = cols.map(c => `<span class="coord">${c}</span>`).join('');
-            bottom.innerHTML = cols.map(c => `<span class="coord">${c}</span>`).join('');
-            left.innerHTML   = rows.map(n => `<span class="coord">${n}</span>`).join('');
-            right.innerHTML  = rows.map(n => `<span class="coord">${n}</span>`).join('');
+            const renderCols = (arr) => arr
+                .map((c, i) => {
+                    const edge = (i === 0 || i === arr.length - 1) ? ' edge' : '';
+                    return `<span class="coord${edge}">${c}</span>`;
+                })
+                .join('');
+
+            const renderRows = (arr) => arr
+                .map((n, i) => {
+                    const edge = (i === 0 || i === arr.length - 1) ? ' edge' : '';
+                    return `<span class="coord${edge}">${n}</span>`;
+                })
+                .join('');
+
+            top.innerHTML    = renderCols(cols);
+            bottom.innerHTML = renderCols(cols);
+            left.innerHTML   = renderRows(rows);
+            right.innerHTML  = renderRows(rows);
         }
 
         /* ═══════════════ RENDERIZAÇÃO ═══════════════ */
