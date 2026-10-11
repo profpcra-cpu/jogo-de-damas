@@ -31,10 +31,6 @@
             --btn-accent: #8b5cf6;
             --btn-whatsapp: #22c55e;
 
-            --board-light: #e2e8f0;
-            --board-dark: #334155;
-            --board-border: rgba(148, 163, 184, 0.45);
-
             --c-green: #4ade80;
             --c-blue: #38bdf8;
             --c-amber: #f59e0b;
@@ -49,6 +45,15 @@
             --t-fast: 0.15s ease;
             --t-base: 0.25s ease;
             --t-slow: 0.4s ease;
+
+            /* Tabuleiro oficial (tema dark — madeira escura) */
+            --board-frame-1: #4a2f1e;
+            --board-frame-2: #2a1810;
+            --board-light: #e8d4a8;
+            --board-light-2: #dcc398;
+            --board-dark: #8b5a2b;
+            --board-dark-2: #7a4a20;
+            --board-coord: rgba(232, 212, 168, 0.85);
         }
 
         [data-theme="light"] {
@@ -67,11 +72,16 @@
             --border-strong: rgba(15, 23, 42, 0.25);
             --input-bg: rgba(255, 255, 255, 0.95);
 
-            --board-light: #cbd5e1;
-            --board-dark: #64748b;
-            --board-border: rgba(15, 23, 42, 0.25);
-
             --shadow-card: 0 20px 60px -20px rgba(30, 41, 59, 0.28);
+
+            /* Tabuleiro oficial (tema light — madeira clara) */
+            --board-frame-1: #5a3a22;
+            --board-frame-2: #3a2418;
+            --board-light: #f0e0c0;
+            --board-light-2: #e6d0a8;
+            --board-dark: #a06a3a;
+            --board-dark-2: #8b5a2b;
+            --board-coord: rgba(240, 224, 192, 0.9);
         }
 
         *, *::before, *::after { box-sizing: border-box; }
@@ -113,7 +123,7 @@
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-card), 0 0 0 1px var(--card-border) inset;
             width: 100%;
-            max-width: 480px;
+            max-width: 520px;
             text-align: center;
             border: 1px solid var(--card-border);
             animation: cardIn 0.55s cubic-bezier(0.16, 1, 0.3, 1);
@@ -231,18 +241,61 @@
         }
         #turno-status { color: var(--c-amber); }
 
+        /* ═══════════════════════════════════════════════════════
+           TABULEIRO OFICIAL — moldura, coordenadas, casas, peças
+           ═══════════════════════════════════════════════════════ */
+        .board-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            padding: 26px;                     /* espaço para as coordenadas */
+            background: linear-gradient(145deg, var(--board-frame-1) 0%, var(--board-frame-2) 100%);
+            border-radius: 12px;
+            box-shadow:
+                0 14px 40px -12px rgba(0, 0, 0, 0.75),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+                0 0 0 2px rgba(0, 0, 0, 0.35);
+            margin-bottom: 12px;
+            user-select: none;
+        }
+
+        /* Coordenadas a-h / 1-8 */
+        .board-labels {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            font-family: 'JetBrains Mono', ui-monospace, monospace;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--board-coord);
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
+        }
+        .board-labels.top    { top: 4px;    left: 26px;  right: 26px;  display: grid; grid-template-columns: repeat(8, 1fr); }
+        .board-labels.bottom { bottom: 4px; left: 26px;  right: 26px;  display: grid; grid-template-columns: repeat(8, 1fr); }
+        .board-labels.left   { left: 4px;   top: 26px;   bottom: 26px; display: grid; grid-template-rows: repeat(8, 1fr); }
+        .board-labels.right  { right: 4px;  top: 26px;   bottom: 26px; display: grid; grid-template-rows: repeat(8, 1fr); }
+
+        .board-labels .coord {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.85;
+        }
+
         .checkers-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             grid-template-rows: repeat(8, 1fr);
             gap: 0;
-            border: 3px solid var(--board-border);
-            border-radius: 10px;
-            overflow: hidden;
             width: 100%;
-            aspect-ratio: 1 / 1;
-            margin-bottom: 12px;
-            box-shadow: 0 12px 40px -14px rgba(0, 0, 0, 0.55);
+            height: 100%;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow:
+                inset 0 0 0 2px rgba(0, 0, 0, 0.45),
+                0 4px 14px rgba(0, 0, 0, 0.55);
         }
 
         .square {
@@ -252,47 +305,99 @@
             position: relative;
             cursor: pointer;
             user-select: none;
+            transition: filter 0.15s ease, box-shadow 0.15s ease;
         }
-        .square.light { background-color: var(--board-light); }
-        .square.dark { background-color: var(--board-dark); }
-        .square.selected { background-color: rgba(99, 102, 241, 0.55) !important; }
-        .square.highlight { background-color: rgba(74, 222, 128, 0.5) !important; }
-        .square.capture-target { background-color: rgba(239, 68, 68, 0.55) !important; }
+        /* Casas claras — madeira bege */
+        .square.light {
+            background-color: var(--board-light);
+            background-image: linear-gradient(135deg, var(--board-light-2) 0%, var(--board-light) 60%, var(--board-light-2) 100%);
+        }
+        /* Casas escuras — madeira marrom */
+        .square.dark {
+            background-color: var(--board-dark);
+            background-image: linear-gradient(135deg, var(--board-dark-2) 0%, var(--board-dark) 60%, var(--board-dark-2) 100%);
+        }
+
+        .square.selected {
+            filter: brightness(0.85);
+            box-shadow: inset 0 0 0 3px rgba(99, 102, 241, 0.95), inset 0 0 14px rgba(99, 102, 241, 0.5) !important;
+        }
+        .square.highlight {
+            filter: brightness(0.9);
+            box-shadow: inset 0 0 0 3px rgba(74, 222, 128, 0.95), inset 0 0 14px rgba(74, 222, 128, 0.5) !important;
+        }
+        .square.capture-target {
+            filter: brightness(0.9);
+            box-shadow: inset 0 0 0 3px rgba(239, 68, 68, 0.95), inset 0 0 14px rgba(239, 68, 68, 0.5) !important;
+        }
         .square:focus-visible {
             outline: 3px solid var(--c-blue);
             outline-offset: -3px;
         }
 
+        /* ═══ PEÇAS — discos com relevo, anel decorativo e sombra ═══ */
         .piece {
-            width: 76%;
-            height: 76%;
+            width: 80%;
+            height: 80%;
             border-radius: 50%;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 11px;
             font-weight: 700;
-            transition: transform var(--t-fast);
+            transition: transform var(--t-fast), filter var(--t-fast);
             position: relative;
         }
+
+        /* Peças brancas — plástico/madeira clara */
         .piece.white {
-            background: radial-gradient(circle at 30% 30%, #ffffff, #cbd5e1);
-            border: 2px solid #94a3b8;
-            color: #0f172a;
+            background:
+                radial-gradient(circle at 32% 28%, #ffffff 0%, #f5ede0 35%, #cdb896 75%, #a08768 100%);
+            border: 1px solid #7a6350;
+            box-shadow:
+                inset 0 0 0 3px rgba(255, 255, 255, 0.65),
+                inset 0 0 0 5px rgba(160, 135, 104, 0.35),
+                inset 0 2px 3px rgba(255, 255, 255, 0.7),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.25),
+                0 3px 0 #7a6350,
+                0 5px 10px rgba(0, 0, 0, 0.55);
         }
+
+        /* Peças vermelhas — vermelho escuro profundo */
         .piece.red {
-            background: radial-gradient(circle at 30% 30%, #f87171, #b91c1c);
-            border: 2px solid #7f1d1d;
-            color: #fff;
+            background:
+                radial-gradient(circle at 32% 28%, #dc2626 0%, #991b1b 40%, #6b0f0f 80%, #450808 100%);
+            border: 1px solid #2d0606;
+            box-shadow:
+                inset 0 0 0 3px rgba(255, 200, 200, 0.22),
+                inset 0 0 0 5px rgba(0, 0, 0, 0.35),
+                inset 0 2px 3px rgba(255, 255, 255, 0.25),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+                0 3px 0 #2d0606,
+                0 5px 10px rgba(0, 0, 0, 0.6);
         }
+
+        /* Dama — coroa dourada sobre a peça */
         .piece.king::after {
-            content: "👑";
-            font-size: 14px;
+            content: "♛";
+            font-size: 17px;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            color: #fbbf24;
+            text-shadow:
+                0 0 8px rgba(251, 191, 36, 0.95),
+                0 0 14px rgba(251, 191, 36, 0.55),
+                0 1px 2px rgba(0, 0, 0, 0.85);
+            font-weight: 900;
+            line-height: 1;
+        }
+        .piece.king.white::after {
+            color: #b45309;
+            text-shadow:
+                0 0 6px rgba(180, 83, 9, 0.7),
+                0 1px 2px rgba(0, 0, 0, 0.6);
         }
 
         .piece-wrapper {
@@ -307,15 +412,15 @@
         }
         @keyframes pulse-movel {
             0%   { transform: scale(1); }
-            50%  { transform: scale(1.05); }
+            50%  { transform: scale(1.055); }
             100% { transform: scale(1); }
         }
         .piece.movel {
             cursor: pointer;
-            box-shadow: 0 0 12px 3px rgba(74, 222, 128, 0.8);
+            filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.9));
         }
         .piece.movel:hover {
-            transform: scale(1.1);
+            transform: scale(1.08);
         }
 
         .instructions {
@@ -371,10 +476,7 @@
             pointer-events: none;
             transition: opacity var(--t-base);
         }
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-card {
             background: var(--card-bg);
             backdrop-filter: blur(18px) saturate(160%);
@@ -388,30 +490,12 @@
             transform: scale(0.9);
             transition: transform var(--t-base);
         }
-        .modal-overlay.active .modal-card {
-            transform: scale(1);
-        }
-        .modal-card h2 {
-            margin: 0 0 8px;
-            font-size: 20px;
-        }
-        .modal-card p {
-            margin: 0 0 18px;
-            color: var(--text-muted);
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        .modal-icon {
-            font-size: 42px;
-            margin-bottom: 8px;
-        }
-        .modal-actions {
-            display: flex;
-            gap: 8px;
-        }
-        .modal-actions button {
-            flex: 1;
-        }
+        .modal-overlay.active .modal-card { transform: scale(1); }
+        .modal-card h2 { margin: 0 0 8px; font-size: 20px; }
+        .modal-card p { margin: 0 0 18px; color: var(--text-muted); font-size: 14px; line-height: 1.5; }
+        .modal-icon { font-size: 42px; margin-bottom: 8px; }
+        .modal-actions { display: flex; gap: 8px; }
+        .modal-actions button { flex: 1; }
         .btn-secondary {
             background: var(--input-bg) !important;
             border: 1px solid var(--border-color) !important;
@@ -419,7 +503,6 @@
             box-shadow: none !important;
         }
 
-        /* Toast */
         .toast-container {
             position: fixed;
             top: 20px;
@@ -454,12 +537,10 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ========== PAINEL DE ERRO (DIAGNÓSTICO) ========== */
+        /* Painel de erro */
         #__erro_painel {
             position: fixed;
-            bottom: 12px;
-            left: 12px;
-            right: 12px;
+            bottom: 12px; left: 12px; right: 12px;
             background: rgba(127, 29, 29, 0.95);
             color: #fee2e2;
             padding: 12px 16px;
@@ -478,8 +559,7 @@
         #__erro_painel.visivel { display: block; }
         #__erro_painel .fechar {
             position: absolute;
-            top: 6px;
-            right: 8px;
+            top: 6px; right: 8px;
             background: transparent;
             border: none;
             color: #fee2e2;
@@ -490,7 +570,7 @@
             box-shadow: none;
         }
 
-        /* ========== MODAL SOBRE (README) ========== */
+        /* Modal Sobre */
         .readme-overlay {
             position: fixed;
             inset: 0;
@@ -505,10 +585,7 @@
             transition: opacity var(--t-base);
             padding: 16px;
         }
-        .readme-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .readme-overlay.active { opacity: 1; pointer-events: auto; }
         .readme-card {
             background: var(--card-bg);
             backdrop-filter: blur(18px) saturate(160%);
@@ -524,9 +601,7 @@
             transform: translateY(12px) scale(0.98);
             transition: transform var(--t-base);
         }
-        .readme-overlay.active .readme-card {
-            transform: translateY(0) scale(1);
-        }
+        .readme-overlay.active .readme-card { transform: translateY(0) scale(1); }
         .readme-header {
             display: flex;
             justify-content: space-between;
@@ -535,15 +610,9 @@
             border-bottom: 1px solid var(--border-color);
             gap: 12px;
         }
-        .readme-header h2 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-color);
-        }
+        .readme-header h2 { margin: 0; font-size: 16px; font-weight: 700; color: var(--text-color); }
         .readme-close {
-            width: 32px !important;
-            height: 32px;
+            width: 32px !important; height: 32px;
             flex: 0 0 auto;
             padding: 0 !important;
             border-radius: 8px !important;
@@ -552,106 +621,60 @@
             color: var(--text-muted) !important;
             font-size: 16px !important;
             box-shadow: none !important;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
         }
-        .readme-close:hover {
-            color: var(--text-color) !important;
-            background: var(--card-bg) !important;
-            transform: none;
-        }
+        .readme-close:hover { color: var(--text-color) !important; background: var(--card-bg) !important; transform: none; }
         .readme-content {
-            flex: 1;
-            overflow-y: auto;
+            flex: 1; overflow-y: auto;
             padding: 20px 24px;
-            font-size: 14px;
-            line-height: 1.65;
-            color: var(--text-color);
-            text-align: left;
+            font-size: 14px; line-height: 1.65;
+            color: var(--text-color); text-align: left;
         }
-        .readme-content h1,
-        .readme-content h2,
-        .readme-content h3,
-        .readme-content h4 {
-            color: var(--text-color);
-            margin: 20px 0 8px;
-            line-height: 1.3;
+        .readme-content h1, .readme-content h2, .readme-content h3, .readme-content h4 {
+            color: var(--text-color); margin: 20px 0 8px; line-height: 1.3;
         }
         .readme-content h1 { font-size: 22px; margin-top: 0; }
-        .readme-content h2 {
-            font-size: 17px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid var(--border-color);
-        }
+        .readme-content h2 { font-size: 17px; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
         .readme-content h3 { font-size: 15px; }
         .readme-content p { margin: 8px 0; color: var(--text-muted); }
-        .readme-content ul,
-        .readme-content ol { margin: 8px 0 8px 22px; color: var(--text-muted); }
+        .readme-content ul, .readme-content ol { margin: 8px 0 8px 22px; color: var(--text-muted); }
         .readme-content li { margin: 4px 0; }
         .readme-content code {
             background: var(--input-bg);
-            padding: 2px 6px;
-            border-radius: 5px;
+            padding: 2px 6px; border-radius: 5px;
             font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
-            font-size: 12.5px;
-            color: var(--c-amber);
+            font-size: 12.5px; color: var(--c-amber);
         }
         .readme-content pre {
-            background: rgba(15, 23, 42, 0.9);
-            color: #e2e8f0;
-            padding: 14px 16px;
-            border-radius: 10px;
-            overflow-x: auto;
-            font-size: 12.5px;
-            line-height: 1.55;
-            margin: 12px 0;
+            background: rgba(15, 23, 42, 0.9); color: #e2e8f0;
+            padding: 14px 16px; border-radius: 10px;
+            overflow-x: auto; font-size: 12.5px; line-height: 1.55; margin: 12px 0;
         }
-        .readme-content pre code {
-            background: transparent;
-            color: inherit;
-            padding: 0;
-            font-size: inherit;
-        }
-        .readme-content a {
-            color: var(--btn-primary-hover);
-            text-decoration: none;
-            font-weight: 600;
-        }
+        .readme-content pre code { background: transparent; color: inherit; padding: 0; font-size: inherit; }
+        .readme-content a { color: var(--btn-primary-hover); text-decoration: none; font-weight: 600; }
         .readme-content a:hover { text-decoration: underline; }
         .readme-content blockquote {
             border-left: 3px solid var(--btn-primary);
             background: var(--input-bg);
-            padding: 8px 14px;
-            margin: 10px 0;
+            padding: 8px 14px; margin: 10px 0;
             color: var(--text-muted);
             border-radius: 0 8px 8px 0;
         }
         .readme-content img { max-width: 100%; border-radius: 10px; margin: 8px 0; }
-        .readme-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 12px 0;
-            font-size: 13px;
-        }
-        .readme-content th,
-        .readme-content td {
+        .readme-content table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+        .readme-content th, .readme-content td {
             padding: 8px 10px;
             border-bottom: 1px solid var(--border-color);
-            text-align: left;
-            color: var(--text-muted);
+            text-align: left; color: var(--text-muted);
         }
-        .readme-content th {
-            background: var(--input-bg);
-            font-weight: 700;
-            color: var(--text-color);
-        }
-        .readme-content hr {
-            border: none;
-            border-top: 1px solid var(--border-color);
-            margin: 18px 0;
-        }
+        .readme-content th { background: var(--input-bg); font-weight: 700; color: var(--text-color); }
+        .readme-content hr { border: none; border-top: 1px solid var(--border-color); margin: 18px 0; }
+
         @media (max-width: 480px) {
+            .board-wrapper { padding: 22px; }
+            .board-labels.top, .board-labels.bottom { left: 22px; right: 22px; }
+            .board-labels.left, .board-labels.right { top: 22px; bottom: 22px; }
+            .board-labels { font-size: 10px; }
             .readme-card { max-height: 94vh; border-radius: 14px; }
             .readme-content { padding: 16px; font-size: 13.5px; }
             .readme-header { padding: 12px 16px; }
@@ -711,7 +734,15 @@
 
             <p class="instructions" id="info-instrucao">Toque em sua peça e depois na casa de destino válida.</p>
 
-            <div class="checkers-grid" id="checkers-board" role="grid" aria-label="Tabuleiro de damas"></div>
+            <!-- TABULEIRO OFICIAL com coordenadas -->
+            <div class="board-wrapper">
+                <div class="board-labels top"    id="labels-top"></div>
+                <div class="board-labels bottom" id="labels-bottom"></div>
+                <div class="board-labels left"   id="labels-left"></div>
+                <div class="board-labels right"  id="labels-right"></div>
+
+                <div class="checkers-grid" id="checkers-board" role="grid" aria-label="Tabuleiro de damas"></div>
+            </div>
 
             <div id="div-whatsapp" class="hidden">
                 <button id="btn-whatsapp" class="btn-whatsapp" type="button">💬 Convidar Colega pelo WhatsApp</button>
@@ -729,7 +760,7 @@
         </div>
     </div>
 
-    <!-- MODAL: SOBRE (README) -->
+    <!-- MODAL SOBRE -->
     <div class="readme-overlay" id="readme-modal" role="dialog" aria-modal="true" aria-labelledby="readme-title">
         <div class="readme-card">
             <header class="readme-header">
@@ -742,22 +773,21 @@
         </div>
     </div>
 
-    <!-- PAINEL DE ERRO (só aparece se houver crash) -->
+    <!-- PAINEL DE ERRO -->
     <div id="__erro_painel">
-        <button class="fechar" onclick="document.getElementById('__erro_painel').classList.remove('visivel')" aria-label="Fechar painel de erro">✕</button>
+        <button class="fechar" onclick="document.getElementById('__erro_painel').classList.remove('visivel')" aria-label="Fechar">✕</button>
         <span id="__erro_conteudo"></span>
     </div>
 
     <!-- TOASTS -->
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- ==========================================================
+    <!-- ═══════════════════════════════════════════════════════
          SCRIPT 1 — PAINEL DE ERRO GLOBAL
-         ========================================================== -->
+         ═══════════════════════════════════════════════════════ -->
     <script>
         (function () {
             'use strict';
-
             function mostrarErroPainel(msg) {
                 const painel = document.getElementById('__erro_painel');
                 const conteudo = document.getElementById('__erro_conteudo');
@@ -766,13 +796,11 @@
                 painel.classList.add('visivel');
             }
             window.mostrarErroPainel = mostrarErroPainel;
-
             window.addEventListener('error', (e) => {
                 const info = `${e.message || 'Erro'}\n${e.filename || ''}:${e.lineno || '?'}`;
                 console.error('❌ Erro global:', info);
                 mostrarErroPainel(info);
             });
-
             window.addEventListener('unhandledrejection', (e) => {
                 const motivo = e.reason;
                 const info = `Promise rejeitada: ${(motivo && (motivo.message || motivo.toString())) || 'desconhecida'}`;
@@ -782,13 +810,12 @@
         })();
     </script>
 
-    <!-- ==========================================================
-         SCRIPT 2 — MODAL "SOBRE" (independente, não bloqueia o jogo)
-         ========================================================== -->
+    <!-- ═══════════════════════════════════════════════════════
+         SCRIPT 2 — MODAL "SOBRE"
+         ═══════════════════════════════════════════════════════ -->
     <script>
         (function () {
             'use strict';
-
             const modal = document.getElementById('readme-modal');
             const conteudo = document.getElementById('readme-content');
             const btnAbout = document.getElementById('btn-about');
@@ -817,7 +844,6 @@
 
             async function renderizarSobre() {
                 if (jaCarregado) return;
-
                 let md = '';
                 try {
                     const mod = await import('./sobre.js');
@@ -832,14 +858,11 @@
                         '</small></p>';
                     return;
                 }
-
                 if (!md.trim()) {
                     conteudo.innerHTML = '<p style="text-align:center;padding:20px;color:#ef4444;">⚠️ Conteúdo vazio.</p>';
                     return;
                 }
-
                 const marked = await carregarMarked();
-
                 if (marked && typeof marked.parse === 'function') {
                     conteudo.innerHTML = marked.parse(md);
                     conteudo.querySelectorAll('a[href^="http"]').forEach((a) => {
@@ -853,7 +876,6 @@
                     conteudo.innerHTML = '';
                     conteudo.appendChild(pre);
                 }
-
                 jaCarregado = true;
             }
 
@@ -868,48 +890,34 @@
             function fecharModalSobre() {
                 modal.classList.remove('active');
                 document.body.style.overflow = '';
-                if (focoAnterior && typeof focoAnterior.focus === 'function') {
-                    focoAnterior.focus();
-                }
+                if (focoAnterior && typeof focoAnterior.focus === 'function') focoAnterior.focus();
             }
 
             btnAbout.addEventListener('click', abrirModalSobre);
             if (btnClose) btnClose.addEventListener('click', fecharModalSobre);
-
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) fecharModalSobre();
-            });
-
+            modal.addEventListener('click', (e) => { if (e.target === modal) fecharModalSobre(); });
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && modal.classList.contains('active')) {
-                    fecharModalSobre();
-                }
+                if (e.key === 'Escape' && modal.classList.contains('active')) fecharModalSobre();
             });
         })();
     </script>
 
-    <!-- ==========================================================
-         SCRIPT 3 — LÓGICA DO JOGO (módulo)
-         ========================================================== -->
+    <!-- ═══════════════════════════════════════════════════════
+         SCRIPT 3 — LÓGICA DO JOGO
+         ═══════════════════════════════════════════════════════ -->
     <script type="module">
         import { db } from "./firebase-config.js";
         import { ref, get, set, update, onValue, runTransaction, onDisconnect, serverTimestamp }
             from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        /* ==========================================================
-           CONSTANTES
-           ========================================================== */
         const VALORES_PECA_VALIDOS = new Set([null, 'white', 'red', 'white-king', 'red-king']);
 
-        /* Recarrega a própria página SEM os parâmetros de sala (?sala=...&cor=...) */
         function voltarAoLobby() {
             limparSessao();
             window.location.href = window.location.pathname;
         }
 
-        /* ==========================================================
-           UI HELPERS
-           ========================================================== */
+        /* ═══════════════ UI HELPERS ═══════════════ */
         const modalOverlay = document.getElementById('modal-overlay');
         const modalIcon    = document.getElementById('modal-icon');
         const modalTitle   = document.getElementById('modal-title');
@@ -958,9 +966,7 @@
             }, duracao);
         }
 
-        /* ==========================================================
-           HELPERS DE SERIALIZAÇÃO
-           ========================================================== */
+        /* ═══════════════ SERIALIZAÇÃO ═══════════════ */
         function tabuleiroParaFirebase(t) { return t.map(row => row.slice()); }
 
         function firebaseParaTabuleiro(raw) {
@@ -971,10 +977,7 @@
                 const linha = [];
                 for (let c = 0; c < 8; c++) {
                     let valor = linhaRaw[c] ?? linhaRaw[String(c)] ?? null;
-                    if (!VALORES_PECA_VALIDOS.has(valor)) {
-                        console.warn(`Valor inválido [${r}][${c}]:`, valor);
-                        valor = null;
-                    }
+                    if (!VALORES_PECA_VALIDOS.has(valor)) valor = null;
                     linha.push(valor);
                 }
                 t.push(linha);
@@ -993,9 +996,7 @@
             return { white: w, red: r };
         }
 
-        /* ==========================================================
-           SESSÃO — com fallback para evitar loop de redirecionamento
-           ========================================================== */
+        /* ═══════════════ SESSÃO ═══════════════ */
         let jogadorSessao = null;
         try { jogadorSessao = JSON.parse(localStorage.getItem('brain_hub_jogador')); } catch (_) {}
 
@@ -1006,15 +1007,12 @@
                 avatar: '😀'
             };
             try { localStorage.setItem('brain_hub_jogador', JSON.stringify(jogadorSessao)); } catch (_) {}
-            console.log('👤 Sessão anónima criada automaticamente:', jogadorSessao.nome);
         }
 
         document.getElementById('lobby-nome').textContent = jogadorSessao.nome;
         document.getElementById('lobby-avatar').textContent = jogadorSessao.avatar;
 
-        /* ==========================================================
-           ESTADO
-           ========================================================== */
+        /* ═══════════════ ESTADO ═══════════════ */
         let idSalaAtual = null;
         let minhaCor = null;
         let tabuleiro = [];
@@ -1029,9 +1027,7 @@
         let inicializando = true;
         let salaConfirmada = false;
 
-        /* ==========================================================
-           TEMA
-           ========================================================== */
+        /* ═══════════════ TEMA ═══════════════ */
         const themeToggleBtn = document.getElementById('theme-toggle');
         const savedTheme = localStorage.getItem('brain_flow_theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -1045,18 +1041,13 @@
             themeToggleBtn.textContent = nxt === 'dark' ? '☀️ Claro' : '🌙 Escuro';
         });
 
-        /* ==========================================================
-           BOTÃO SAIR — limpa sessão da sala e volta ao lobby
-           ========================================================== */
+        /* ═══════════════ SAIR ═══════════════ */
         document.getElementById('btn-sair').addEventListener('click', () => {
             if (!salaConfirmada) {
-                // Já está no lobby — só limpa parâmetros residuais
                 limparSessao();
                 return;
             }
             if (!confirm('Deseja sair da sala atual? Sua sessão de sala será encerrada.')) return;
-
-            // Desconecta o listener antes de recarregar
             if (unsubscribeFirebase) {
                 try { unsubscribeFirebase(); } catch (_) {}
                 unsubscribeFirebase = null;
@@ -1064,9 +1055,7 @@
             voltarAoLobby();
         });
 
-        /* ==========================================================
-           TABULEIRO
-           ========================================================== */
+        /* ═══════════════ TABULEIRO ═══════════════ */
         function criarTabuleiroInicial() {
             const t = Array.from({ length: 8 }, () => Array(8).fill(null));
             for (let r = 0; r < 3; r++) for (let c = 0; c < 8; c++) {
@@ -1078,9 +1067,7 @@
             return t;
         }
 
-        /* ==========================================================
-           SESSÃO LOCAL / URL
-           ========================================================== */
+        /* ═══════════════ SESSÃO LOCAL / URL ═══════════════ */
         function salvarSessao() {
             if (!idSalaAtual || !minhaCor) return;
             localStorage.setItem('brain_damas_sessao', JSON.stringify({ sala: idSalaAtual, cor: minhaCor }));
@@ -1097,23 +1084,18 @@
             window.history.replaceState({}, '', url.toString());
         }
 
-        /* ==========================================================
-           PRESENÇA
-           ========================================================== */
+        /* ═══════════════ PRESENÇA ═══════════════ */
         async function registrarPresenca(codigo) {
             try {
                 const presencaRef = ref(db, `salas_damas/${codigo}/jogadores/${jogadorSessao.chave}/online`);
                 await set(presencaRef, true);
                 onDisconnect(presencaRef).set(false);
-                console.log('✅ Presença registrada para sala', codigo);
             } catch (e) {
                 console.warn('Falha ao registrar presença:', e);
             }
         }
 
-        /* ==========================================================
-           DETECÇÃO DE CONVITE
-           ========================================================== */
+        /* ═══════════════ CONVITE ═══════════════ */
         function detectarConviteNaURL() {
             const params = new URLSearchParams(window.location.search);
             const sala = params.get('sala');
@@ -1121,45 +1103,30 @@
             const host = params.get('host');
             const cor = params.get('cor');
 
-            if (sala && convite === '1') {
-                return { tipo: 'convite', sala, host, cor };
-            }
-            if (sala && !cor && host && host !== jogadorSessao.chave) {
-                return { tipo: 'convite', sala, host, cor: null };
-            }
+            if (sala && convite === '1') return { tipo: 'convite', sala, host, cor };
+            if (sala && !cor && host && host !== jogadorSessao.chave) return { tipo: 'convite', sala, host, cor: null };
             return { tipo: 'nenhum' };
         }
 
-        /* ==========================================================
-           ENTRADA DIRETA POR CONVITE
-           ========================================================== */
         async function entrarDiretoPorConvite(codigo) {
-            console.log(`🎟️ Tentando entrar por convite na sala ${codigo}...`);
-
             try {
                 const snapshot = await get(ref(db, 'salas_damas/' + codigo));
-
                 if (!snapshot.exists()) {
-                    console.warn('❌ Sala não encontrada no Firebase');
                     abrirModal({
                         icon: '🚫',
                         title: 'Sala não encontrada',
                         message: 'O convite expirou ou a sala foi encerrada pelo anfitrião.',
-                        actions: [
-                            { label: 'Voltar ao lobby', onClick: voltarAoLobby }
-                        ]
+                        actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }]
                     });
                     return false;
                 }
 
                 const dados = snapshot.val();
-                console.log('📦 Sala encontrada. Status:', dados.status);
-
                 if (dados.status === 'encerrado') {
                     abrirModal({
                         icon: '🏁',
                         title: 'Partida encerrada',
-                        message: 'Esta partida já foi encerrada. Peça ao anfitrião para criar uma nova.',
+                        message: 'Esta partida já foi encerrada.',
                         actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }]
                     });
                     return false;
@@ -1168,7 +1135,6 @@
                 const jogadores = dados.jogadores || {};
 
                 if (jogadores[jogadorSessao.chave]) {
-                    console.log('🔄 Já estava na sala. Reconectando...');
                     idSalaAtual = codigo;
                     minhaCor = jogadores[jogadorSessao.chave].cor;
                     tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
@@ -1185,17 +1151,12 @@
                     return true;
                 }
 
-                const total = Object.keys(jogadores).length;
-                if (total >= 2) {
-                    console.warn('⚠️ Sala cheia:', total, 'jogadores');
+                if (Object.keys(jogadores).length >= 2) {
                     abrirModal({
                         icon: '👥',
                         title: 'Sala cheia',
-                        message: 'Esta sala já tem dois jogadores. Peça ao anfitrião para criar uma nova.',
-                        actions: [
-                            { label: 'Voltar ao lobby', onClick: voltarAoLobby },
-                            { label: 'Fechar', secondary: true, onClick: limparSessao }
-                        ]
+                        message: 'Esta sala já tem dois jogadores.',
+                        actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }]
                     });
                     return false;
                 }
@@ -1222,27 +1183,13 @@
                 });
 
                 if (!resultado.committed) {
-                    console.warn('❌ Transação falhou:', motivoFalha);
                     if (motivoFalha === 'JA_ESTA') return entrarDiretoPorConvite(codigo);
-                    if (motivoFalha === 'CHEIA') {
-                        abrirModal({
-                            icon: '👥',
-                            title: 'Sala cheia',
-                            message: 'Esta sala já tem dois jogadores.',
-                            actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }]
-                        });
-                        return false;
-                    }
-                    if (motivoFalha === 'REMOVIDA') {
-                        abrirModal({
-                            icon: '🚫',
-                            title: 'Sala não encontrada',
-                            message: 'A sala foi removida pelo anfitrião.',
-                            actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }]
-                        });
-                        return false;
-                    }
-                    toast('Não foi possível entrar.', 'error');
+                    abrirModal({
+                        icon: '🚫',
+                        title: 'Não foi possível entrar',
+                        message: 'A sala pode estar cheia ou foi removida.',
+                        actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }]
+                    });
                     return false;
                 }
 
@@ -1262,7 +1209,6 @@
                 escutarFirebase();
                 toast(`🎉 Você entrou como ${minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas'}!`, 'success', 3500);
                 return true;
-
             } catch (e) {
                 console.error('Erro no convite direto:', e);
                 toast('Erro ao entrar pelo convite.', 'error');
@@ -1270,16 +1216,13 @@
             }
         }
 
-        /* ==========================================================
-           INICIALIZAÇÃO
-           ========================================================== */
+        /* ═══════════════ INICIALIZAÇÃO ═══════════════ */
         async function inicializarPerfil() {
             document.getElementById('display-nome').textContent = jogadorSessao.nome;
             document.getElementById('display-avatar').textContent = jogadorSessao.avatar;
 
             const convite = detectarConviteNaURL();
             if (convite.tipo === 'convite') {
-                console.log('🎟️ Convite detectado na URL. Ignorando sessão antiga.');
                 localStorage.removeItem('brain_damas_sessao');
                 const entrou = await entrarDiretoPorConvite(convite.sala);
                 inicializando = false;
@@ -1291,11 +1234,9 @@
             try { sessaoSalva = JSON.parse(localStorage.getItem('brain_damas_sessao')); } catch (_) {}
 
             if (sessaoSalva && sessaoSalva.sala && sessaoSalva.cor) {
-                console.log('🔄 Tentando reconectar à sessão salva:', sessaoSalva.sala);
                 try {
                     const snap = await get(ref(db, 'salas_damas/' + sessaoSalva.sala));
                     if (!snap.exists()) {
-                        console.log('❌ Sessão antiga aponta para sala inexistente. Limpando.');
                         limparSessao();
                     } else {
                         await reentrarNaSala(sessaoSalva.sala, sessaoSalva.cor);
@@ -1312,30 +1253,22 @@
             const corUrl = params.get('cor');
 
             if (salaUrl && corUrl) {
-                console.log('🔄 Sala e cor na URL. Reentrando...');
                 await reentrarNaSala(salaUrl, corUrl);
             }
-
             inicializando = false;
         }
 
         async function reentrarNaSala(codigo, cor) {
             try {
                 const snapshot = await get(ref(db, 'salas_damas/' + codigo));
-                if (!snapshot.exists()) {
-                    limparSessao();
-                    return;
-                }
+                if (!snapshot.exists()) { limparSessao(); return; }
 
                 const dados = snapshot.val();
                 const jogadores = dados.jogadores || {};
                 const jaEsta = jogadores[jogadorSessao.chave];
 
-                if (jaEsta) {
-                    cor = jaEsta.cor;
-                } else {
-                    return entrarDiretoPorConvite(codigo);
-                }
+                if (jaEsta) cor = jaEsta.cor;
+                else return entrarDiretoPorConvite(codigo);
 
                 idSalaAtual = codigo;
                 minhaCor = cor;
@@ -1355,9 +1288,7 @@
 
         inicializarPerfil();
 
-        /* ==========================================================
-           LOBBY
-           ========================================================== */
+        /* ═══════════════ LOBBY ═══════════════ */
         document.getElementById('btn-criar-sala').addEventListener('click', async () => {
             try {
                 idSalaAtual = 'DAMAS-' + Date.now().toString(36).toUpperCase();
@@ -1372,11 +1303,7 @@
                     turno: 'white',
                     tabuleiro: tabuleiroParaFirebase(tabuleiro),
                     jogadores: {
-                        [jogadorSessao.chave]: {
-                            nome: jogadorSessao.nome,
-                            cor: 'white',
-                            online: true
-                        }
+                        [jogadorSessao.chave]: { nome: jogadorSessao.nome, cor: 'white', online: true }
                     },
                     criadaEm: serverTimestamp()
                 });
@@ -1403,10 +1330,7 @@
         async function entrarPorCodigo(codigo) {
             try {
                 const snapshot = await get(ref(db, 'salas_damas/' + codigo));
-                if (!snapshot.exists()) {
-                    toast('Sala não encontrada!', 'error');
-                    return;
-                }
+                if (!snapshot.exists()) { toast('Sala não encontrada!', 'error'); return; }
                 const dados = snapshot.val();
                 if (dados.status === 'encerrado') {
                     abrirModal({
@@ -1434,10 +1358,7 @@
                     return;
                 }
 
-                const entrou = await entrarDiretoPorConvite(codigo);
-                if (!entrou) {
-                    console.warn('Fallback de entrada por código');
-                }
+                await entrarDiretoPorConvite(codigo);
             } catch (e) {
                 console.error('Erro ao entrar por código:', e);
                 toast('Erro ao entrar.', 'error');
@@ -1453,9 +1374,7 @@
             renderizarTabuleiro();
         }
 
-        /* ==========================================================
-           WHATSAPP
-           ========================================================== */
+        /* ═══════════════ WHATSAPP ═══════════════ */
         document.getElementById('btn-whatsapp').addEventListener('click', () => {
             const url = new URL(window.location.href);
             url.searchParams.set('sala', idSalaAtual);
@@ -1473,9 +1392,28 @@
             window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
         });
 
-        /* ==========================================================
-           RENDERIZAÇÃO
-           ========================================================== */
+        /* ═══════════════ COORDENADAS DO TABULEIRO ═══════════════ */
+        function gerarCoordenadas() {
+            const colunas = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+            const linhas  = ['8', '7', '6', '5', '4', '3', '2', '1'];
+
+            // Inverte consoante a perspetiva do jogador
+            const cols = (minhaCor === 'red') ? [...colunas].reverse() : colunas;
+            const rows = (minhaCor === 'red') ? [...linhas].reverse()  : linhas;
+
+            const top    = document.getElementById('labels-top');
+            const bottom = document.getElementById('labels-bottom');
+            const left   = document.getElementById('labels-left');
+            const right  = document.getElementById('labels-right');
+            if (!top || !bottom || !left || !right) return;
+
+            top.innerHTML    = cols.map(c => `<span class="coord">${c}</span>`).join('');
+            bottom.innerHTML = cols.map(c => `<span class="coord">${c}</span>`).join('');
+            left.innerHTML   = rows.map(n => `<span class="coord">${n}</span>`).join('');
+            right.innerHTML  = rows.map(n => `<span class="coord">${n}</span>`).join('');
+        }
+
+        /* ═══════════════ RENDERIZAÇÃO ═══════════════ */
         function renderizarTabuleiro() {
             const grid = document.getElementById('checkers-board');
             if (!grid) return;
@@ -1530,11 +1468,11 @@
             if (jogoEncerrado) statusEl.textContent = '🏁 Jogo encerrado';
             else if (turnoAtual === minhaCor) statusEl.textContent = capturaMultiplaEmAndamento ? 'Continue capturando!' : 'Sua vez de jogar!';
             else statusEl.textContent = 'Vez do oponente...';
+
+            gerarCoordenadas();
         }
 
-        /* ==========================================================
-           CLIQUE
-           ========================================================== */
+        /* ═══════════════ CLIQUE ═══════════════ */
         function clicarCasa(r, c) {
             if (jogoEncerrado || !salaConfirmada) return;
             if (turnoAtual !== minhaCor) {
@@ -1562,9 +1500,7 @@
             renderizarTabuleiro();
         }
 
-        /* ==========================================================
-           MOVIMENTOS
-           ========================================================== */
+        /* ═══════════════ MOVIMENTOS ═══════════════ */
         function calcularMovimentos(r, c) {
             const peca = tabuleiro[r][c];
             if (!peca) return [];
@@ -1627,11 +1563,9 @@
                 houveCaptura = true;
             }
 
-            const ehPeaoBranco = pecaMovida === 'white';
-            const ehPeaoVermelho = pecaMovida === 'red';
             let promoveu = false;
-            if (ehPeaoBranco && paraR === 0)   { tabuleiro[paraR][paraC] = 'white-king'; promoveu = true; }
-            if (ehPeaoVermelho && paraR === 7) { tabuleiro[paraR][paraC] = 'red-king'; promoveu = true; }
+            if (pecaMovida === 'white' && paraR === 0)   { tabuleiro[paraR][paraC] = 'white-king'; promoveu = true; }
+            if (pecaMovida === 'red'   && paraR === 7)   { tabuleiro[paraR][paraC] = 'red-king';   promoveu = true; }
 
             if (houveCaptura && !promoveu) {
                 const maisCapturas = calcularMovimentos(paraR, paraC).filter(m => m.captura);
@@ -1713,9 +1647,7 @@
             return false;
         }
 
-        /* ==========================================================
-           LISTENER FIREBASE
-           ========================================================== */
+        /* ═══════════════ LISTENER FIREBASE ═══════════════ */
         function escutarFirebase() {
             if (unsubscribeFirebase) {
                 try { unsubscribeFirebase(); } catch (_) {}
@@ -1735,15 +1667,9 @@
                 }
 
                 const dados = snapshot.val();
-
-                if (dados.status === 'encerrado' && !jogoEncerrado) {
-                    console.log('🏁 Sala encerrada pelo oponente.');
-                }
-
                 const novoTabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
-                const novaContagem = contarPecas(novoTabuleiro);
                 tabuleiro = novoTabuleiro;
-                ultimaContagemPecas = novaContagem;
+                ultimaContagemPecas = contarPecas(novoTabuleiro);
                 turnoAtual = dados.turno || 'white';
                 jogoEncerrado = dados.status === 'encerrado';
 
@@ -1782,9 +1708,7 @@
             });
         }
 
-        /* ==========================================================
-           CLEANUP
-           ========================================================== */
+        /* ═══════════════ CLEANUP ═══════════════ */
         window.addEventListener('beforeunload', () => {
             if (unsubscribeFirebase) {
                 try { unsubscribeFirebase(); } catch (_) {}
