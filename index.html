@@ -1,464 +1,1656 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Damas Brasileira Online</title>
-  
-  <meta name="theme-color" content="#0f172a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Damas - Duelo Multiplayer</title>
 
-  <style>
-    :root {
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
-      --text-color: #f8fafc;
-      --accent: #6366f1;
-      --accent-hover: #4f46e5;
-      --danger: #ef4444;
-      --success: #22c55e;
-      --border: #334155;
-    }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      box-sizing: border-box;
-    }
+    <style>
+        :root {
+            --bg-color: #0b1020;
+            --bg-gradient-1: #1e1b4b;
+            --bg-gradient-2: #0b1020;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(148, 163, 184, 0.15);
+            --card-glow: rgba(99, 102, 241, 0.25);
 
-    .container {
-      width: 100%;
-      max-width: 400px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-subtle: #64748b;
 
-    h1 {
-      margin: 8px 0 12px 0;
-      font-size: 1.5rem;
-      color: #818cf8;
-      text-align: center;
-    }
+            --border-color: rgba(148, 163, 184, 0.18);
+            --border-strong: rgba(148, 163, 184, 0.35);
+            --input-bg: rgba(15, 23, 42, 0.7);
 
-    .lobby-panel {
-      width: 100%;
-      background: var(--card-bg);
-      padding: 16px;
-      border-radius: 12px;
-      margin-bottom: 12px;
-      border: 1px solid var(--border);
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+            --btn-primary: #6366f1;
+            --btn-primary-hover: #818cf8;
+            --btn-accent: #8b5cf6;
+            --btn-whatsapp: #22c55e;
 
-    input {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: #0f172a;
-      color: var(--text-color);
-      font-size: 1rem;
-      text-align: center;
-    }
+            --board-light: #e2e8f0;
+            --board-dark: #334155;
+            --board-border: rgba(148, 163, 184, 0.45);
 
-    .stats-panel {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      background: var(--card-bg);
-      padding: 10px 16px;
-      border-radius: 12px;
-      margin-bottom: 12px;
-      box-sizing: border-box;
-      font-size: 0.85rem;
-      border: 1px solid var(--border);
-    }
+            --c-green: #4ade80;
+            --c-blue: #38bdf8;
+            --c-amber: #f59e0b;
+            --c-red: #ef4444;
 
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-    }
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --shadow-card: 0 20px 60px -20px rgba(0, 0, 0, 0.65);
+            --shadow-btn: 0 6px 20px -6px rgba(99, 102, 241, 0.55);
 
-    .stat-value {
-      font-weight: bold;
-      color: #38bdf8;
-      font-size: 1.05rem;
-    }
+            --t-fast: 0.15s ease;
+            --t-base: 0.25s ease;
+            --t-slow: 0.4s ease;
+        }
 
-    button {
-      flex: 1;
-      padding: 11px;
-      font-size: 0.9rem;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--card-bg);
-      color: var(--text-color);
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
+        [data-theme="light"] {
+            --bg-color: #eef2ff;
+            --bg-gradient-1: #e0e7ff;
+            --bg-gradient-2: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.88);
+            --card-border: rgba(15, 23, 42, 0.08);
+            --card-glow: rgba(99, 102, 241, 0.15);
 
-    button.primary {
-      background-color: var(--accent);
-      color: white;
-      border: none;
-    }
+            --text-color: #0f172a;
+            --text-muted: #475569;
+            --text-subtle: #64748b;
 
-    button.primary:hover {
-      background-color: var(--accent-hover);
-    }
+            --border-color: rgba(15, 23, 42, 0.1);
+            --border-strong: rgba(15, 23, 42, 0.25);
+            --input-bg: rgba(255, 255, 255, 0.95);
 
-    .board {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      grid-template-rows: repeat(8, 1fr);
-      width: 100%;
-      aspect-ratio: 1;
-      background-color: #0f172a;
-      border: 3px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
-      margin-bottom: 14px;
-    }
+            --board-light: #cbd5e1;
+            --board-dark: #64748b;
+            --board-border: rgba(15, 23, 42, 0.25);
 
-    .cell {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      cursor: pointer;
-      user-select: none;
-    }
+            --shadow-card: 0 20px 60px -20px rgba(30, 41, 59, 0.28);
+        }
 
-    .cell.dark { background-color: #334155; }
-    .cell.light { background-color: #cbd5e1; }
-    .cell.selected { background-color: #4f46e5 !important; }
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { height: 100%; }
 
-    .cell.highlight::after {
-      content: '';
-      width: 16px;
-      height: 16px;
-      background-color: rgba(34, 197, 94, 0.8);
-      border-radius: 50%;
-      position: absolute;
-    }
+        body {
+            font-family: 'Plus Jakarta Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle at 20% 0%, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 55%);
+            background-attachment: fixed;
+            color: var(--text-color);
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background-color var(--t-slow), color var(--t-base);
+            -webkit-font-smoothing: antialiased;
+        }
 
-    .piece {
-      width: 75%;
-      height: 75%;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-      font-weight: bold;
-    }
+        body::before, body::after {
+            content: "";
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(130px);
+            opacity: 0.3;
+            z-index: -1;
+            pointer-events: none;
+        }
+        body::before { width: 420px; height: 420px; background: #6366f1; top: -140px; left: -120px; }
+        body::after { width: 460px; height: 460px; background: #8b5cf6; bottom: -180px; right: -140px; }
 
-    .piece.white {
-      background: radial-gradient(circle at 30% 30%, #ffffff, #cbd5e1);
-      color: #0f172a;
-      border: 2px solid #94a3b8;
-    }
+        .container {
+            position: relative;
+            background: var(--card-bg);
+            backdrop-filter: blur(18px) saturate(160%);
+            -webkit-backdrop-filter: blur(18px) saturate(160%);
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card), 0 0 0 1px var(--card-border) inset;
+            width: 100%;
+            max-width: 480px;
+            text-align: center;
+            border: 1px solid var(--card-border);
+            animation: cardIn 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
 
-    .piece.black {
-      background: radial-gradient(circle at 30% 30%, #475569, #0f172a);
-      color: #f8fafc;
-      border: 2px solid #1e293b;
-    }
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
 
-    .piece.dama::after {
-      content: '👑';
-      font-size: 1rem;
-    }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 8px;
+        }
 
-    #status-msg {
-      font-weight: bold;
-      min-height: 24px;
-      text-align: center;
-      margin-bottom: 6px;
-      font-size: 0.95rem;
-    }
-  </style>
+        .btn-small {
+            width: auto;
+            margin: 0;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--t-base);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-small:hover {
+            color: var(--text-color);
+            border-color: var(--border-strong);
+            background: var(--card-bg);
+        }
 
-  <!-- Bibliotecas Firebase via Compat CDN -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+        .lobby-box {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 12px;
+            text-align: left;
+        }
+        .lobby-box h3 {
+            margin-top: 0;
+            font-size: 15px;
+            color: var(--c-blue);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .lobby-box p {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .user-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            background: var(--input-bg);
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+        .user-info-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .user-avatar-display {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(99,102,241,0.25), rgba(139,92,246,0.2));
+            border: 1px solid rgba(99, 102, 241, 0.4);
+        }
+        #display-nome { font-size: 13.5px; font-weight: 700; }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-left: 6px;
+            background: var(--text-subtle);
+            transition: background var(--t-base);
+        }
+        .status-dot.online { background: var(--c-green); box-shadow: 0 0 8px var(--c-green); }
+        .status-dot.offline { background: var(--c-red); }
+
+        .match-info-bar {
+            display: flex;
+            justify-content: space-between;
+            background: var(--input-bg);
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            margin-bottom: 10px;
+            font-size: 12px;
+            border: 1px solid var(--border-color);
+            font-weight: 600;
+        }
+        #turno-status { color: var(--c-amber); }
+
+        .checkers-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            gap: 0;
+            border: 3px solid var(--board-border);
+            border-radius: 10px;
+            overflow: hidden;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            margin-bottom: 12px;
+            box-shadow: 0 12px 40px -14px rgba(0, 0, 0, 0.55);
+        }
+
+        .square {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+        }
+        .square.light { background-color: var(--board-light); }
+        .square.dark { background-color: var(--board-dark); }
+        .square.selected { background-color: rgba(99, 102, 241, 0.55) !important; }
+        .square.highlight { background-color: rgba(74, 222, 128, 0.5) !important; }
+        .square.capture-target { background-color: rgba(239, 68, 68, 0.55) !important; }
+        .square:focus-visible {
+            outline: 3px solid var(--c-blue);
+            outline-offset: -3px;
+        }
+
+        .piece {
+            width: 76%;
+            height: 76%;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            transition: transform var(--t-fast);
+            position: relative;
+        }
+        .piece.white {
+            background: radial-gradient(circle at 30% 30%, #ffffff, #cbd5e1);
+            border: 2px solid #94a3b8;
+            color: #0f172a;
+        }
+        .piece.red {
+            background: radial-gradient(circle at 30% 30%, #f87171, #b91c1c);
+            border: 2px solid #7f1d1d;
+            color: #fff;
+        }
+        .piece.king::after {
+            content: "👑";
+            font-size: 14px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .piece-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+        .piece-wrapper.movel {
+            animation: pulse-movel 1.5s infinite;
+        }
+        @keyframes pulse-movel {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .piece.movel {
+            cursor: pointer;
+            box-shadow: 0 0 12px 3px rgba(74, 222, 128, 0.8);
+        }
+        .piece.movel:hover {
+            transform: scale(1.1);
+        }
+
+        .instructions {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin: 4px 0 10px;
+            min-height: 18px;
+        }
+
+        button, input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 13.5px;
+            font-family: inherit;
+            font-weight: 600;
+            background: var(--input-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all var(--t-base);
+        }
+        button {
+            border: none;
+            color: #fff;
+            background: linear-gradient(135deg, var(--btn-primary), var(--btn-accent));
+            box-shadow: var(--shadow-btn);
+        }
+        button:hover { filter: brightness(1.08); transform: translateY(-1px); }
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* ========== MODAL / TOAST ========== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--t-base);
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(18px) saturate(160%);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+            box-shadow: var(--shadow-card);
+            transform: scale(0.9);
+            transition: transform var(--t-base);
+        }
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+        .modal-card h2 {
+            margin: 0 0 8px;
+            font-size: 20px;
+        }
+        .modal-card p {
+            margin: 0 0 18px;
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .modal-icon {
+            font-size: 42px;
+            margin-bottom: 8px;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .modal-actions button {
+            flex: 1;
+        }
+        .btn-secondary {
+            background: var(--input-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-color) !important;
+            box-shadow: none !important;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1100;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+        .toast {
+            background: var(--card-bg);
+            backdrop-filter: blur(18px);
+            border: 1px solid var(--card-border);
+            border-left: 4px solid var(--c-blue);
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-color);
+            box-shadow: var(--shadow-card);
+            animation: toastIn 0.3s ease;
+            max-width: 340px;
+        }
+        .toast.success { border-left-color: var(--c-green); }
+        .toast.error   { border-left-color: var(--c-red); }
+        .toast.warn    { border-left-color: var(--c-amber); }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========== MODAL SOBRE (README) ========== */
+        .readme-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--t-base);
+            padding: 16px;
+        }
+        .readme-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .readme-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(18px) saturate(160%);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 720px;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            transform: translateY(12px) scale(0.98);
+            transition: transform var(--t-base);
+        }
+        .readme-overlay.active .readme-card {
+            transform: translateY(0) scale(1);
+        }
+        .readme-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            gap: 12px;
+        }
+        .readme-header h2 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+        .readme-close {
+            width: 32px !important;
+            height: 32px;
+            flex: 0 0 auto;
+            padding: 0 !important;
+            border-radius: 8px !important;
+            background: var(--input-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-muted) !important;
+            font-size: 16px !important;
+            box-shadow: none !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .readme-close:hover {
+            color: var(--text-color) !important;
+            background: var(--card-bg) !important;
+            transform: none;
+        }
+        .readme-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+            font-size: 14px;
+            line-height: 1.65;
+            color: var(--text-color);
+            text-align: left;
+        }
+        .readme-content h1,
+        .readme-content h2,
+        .readme-content h3,
+        .readme-content h4 {
+            color: var(--text-color);
+            margin: 20px 0 8px;
+            line-height: 1.3;
+        }
+        .readme-content h1 { font-size: 22px; margin-top: 0; }
+        .readme-content h2 {
+            font-size: 17px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .readme-content h3 { font-size: 15px; }
+        .readme-content p { margin: 8px 0; color: var(--text-muted); }
+        .readme-content ul,
+        .readme-content ol { margin: 8px 0 8px 22px; color: var(--text-muted); }
+        .readme-content li { margin: 4px 0; }
+        .readme-content code {
+            background: var(--input-bg);
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+            font-size: 12.5px;
+            color: var(--c-amber);
+        }
+        .readme-content pre {
+            background: rgba(15, 23, 42, 0.9);
+            color: #e2e8f0;
+            padding: 14px 16px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 12.5px;
+            line-height: 1.55;
+            margin: 12px 0;
+        }
+        .readme-content pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            font-size: inherit;
+        }
+        .readme-content a {
+            color: var(--btn-primary-hover);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .readme-content a:hover { text-decoration: underline; }
+        .readme-content blockquote {
+            border-left: 3px solid var(--btn-primary);
+            background: var(--input-bg);
+            padding: 8px 14px;
+            margin: 10px 0;
+            color: var(--text-muted);
+            border-radius: 0 8px 8px 0;
+        }
+        .readme-content img { max-width: 100%; border-radius: 10px; margin: 8px 0; }
+        .readme-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 13px;
+        }
+        .readme-content th,
+        .readme-content td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+            color: var(--text-muted);
+        }
+        .readme-content th {
+            background: var(--input-bg);
+            font-weight: 700;
+            color: var(--text-color);
+        }
+        .readme-content hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 18px 0;
+        }
+        @media (max-width: 480px) {
+            .readme-card { max-height: 94vh; border-radius: 14px; }
+            .readme-content { padding: 16px; font-size: 13.5px; }
+            .readme-header { padding: 12px 16px; }
+        }
+    </style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>👑 Damas Online</h1>
+    <div class="container">
+        <div class="top-bar">
+            <button class="btn-small" onclick="window.location.href='index.html'">🏠 Menu Hub</button>
+            <div style="display:flex; gap:6px;">
+                <button id="btn-about" class="btn-small" title="Sobre o jogo">📖 Sobre</button>
+                <button id="theme-toggle" class="btn-small">🌙 Tema</button>
+            </div>
+        </div>
 
-    <!-- Lobby / Criação de Salas -->
-    <div id="lobby" class="lobby-panel">
-      <div style="font-weight: bold; text-align: center; color: #38bdf8;">Modo Multijogador Online</div>
-      <button class="primary" onclick="criarSala()">Criar Nova Sala</button>
-      <div style="display: flex; gap: 8px; margin-top: 5px;">
-        <input type="text" id="room-code-input" placeholder="Código da Sala" style="text-transform: uppercase;">
-        <button onclick="entrarSala()">Entrar</button>
-      </div>
+        <!-- LOBBY -->
+        <div id="lobby-screen">
+            <div class="user-header" style="justify-content: center;">
+                <div class="user-info-left">
+                    <span id="lobby-avatar" class="user-avatar-display">😀</span>
+                    <strong id="lobby-nome">Carregando...</strong>
+                </div>
+            </div>
+
+            <div class="lobby-box">
+                <h3>♟️ Jogo de Damas Multiplayer</h3>
+                <p>Jogue uma partida clássica de Damas 8x8 em turnos com um colega em tempo real. Crie sua sala e envie o convite pelo WhatsApp!</p>
+                <button id="btn-criar-sala">🚀 Criar Sala de Damas</button>
+            </div>
+
+            <div class="lobby-box" style="margin-bottom: 0;">
+                <h3>🔗 Entrar com Código</h3>
+                <div style="display: flex; gap: 6px;">
+                    <input type="text" id="input-codigo-sala" placeholder="Ex: DAMAS-7812" style="font-family: monospace;">
+                    <button id="btn-entrar-sala" style="width: 120px;">Entrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA DO JOGO -->
+        <div id="game-screen" class="hidden">
+            <div class="user-header">
+                <div class="user-info-left">
+                    <span id="display-avatar" class="user-avatar-display">😀</span>
+                    <strong id="display-nome"></strong>
+                    <span id="oponente-status" class="status-dot" title="Status do oponente"></span>
+                </div>
+                <span id="display-sala-tag" style="font-size: 11px; background: rgba(99,102,241,0.15); padding: 4px 8px; border-radius: 6px; color: var(--c-blue);">Sala</span>
+            </div>
+
+            <div class="match-info-bar">
+                <span>Sua Peça: <strong id="info-minha-cor" style="color: var(--c-blue);">--</strong></span>
+                <span id="turno-status">Aguardando...</span>
+            </div>
+
+            <p class="instructions" id="info-instrucao">Toque em sua peça e depois na casa de destino válida.</p>
+
+            <div class="checkers-grid" id="checkers-board" role="grid" aria-label="Tabuleiro de damas"></div>
+
+            <div id="div-whatsapp" class="hidden">
+                <button id="btn-whatsapp" class="btn-whatsapp">💬 Convidar Colega pelo WhatsApp</button>
+            </div>
+        </div>
     </div>
 
-    <!-- Painel de Status do Jogo -->
-    <div id="game-info" class="stats-panel" style="display: none;">
-      <div class="stat-item">
-        <span>👤 És</span>
-        <span id="my-role" class="stat-value">-</span>
-      </div>
-      <div class="stat-item">
-        <span>🎯 Vez de</span>
-        <span id="turn-indicator" class="stat-value">-</span>
-      </div>
-      <div class="stat-item">
-        <span>🔑 Sala</span>
-        <span id="room-display" class="stat-value" style="font-size: 0.85rem;">-</span>
-      </div>
+    <!-- MODAL GENÉRICO -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-icon" id="modal-icon">ℹ️</div>
+            <h2 id="modal-title">Título</h2>
+            <p id="modal-message">Mensagem</p>
+            <div class="modal-actions" id="modal-actions"></div>
+        </div>
     </div>
 
-    <!-- Tabuleiro 8x8 -->
-    <div id="board" class="board" style="display: none;"></div>
+    <!-- MODAL: SOBRE (README) -->
+    <div class="readme-overlay" id="readme-modal" role="dialog" aria-modal="true" aria-labelledby="readme-title">
+        <div class="readme-card">
+            <header class="readme-header">
+                <h2 id="readme-title">📘 Sobre o Jogo de Damas</h2>
+                <button class="readme-close" id="btn-close-readme" aria-label="Fechar">✕</button>
+            </header>
+            <div class="readme-content" id="readme-content">
+                <p style="text-align:center;color:#94a3b8;padding:24px 0;">A carregar…</p>
+            </div>
+        </div>
+    </div>
 
-    <div id="status-msg"></div>
-  </div>
+    <!-- TOASTS -->
+    <div class="toast-container" id="toast-container"></div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyANhOHKGajy5rR7lOjFlhPXHKFOfDoyyAY",
-      authDomain: "damas-brasileiras-e07ea.firebaseapp.com",
-      databaseURL: "https://damas-brasileiras-e07ea-default-rtdb.firebaseio.com",
-      projectId: "damas-brasileiras-e07ea",
-      storageBucket: "damas-brasileiras-e07ea.firebasestorage.app",
-      messagingSenderId: "1059294949823",
-      appId: "1:1059294949823:web:313f861ff51e135082310a",
-      measurementId: "G-DREX69JL1M"
-    };
+    <!-- LÓGICA DO JOGO -->
+    <script type="module">
+        import { db } from "./firebase-config.js";
+        import { ref, get, set, update, onValue, runTransaction, onDisconnect, serverTimestamp, off }
+            from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+        /* ==========================================================
+           CONSTANTES
+           ========================================================== */
+        const URL_BASE = 'index.html';
+        const VALORES_PECA_VALIDOS = new Set([null, 'white', 'red', 'white-king', 'red-king']);
 
-    let currentRoom = null;
-    let myRole = null; 
-    let gameState = null;
-    let selectedPiece = null;
-    let validMoves = [];
+        /* ==========================================================
+           UI HELPERS
+           ========================================================== */
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalIcon    = document.getElementById('modal-icon');
+        const modalTitle   = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalActions = document.getElementById('modal-actions');
 
-    function criarSala() {
-      const roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-      currentRoom = roomCode;
-      myRole = 'white';
-
-      const initialBoard = criarTabuleiroInicial();
-      
-      const gameData = {
-        board: initialBoard,
-        turn: 'white',
-        status: 'A aguardar adversário...'
-      };
-
-      db.ref('salas/' + roomCode).set(gameData).then(() => {
-        iniciarInterfaceJogo(roomCode);
-        escutarMudancasSala(roomCode);
-      });
-    }
-
-    function entrarSala() {
-      const code = document.getElementById('room-code-input').value.trim().toUpperCase();
-      if (!code) {
-        alert('Insira o código da sala!');
-        return;
-      }
-
-      db.ref('salas/' + code).once('value').then((snapshot) => {
-        if (snapshot.exists()) {
-          currentRoom = code;
-          myRole = 'black'; 
-          iniciarInterfaceJogo(code);
-          escutarMudancasSala(code);
-          db.ref('salas/' + code + '/status').set('Partida a decorrer!');
-        } else {
-          alert('Sala não encontrada!');
-        }
-      });
-    }
-
-    function criarTabuleiroInicial() {
-      let b = Array(8).fill(null).map(() => Array(8).fill(null));
-      for (let r = 0; r < 3; r++) {
-        for (let c = 0; c < 8; c++) {
-          if ((r + c) % 2 === 1) b[r][c] = { player: 'black', dama: false };
-        }
-      }
-      for (let r = 5; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-          if ((r + c) % 2 === 1) b[r][c] = { player: 'white', dama: false };
-        }
-      }
-      return b;
-    }
-
-    function iniciarInterfaceJogo(code) {
-      document.getElementById('lobby').style.display = 'none';
-      document.getElementById('game-info').style.display = 'flex';
-      document.getElementById('board').style.display = 'grid';
-      document.getElementById('room-display').innerText = code;
-      document.getElementById('my-role').innerText = myRole === 'white' ? 'Brancas (⚪)' : 'Pretas (⚫)';
-    }
-
-    function escutarMudancasSala(code) {
-      db.ref('salas/' + code).on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          gameState = data;
-          renderizar();
-        }
-      });
-    }
-
-    function renderizar() {
-      if (!gameState) return;
-      const boardEl = document.getElementById('board');
-      boardEl.innerHTML = '';
-
-      for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-          const cell = document.createElement('div');
-          cell.className = `cell ${(r + c) % 2 === 1 ? 'dark' : 'light'}`;
-
-          const piece = gameState.board[r][c];
-          if (piece) {
-            const pieceEl = document.createElement('div');
-            pieceEl.className = `piece ${piece.player} ${piece.dama ? 'dama' : ''}`;
-            cell.appendChild(pieceEl);
-          }
-
-          if (selectedPiece && selectedPiece.r === r && selectedPiece.c === c) {
-            cell.classList.add('selected');
-          }
-
-          if (validMoves.some(m => m.r === r && m.c === c)) {
-            cell.classList.add('highlight');
-          }
-
-          cell.addEventListener('click', () => clicarCasa(r, c));
-          boardEl.appendChild(cell);
-        }
-      }
-
-      document.getElementById('turn-indicator').innerText = gameState.turn === 'white' ? 'Brancas' : 'Pretas';
-      document.getElementById('status-msg').innerText = gameState.status || '';
-    }
-
-    function clicarCasa(r, c) {
-      if (!gameState || gameState.turn !== myRole) {
-        return; 
-      }
-
-      const piece = gameState.board[r][c];
-      const move = validMoves.find(m => m.r === r && m.c === c);
-
-      if (move) {
-        executarMovimento(move);
-        return;
-      }
-
-      if (piece && piece.player === myRole) {
-        selectedPiece = { r, c };
-        validMoves = calcularMovimentos(r, c);
-        renderizar();
-        return;
-      }
-
-      selectedPiece = null;
-      validMoves = [];
-      renderizar();
-    }
-
-    function calcularMovimentos(r, c) {
-      const piece = gameState.board[r][c];
-      let moves = [];
-      let directions = piece.dama ? [[-1, -1], [-1, 1], [1, -1], [1, 1]] : (piece.player === 'white' ? [[-1, -1], [-1, 1]] : [[1, -1], [1, 1]]);
-
-      directions.forEach(([dr, dc]) => {
-        let nr = r + dr;
-        let nc = c + dc;
-        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
-          if (!gameState.board[nr][nc]) {
-            moves.push({ r: nr, c: nc, jump: null });
-          } else if (gameState.board[nr][nc].player !== piece.player) {
-            let jumpR = nr + dr;
-            let jumpC = nc + dc;
-            if (jumpR >= 0 && jumpR < 8 && jumpC >= 0 && jumpC < 8 && !gameState.board[jumpR][jumpC]) {
-              moves.push({ r: jumpR, c: jumpC, jump: { r: nr, c: nc } });
+        function abrirModal({ icon = 'ℹ️', title, message, actions = [] }) {
+            modalIcon.textContent = icon;
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalActions.innerHTML = '';
+            actions.forEach(acao => {
+                const btn = document.createElement('button');
+                btn.textContent = acao.label;
+                if (acao.secondary) btn.classList.add('btn-secondary');
+                btn.addEventListener('click', () => {
+                    fecharModal();
+                    if (typeof acao.onClick === 'function') acao.onClick();
+                });
+                modalActions.appendChild(btn);
+            });
+            if (actions.length === 0) {
+                const btn = document.createElement('button');
+                btn.textContent = 'OK';
+                btn.addEventListener('click', fecharModal);
+                modalActions.appendChild(btn);
             }
-          }
+            modalOverlay.classList.add('active');
         }
-      });
-      return moves;
-    }
+        function fecharModal() { modalOverlay.classList.remove('active'); }
+        modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) fecharModal(); });
 
-    function executarMovimento(move) {
-      let newBoard = JSON.parse(JSON.stringify(gameState.board));
-      const fromR = selectedPiece.r;
-      const fromC = selectedPiece.c;
+        function toast(mensagem, tipo = 'info', duracao = 3200) {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = `toast ${tipo}`;
+            el.textContent = mensagem;
+            container.appendChild(el);
+            setTimeout(() => {
+                el.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(-10px)';
+                setTimeout(() => el.remove(), 320);
+            }, duracao);
+        }
 
-      newBoard[move.r][move.c] = newBoard[fromR][fromC];
-      newBoard[fromR][fromC] = null;
+        /* ==========================================================
+           HELPERS DE SERIALIZAÇÃO
+           ========================================================== */
+        function tabuleiroParaFirebase(t) { return t.map(row => row.slice()); }
 
-      if (move.jump) {
-        newBoard[move.jump.r][move.jump.c] = null;
-      }
+        function firebaseParaTabuleiro(raw) {
+            if (!raw) return criarTabuleiroInicial();
+            const t = [];
+            for (let r = 0; r < 8; r++) {
+                const linhaRaw = raw[r] || raw[String(r)] || {};
+                const linha = [];
+                for (let c = 0; c < 8; c++) {
+                    let valor = linhaRaw[c] ?? linhaRaw[String(c)] ?? null;
+                    if (!VALORES_PECA_VALIDOS.has(valor)) {
+                        console.warn(`Valor inválido [${r}][${c}]:`, valor);
+                        valor = null;
+                    }
+                    linha.push(valor);
+                }
+                t.push(linha);
+            }
+            return t;
+        }
 
-      if (newBoard[move.r][move.c].player === 'white' && move.r === 0) newBoard[move.r][move.c].dama = true;
-      if (newBoard[move.r][move.c].player === 'black' && move.r === 7) newBoard[move.r][move.c].dama = true;
+        function contarPecas(t) {
+            let w = 0, r = 0;
+            for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) {
+                const p = t[i][j];
+                if (!p) continue;
+                if (p.startsWith('white')) w++;
+                else if (p.startsWith('red')) r++;
+            }
+            return { white: w, red: r };
+        }
 
-      const nextTurn = gameState.turn === 'white' ? 'black' : 'white';
+        /* ==========================================================
+           SESSÃO
+           ========================================================== */
+        let jogadorSessao = null;
+        try { jogadorSessao = JSON.parse(localStorage.getItem('brain_hub_jogador')); } catch (_) {}
+        if (!jogadorSessao) window.location.href = URL_BASE;
 
-      db.ref('salas/' + currentRoom).update({
-        board: newBoard,
-        turn: nextTurn
-      });
+        document.getElementById('lobby-nome').textContent = jogadorSessao.nome;
+        document.getElementById('lobby-avatar').textContent = jogadorSessao.avatar;
 
-      selectedPiece = null;
-      validMoves = [];
-    }
-  </script>
+        /* ==========================================================
+           ESTADO
+           ========================================================== */
+        let idSalaAtual = null;
+        let minhaCor = null;
+        let tabuleiro = [];
+        let celulaSelecionada = null;
+        let movimentosValidos = [];
+        let turnoAtual = 'white';
+        let jogoEncerrado = false;
+        let unsubscribeFirebase = null;
+        let oponenteConectado = false;
+        let capturaMultiplaEmAndamento = false;
+        let ultimaContagemPecas = null;
+        let inicializando = true;
+        let salaConfirmada = false;
+
+        /* ==========================================================
+           TEMA
+           ========================================================== */
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('brain_flow_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeToggleBtn.textContent = savedTheme === 'dark' ? '☀️ Claro' : '🌙 Escuro';
+
+        themeToggleBtn.addEventListener('click', () => {
+            const cur = document.documentElement.getAttribute('data-theme');
+            const nxt = cur === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', nxt);
+            localStorage.setItem('brain_flow_theme', nxt);
+            themeToggleBtn.textContent = nxt === 'dark' ? '☀️ Claro' : '🌙 Escuro';
+        });
+
+        /* ==========================================================
+           TABULEIRO
+           ========================================================== */
+        function criarTabuleiroInicial() {
+            const t = Array.from({ length: 8 }, () => Array(8).fill(null));
+            for (let r = 0; r < 3; r++) for (let c = 0; c < 8; c++) {
+                if ((r + c) % 2 === 1) t[r][c] = 'red';
+            }
+            for (let r = 5; r < 8; r++) for (let c = 0; c < 8; c++) {
+                if ((r + c) % 2 === 1) t[r][c] = 'white';
+            }
+            return t;
+        }
+
+        /* ==========================================================
+           SESSÃO LOCAL / URL
+           ========================================================== */
+        function salvarSessao() {
+            if (!idSalaAtual || !minhaCor) return;
+            localStorage.setItem('brain_damas_sessao', JSON.stringify({ sala: idSalaAtual, cor: minhaCor }));
+            const url = new URL(window.location.href);
+            url.searchParams.set('sala', idSalaAtual);
+            url.searchParams.set('cor', minhaCor);
+            window.history.replaceState({}, '', url.toString());
+        }
+
+        function limparSessao() {
+            localStorage.removeItem('brain_damas_sessao');
+            const url = new URL(window.location.href);
+            ['sala', 'cor', 'convite', 'host'].forEach(p => url.searchParams.delete(p));
+            window.history.replaceState({}, '', url.toString());
+        }
+
+        /* ==========================================================
+           PRESENÇA
+           ========================================================== */
+        async function registrarPresenca(codigo) {
+            try {
+                const presencaRef = ref(db, `salas_damas/${codigo}/jogadores/${jogadorSessao.chave}/online`);
+                await set(presencaRef, true);
+                onDisconnect(presencaRef).set(false);
+                console.log('✅ Presença registrada para sala', codigo);
+            } catch (e) {
+                console.warn('Falha ao registrar presença:', e);
+            }
+        }
+
+        /* ==========================================================
+           DETECÇÃO DE CONVITE
+           ========================================================== */
+        function detectarConviteNaURL() {
+            const params = new URLSearchParams(window.location.search);
+            const sala = params.get('sala');
+            const convite = params.get('convite');
+            const host = params.get('host');
+            const cor = params.get('cor');
+
+            if (sala && convite === '1') {
+                return { tipo: 'convite', sala, host, cor };
+            }
+            if (sala && !cor && host && host !== jogadorSessao.chave) {
+                return { tipo: 'convite', sala, host, cor: null };
+            }
+            return { tipo: 'nenhum' };
+        }
+
+        /* ==========================================================
+           ENTRADA DIRETA POR CONVITE
+           ========================================================== */
+        async function entrarDiretoPorConvite(codigo) {
+            console.log(`🎟️ Tentando entrar por convite na sala ${codigo}...`);
+
+            try {
+                const snapshot = await get(ref(db, 'salas_damas/' + codigo));
+
+                if (!snapshot.exists()) {
+                    console.warn('❌ Sala não encontrada no Firebase');
+                    abrirModal({
+                        icon: '🚫',
+                        title: 'Sala não encontrada',
+                        message: 'O convite expirou ou a sala foi encerrada pelo anfitrião.',
+                        actions: [
+                            { label: 'Ir ao lobby', onClick: () => { limparSessao(); location.href = URL_BASE; } }
+                        ]
+                    });
+                    return false;
+                }
+
+                const dados = snapshot.val();
+                console.log('📦 Sala encontrada. Status:', dados.status);
+
+                if (dados.status === 'encerrado') {
+                    abrirModal({
+                        icon: '🏁',
+                        title: 'Partida encerrada',
+                        message: 'Esta partida já foi encerrada. Peça ao anfitrião para criar uma nova.',
+                        actions: [{ label: 'Ir ao lobby', onClick: () => { limparSessao(); location.href = URL_BASE; } }]
+                    });
+                    return false;
+                }
+
+                const jogadores = dados.jogadores || {};
+
+                if (jogadores[jogadorSessao.chave]) {
+                    console.log('🔄 Já estava na sala. Reconectando...');
+                    idSalaAtual = codigo;
+                    minhaCor = jogadores[jogadorSessao.chave].cor;
+                    tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
+                    ultimaContagemPecas = contarPecas(tabuleiro);
+                    turnoAtual = dados.turno || 'white';
+                    jogoEncerrado = dados.status === 'encerrado';
+
+                    await registrarPresenca(codigo);
+                    salaConfirmada = true;
+                    salvarSessao();
+                    entrarInterfaceJogo();
+                    escutarFirebase();
+                    toast('✅ Reconectado à partida!', 'success');
+                    return true;
+                }
+
+                const total = Object.keys(jogadores).length;
+                if (total >= 2) {
+                    console.warn('⚠️ Sala cheia:', total, 'jogadores');
+                    abrirModal({
+                        icon: '👥',
+                        title: 'Sala cheia',
+                        message: 'Esta sala já tem dois jogadores. Peça ao anfitrião para criar uma nova.',
+                        actions: [
+                            { label: 'Ir ao lobby', onClick: () => { limparSessao(); location.href = URL_BASE; } },
+                            { label: 'Fechar', secondary: true, onClick: limparSessao }
+                        ]
+                    });
+                    return false;
+                }
+
+                let corEscolhida = null;
+                let motivoFalha = null;
+
+                const resultado = await runTransaction(ref(db, 'salas_damas/' + codigo), (atual) => {
+                    if (!atual) { motivoFalha = 'REMOVIDA'; return; }
+                    if (atual.status === 'encerrado') { motivoFalha = 'ENCERRADA'; return; }
+                    atual.jogadores = atual.jogadores || {};
+                    if (atual.jogadores[jogadorSessao.chave]) { motivoFalha = 'JA_ESTA'; return; }
+                    if (Object.keys(atual.jogadores).length >= 2) { motivoFalha = 'CHEIA'; return; }
+
+                    const cores = Object.values(atual.jogadores).map(j => j.cor);
+                    const corLivre = cores.includes('white') ? 'red' : 'white';
+                    atual.jogadores[jogadorSessao.chave] = {
+                        nome: jogadorSessao.nome,
+                        cor: corLivre,
+                        online: true
+                    };
+                    corEscolhida = corLivre;
+                    return atual;
+                });
+
+                if (!resultado.committed) {
+                    console.warn('❌ Transação falhou:', motivoFalha);
+                    if (motivoFalha === 'JA_ESTA') return entrarDiretoPorConvite(codigo);
+                    if (motivoFalha === 'CHEIA') {
+                        abrirModal({
+                            icon: '👥',
+                            title: 'Sala cheia',
+                            message: 'Esta sala já tem dois jogadores.',
+                            actions: [{ label: 'Ir ao lobby', onClick: () => { limparSessao(); location.href = URL_BASE; } }]
+                        });
+                        return false;
+                    }
+                    if (motivoFalha === 'REMOVIDA') {
+                        abrirModal({
+                            icon: '🚫',
+                            title: 'Sala não encontrada',
+                            message: 'A sala foi removida pelo anfitrião.',
+                            actions: [{ label: 'Ir ao lobby', onClick: () => { limparSessao(); location.href = URL_BASE; } }]
+                        });
+                        return false;
+                    }
+                    toast('Não foi possível entrar.', 'error');
+                    return false;
+                }
+
+                const dadosAtualizados = resultado.snapshot.val();
+                idSalaAtual = codigo;
+                minhaCor = corEscolhida || 'red';
+                tabuleiro = firebaseParaTabuleiro(dadosAtualizados.tabuleiro);
+                ultimaContagemPecas = contarPecas(tabuleiro);
+                turnoAtual = dadosAtualizados.turno || 'white';
+                jogoEncerrado = false;
+
+                await registrarPresenca(codigo);
+                salaConfirmada = true;
+
+                salvarSessao();
+                entrarInterfaceJogo();
+                escutarFirebase();
+                toast(`🎉 Você entrou como ${minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas'}!`, 'success', 3500);
+                return true;
+
+            } catch (e) {
+                console.error('Erro no convite direto:', e);
+                toast('Erro ao entrar pelo convite.', 'error');
+                return false;
+            }
+        }
+
+        /* ==========================================================
+           INICIALIZAÇÃO
+           ========================================================== */
+        async function inicializarPerfil() {
+            document.getElementById('display-nome').textContent = jogadorSessao.nome;
+            document.getElementById('display-avatar').textContent = jogadorSessao.avatar;
+
+            const convite = detectarConviteNaURL();
+            if (convite.tipo === 'convite') {
+                console.log('🎟️ Convite detectado na URL. Ignorando sessão antiga.');
+                localStorage.removeItem('brain_damas_sessao');
+                const entrou = await entrarDiretoPorConvite(convite.sala);
+                inicializando = false;
+                if (entrou) return;
+                return;
+            }
+
+            let sessaoSalva = null;
+            try { sessaoSalva = JSON.parse(localStorage.getItem('brain_damas_sessao')); } catch (_) {}
+
+            if (sessaoSalva && sessaoSalva.sala && sessaoSalva.cor) {
+                console.log('🔄 Tentando reconectar à sessão salva:', sessaoSalva.sala);
+                try {
+                    const snap = await get(ref(db, 'salas_damas/' + sessaoSalva.sala));
+                    if (!snap.exists()) {
+                        console.log('❌ Sessão antiga aponta para sala inexistente. Limpando.');
+                        limparSessao();
+                    } else {
+                        await reentrarNaSala(sessaoSalva.sala, sessaoSalva.cor);
+                        inicializando = false;
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Erro ao validar sessão antiga:', e);
+                }
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            const salaUrl = params.get('sala');
+            const corUrl = params.get('cor');
+
+            if (salaUrl && corUrl) {
+                console.log('🔄 Sala e cor na URL. Reentrando...');
+                await reentrarNaSala(salaUrl, corUrl);
+            }
+
+            inicializando = false;
+        }
+
+        async function reentrarNaSala(codigo, cor) {
+            try {
+                const snapshot = await get(ref(db, 'salas_damas/' + codigo));
+                if (!snapshot.exists()) {
+                    limparSessao();
+                    return;
+                }
+
+                const dados = snapshot.val();
+                const jogadores = dados.jogadores || {};
+                const jaEsta = jogadores[jogadorSessao.chave];
+
+                if (jaEsta) {
+                    cor = jaEsta.cor;
+                } else {
+                    return entrarDiretoPorConvite(codigo);
+                }
+
+                idSalaAtual = codigo;
+                minhaCor = cor;
+                tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
+                ultimaContagemPecas = contarPecas(tabuleiro);
+                turnoAtual = dados.turno || 'white';
+                jogoEncerrado = dados.status === 'encerrado';
+                salaConfirmada = true;
+
+                await registrarPresenca(codigo);
+                entrarInterfaceJogo();
+                escutarFirebase();
+            } catch (e) {
+                console.error('Erro ao reentrar:', e);
+            }
+        }
+
+        inicializarPerfil();
+
+        /* ==========================================================
+           LOBBY
+           ========================================================== */
+        document.getElementById('btn-criar-sala').addEventListener('click', async () => {
+            try {
+                idSalaAtual = 'DAMAS-' + Date.now().toString(36).toUpperCase();
+                minhaCor = 'white';
+                tabuleiro = criarTabuleiroInicial();
+                ultimaContagemPecas = contarPecas(tabuleiro);
+                turnoAtual = 'white';
+                jogoEncerrado = false;
+
+                await set(ref(db, 'salas_damas/' + idSalaAtual), {
+                    status: 'jogando',
+                    turno: 'white',
+                    tabuleiro: tabuleiroParaFirebase(tabuleiro),
+                    jogadores: {
+                        [jogadorSessao.chave]: {
+                            nome: jogadorSessao.nome,
+                            cor: 'white',
+                            online: true
+                        }
+                    },
+                    criadaEm: serverTimestamp()
+                });
+
+                await registrarPresenca(idSalaAtual);
+                salaConfirmada = true;
+                salvarSessao();
+                entrarInterfaceJogo();
+                document.getElementById('div-whatsapp').classList.remove('hidden');
+                escutarFirebase();
+                toast('Sala criada! Envie o convite pelo WhatsApp.', 'success', 3500);
+            } catch (e) {
+                console.error('Erro ao criar sala:', e);
+                toast('Erro ao criar sala.', 'error');
+            }
+        });
+
+        document.getElementById('btn-entrar-sala').addEventListener('click', () => {
+            const codigo = document.getElementById('input-codigo-sala').value.trim().toUpperCase();
+            if (!codigo) { toast('Digite o código da sala.', 'warn'); return; }
+            entrarPorCodigo(codigo);
+        });
+
+        async function entrarPorCodigo(codigo) {
+            try {
+                const snapshot = await get(ref(db, 'salas_damas/' + codigo));
+                if (!snapshot.exists()) {
+                    toast('Sala não encontrada!', 'error');
+                    return;
+                }
+                const dados = snapshot.val();
+                if (dados.status === 'encerrado') {
+                    abrirModal({
+                        icon: '🏁',
+                        title: 'Partida encerrada',
+                        message: 'Esta partida já foi encerrada.',
+                        actions: [{ label: 'OK' }]
+                    });
+                    return;
+                }
+
+                const jogadores = dados.jogadores || {};
+                if (jogadores[jogadorSessao.chave]) {
+                    idSalaAtual = codigo;
+                    minhaCor = jogadores[jogadorSessao.chave].cor;
+                    tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
+                    ultimaContagemPecas = contarPecas(tabuleiro);
+                    turnoAtual = dados.turno || 'white';
+                    jogoEncerrado = dados.status === 'encerrado';
+                    await registrarPresenca(codigo);
+                    salaConfirmada = true;
+                    salvarSessao();
+                    entrarInterfaceJogo();
+                    escutarFirebase();
+                    return;
+                }
+
+                const entrou = await entrarDiretoPorConvite(codigo);
+                if (!entrou) {
+                    console.warn('Fallback de entrada por código');
+                }
+            } catch (e) {
+                console.error('Erro ao entrar por código:', e);
+                toast('Erro ao entrar.', 'error');
+            }
+        }
+
+        function entrarInterfaceJogo() {
+            document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('display-sala-tag').textContent = `Sala: ${idSalaAtual}`;
+            document.getElementById('info-minha-cor').textContent =
+                minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
+            renderizarTabuleiro();
+        }
+
+        /* ==========================================================
+           WHATSAPP
+           ========================================================== */
+        document.getElementById('btn-whatsapp').addEventListener('click', () => {
+            const url = new URL(window.location.href);
+            url.searchParams.set('sala', idSalaAtual);
+            url.searchParams.set('convite', '1');
+            url.searchParams.set('host', jogadorSessao.chave);
+            url.searchParams.delete('cor');
+
+            const link = url.toString();
+            const msg = encodeURIComponent(
+                `♟️ *Convite para Damas — Brain Hub*\n\n` +
+                `Você foi desafiado(a) por *${jogadorSessao.nome}*!\n\n` +
+                `👉 Clique para entrar direto:\n${link}\n\n` +
+                `_Ou use o código:_ *${idSalaAtual}*`
+            );
+            window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
+        });
+
+        /* ==========================================================
+           RENDERIZAÇÃO
+           ========================================================== */
+        function renderizarTabuleiro() {
+            const grid = document.getElementById('checkers-board');
+            if (!grid) return;
+            grid.innerHTML = '';
+            const invertido = (minhaCor === 'red');
+
+            for (let visualR = 0; visualR < 8; visualR++) {
+                for (let visualC = 0; visualC < 8; visualC++) {
+                    const r = invertido ? (7 - visualR) : visualR;
+                    const c = invertido ? (7 - visualC) : visualC;
+                    const square = document.createElement('div');
+                    const isDark = (r + c) % 2 === 1;
+                    square.className = `square ${isDark ? 'dark' : 'light'}`;
+                    square.dataset.row = r;
+                    square.dataset.col = c;
+
+                    if (celulaSelecionada && celulaSelecionada.r === r && celulaSelecionada.c === c) {
+                        square.classList.add('selected');
+                    }
+                    const mov = movimentosValidos.find(m => m.r === r && m.c === c);
+                    if (mov) square.classList.add(mov.captura ? 'capture-target' : 'highlight');
+
+                    const peca = tabuleiro[r]?.[c];
+                    if (peca) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'piece-wrapper';
+                        const pieceEl = document.createElement('div');
+                        const corClasse = peca.startsWith('white') ? 'white' : 'red';
+                        const isDama = peca.includes('king') ? ' king' : '';
+
+                        let classeExtra = '';
+                        if (!jogoEncerrado && turnoAtual === minhaCor && peca.startsWith(minhaCor)) {
+                            const movsPeca = calcularMovimentos(r, c);
+                            if (movsPeca.length > 0) {
+                                classeExtra = ' movel';
+                                wrapper.classList.add('movel');
+                            }
+                        }
+                        pieceEl.className = `piece ${corClasse}${isDama}${classeExtra}`;
+                        wrapper.appendChild(pieceEl);
+                        square.appendChild(wrapper);
+                    }
+
+                    if (isDark) {
+                        square.addEventListener('click', () => clicarCasa(r, c));
+                    }
+                    grid.appendChild(square);
+                }
+            }
+
+            const statusEl = document.getElementById('turno-status');
+            if (jogoEncerrado) statusEl.textContent = '🏁 Jogo encerrado';
+            else if (turnoAtual === minhaCor) statusEl.textContent = capturaMultiplaEmAndamento ? 'Continue capturando!' : 'Sua vez de jogar!';
+            else statusEl.textContent = 'Vez do oponente...';
+        }
+
+        /* ==========================================================
+           CLIQUE
+           ========================================================== */
+        function clicarCasa(r, c) {
+            if (jogoEncerrado || !salaConfirmada) return;
+            if (turnoAtual !== minhaCor) {
+                document.getElementById('info-instrucao').textContent = '⏳ Aguarde a sua vez!';
+                return;
+            }
+            const peca = tabuleiro[r][c];
+            if (capturaMultiplaEmAndamento) {
+                const movs = movimentosValidos.find(m => m.r === r && m.c === c);
+                if (movs) executarMovimento(celulaSelecionada.r, celulaSelecionada.c, r, c);
+                return;
+            }
+            if (peca && peca.startsWith(minhaCor)) {
+                celulaSelecionada = { r, c };
+                movimentosValidos = calcularMovimentos(r, c);
+                renderizarTabuleiro();
+                return;
+            }
+            if (celulaSelecionada && movimentosValidos.some(m => m.r === r && m.c === c)) {
+                executarMovimento(celulaSelecionada.r, celulaSelecionada.c, r, c);
+                return;
+            }
+            celulaSelecionada = null;
+            movimentosValidos = [];
+            renderizarTabuleiro();
+        }
+
+        /* ==========================================================
+           MOVIMENTOS
+           ========================================================== */
+        function calcularMovimentos(r, c) {
+            const peca = tabuleiro[r][c];
+            if (!peca) return [];
+            const isDama = peca.includes('king');
+            const cor = peca.startsWith('white') ? 'white' : 'red';
+            const movimentos = [];
+            const direcoesFrente = cor === 'white' ? [-1] : [+1];
+            const direcoesDama = [-1, +1];
+
+            if (isDama) {
+                for (const dr of direcoesDama) for (const dc of [-1, +1]) {
+                    let nr = r + dr, nc = c + dc, capturada = null;
+                    while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+                        const alvo = tabuleiro[nr][nc];
+                        if (!alvo) {
+                            if (!capturada) movimentos.push({ r: nr, c: nc });
+                            else { movimentos.push({ r: nr, c: nc, captura: capturada }); break; }
+                        } else if (alvo.startsWith(cor)) break;
+                        else {
+                            if (capturada) break;
+                            capturada = { r: nr, c: nc };
+                        }
+                        nr += dr; nc += dc;
+                    }
+                }
+            } else {
+                for (const dr of direcoesFrente) for (const dc of [-1, +1]) {
+                    const nr = r + dr, nc = c + dc;
+                    if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tabuleiro[nr][nc]) {
+                        movimentos.push({ r: nr, c: nc });
+                    }
+                }
+                for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
+                    const mr = r + dr, mc = c + dc;
+                    const jr = r + 2 * dr, jc = c + 2 * dc;
+                    if (jr < 0 || jr >= 8 || jc < 0 || jc >= 8) continue;
+                    const meio = tabuleiro[mr][mc];
+                    const destino = tabuleiro[jr][jc];
+                    if (meio && !meio.startsWith(cor) && !destino) {
+                        movimentos.push({ r: jr, c: jc, captura: { r: mr, c: mc } });
+                    }
+                }
+            }
+            const capturas = movimentos.filter(m => m.captura);
+            return capturas.length > 0 ? capturas : movimentos;
+        }
+
+        async function executarMovimento(deR, deC, paraR, paraC) {
+            if (!salaConfirmada) return;
+            const mov = movimentosValidos.find(m => m.r === paraR && m.c === paraC);
+            if (!mov) return;
+
+            const pecaMovida = tabuleiro[deR][deC];
+            tabuleiro[paraR][paraC] = pecaMovida;
+            tabuleiro[deR][deC] = null;
+
+            let houveCaptura = false;
+            if (mov.captura) {
+                tabuleiro[mov.captura.r][mov.captura.c] = null;
+                houveCaptura = true;
+            }
+
+            const ehPeaoBranco = pecaMovida === 'white';
+            const ehPeaoVermelho = pecaMovida === 'red';
+            let promoveu = false;
+            if (ehPeaoBranco && paraR === 0)   { tabuleiro[paraR][paraC] = 'white-king'; promoveu = true; }
+            if (ehPeaoVermelho && paraR === 7) { tabuleiro[paraR][paraC] = 'red-king'; promoveu = true; }
+
+            if (houveCaptura && !promoveu) {
+                const maisCapturas = calcularMovimentos(paraR, paraC).filter(m => m.captura);
+                if (maisCapturas.length > 0) {
+                    capturaMultiplaEmAndamento = true;
+                    celulaSelecionada = { r: paraR, c: paraC };
+                    movimentosValidos = maisCapturas;
+                    renderizarTabuleiro();
+                    document.getElementById('info-instrucao').textContent = '🔥 Captura múltipla! Continue capturando.';
+                    try {
+                        await update(ref(db, `salas_damas/${idSalaAtual}`), {
+                            tabuleiro: tabuleiroParaFirebase(tabuleiro),
+                            turno: turnoAtual,
+                            status: 'jogando'
+                        });
+                    } catch (e) { console.error(e); }
+                    return;
+                }
+            }
+
+            capturaMultiplaEmAndamento = false;
+            celulaSelecionada = null;
+            movimentosValidos = [];
+            turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
+            renderizarTabuleiro();
+
+            const oponente = turnoAtual;
+            let encerradoAgora = false;
+            let mensagemFinal = '';
+
+            if (!temPecas(oponente)) {
+                encerradoAgora = true;
+                const vencedor = oponente === 'white' ? 'red' : 'white';
+                mensagemFinal = `🏆 Vitória das ${vencedor === 'white' ? 'brancas' : 'vermelhas'}!`;
+            } else if (!temMovimentos(oponente)) {
+                encerradoAgora = true;
+                const vencedor = minhaCor;
+                mensagemFinal = `🏆 Vitória das ${vencedor === 'white' ? 'brancas' : 'vermelhas'}!`;
+            }
+
+            if (encerradoAgora) {
+                jogoEncerrado = true;
+                document.getElementById('info-instrucao').textContent = mensagemFinal;
+                setTimeout(() => abrirModal({
+                    icon: '🏆',
+                    title: 'Fim de jogo!',
+                    message: mensagemFinal,
+                    actions: [
+                        { label: 'Nova Partida', onClick: () => location.href = URL_BASE },
+                        { label: 'Fechar', secondary: true }
+                    ]
+                }), 250);
+            }
+
+            try {
+                await update(ref(db, `salas_damas/${idSalaAtual}`), {
+                    tabuleiro: tabuleiroParaFirebase(tabuleiro),
+                    turno: turnoAtual,
+                    status: jogoEncerrado ? 'encerrado' : 'jogando'
+                });
+            } catch (e) {
+                console.error('Erro de sync:', e);
+                toast('Falha de sincronização.', 'error');
+            }
+        }
+
+        function temPecas(cor) {
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                const p = tabuleiro[r][c];
+                if (p && p.startsWith(cor)) return true;
+            }
+            return false;
+        }
+        function temMovimentos(cor) {
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                const p = tabuleiro[r][c];
+                if (p && p.startsWith(cor) && calcularMovimentos(r, c).length > 0) return true;
+            }
+            return false;
+        }
+
+        /* ==========================================================
+           LISTENER FIREBASE
+           ========================================================== */
+        function escutarFirebase() {
+            if (unsubscribeFirebase) {
+                try { unsubscribeFirebase(); } catch (_) {}
+                unsubscribeFirebase = null;
+            }
+
+            if (!salaConfirmada || !idSalaAtual) {
+                console.warn('⚠️ Tentativa de escutar antes de confirmar sala. Ignorando.');
+                return;
+            }
+
+            const salaRef = ref(db, 'salas_damas/' + idSalaAtual);
+            unsubscribeFirebase = onValue(salaRef, (snapshot) => {
+                if (!snapshot.exists()) {
+                    console.warn('⚠️ Sala não existe no snapshot, mas foi confirmada antes. Ignorando flutuação.');
+                    return;
+                }
+
+                const dados = snapshot.val();
+
+                if (dados.status === 'encerrado' && !jogoEncerrado) {
+                    console.log('🏁 Sala encerrada pelo oponente.');
+                }
+
+                const novoTabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
+                const novaContagem = contarPecas(novoTabuleiro);
+                tabuleiro = novoTabuleiro;
+                ultimaContagemPecas = novaContagem;
+                turnoAtual = dados.turno || 'white';
+                jogoEncerrado = dados.status === 'encerrado';
+
+                if (jogoEncerrado) {
+                    capturaMultiplaEmAndamento = false;
+                    celulaSelecionada = null;
+                    movimentosValidos = [];
+                }
+
+                const jogadores = dados.jogadores || {};
+                const totalJogadores = Object.keys(jogadores).length;
+                const oponenteEntry = Object.values(jogadores).find(j => j.cor !== minhaCor);
+                const novoStatusOponente = !!(oponenteEntry && oponenteEntry.online);
+                const statusDot = document.getElementById('oponente-status');
+
+                if (novoStatusOponente && !oponenteConectado) toast('✅ Oponente conectado!', 'success');
+                else if (!novoStatusOponente && oponenteConectado) toast('⚠️ Oponente desconectou.', 'warn');
+                oponenteConectado = novoStatusOponente;
+
+                if (statusDot) {
+                    statusDot.classList.toggle('online', novoStatusOponente);
+                    statusDot.classList.toggle('offline', !novoStatusOponente && totalJogadores === 2);
+                    statusDot.title = novoStatusOponente ? 'Oponente online' : (totalJogadores === 2 ? 'Oponente offline' : 'Aguardando oponente');
+                }
+
+                if (totalJogadores === 2) {
+                    document.getElementById('info-instrucao').textContent =
+                        '✅ Oponente conectado! ' + (turnoAtual === minhaCor ? 'Sua vez.' : 'Aguarde a jogada dele.');
+                } else if (minhaCor === 'white') {
+                    document.getElementById('info-instrucao').textContent = '⏳ Aguardando o oponente entrar na sala...';
+                }
+
+                renderizarTabuleiro();
+            }, (error) => {
+                console.error('Erro no listener:', error);
+            });
+        }
+
+        /* ==========================================================
+           CLEANUP
+           ========================================================== */
+        window.addEventListener('beforeunload', () => {
+            if (unsubscribeFirebase) {
+                try { unsubscribeFirebase(); } catch (_) {}
+            }
+        });
+    </script>
+
+    <!-- LÓGICA DO MODAL "SOBRE" — carrega conteúdo de sobre.js -->
+    <script type="module">
+        import { marked } from 'https://esm.sh/marked@12';
+
+        const modal = document.getElementById('readme-modal');
+        const conteudo = document.getElementById('readme-content');
+        const btnAbout = document.getElementById('btn-about');
+        const btnClose = document.getElementById('btn-close-readme');
+
+        if (!modal || !btnAbout || !conteudo) {
+            console.warn('[Sobre] Elementos do modal não encontrados.');
+        } else {
+            let jaCarregado = false;
+            let focoAnterior = null;
+
+            async function renderizarSobre() {
+                if (jaCarregado) return;
+                try {
+                    const modulo = await import('./sobre.js');
+                    const md = modulo.CONTEUDO_SOBRE || modulo.default || '';
+
+                    if (!md.trim()) {
+                        conteudo.innerHTML =
+                            '<p style="text-align:center;padding:20px;color:#ef4444;">⚠️ Conteúdo vazio.</p>';
+                        return;
+                    }
+
+                    conteudo.innerHTML = marked.parse(md);
+
+                    conteudo.querySelectorAll('a[href^="http"]').forEach((a) => {
+                        a.setAttribute('target', '_blank');
+                        a.setAttribute('rel', 'noopener noreferrer');
+                    });
+
+                    jaCarregado = true;
+                } catch (e) {
+                    console.error('[Sobre] Falha ao carregar sobre.js:', e);
+                    conteudo.innerHTML =
+                        '<p style="color:#ef4444;text-align:center;padding:20px;">' +
+                        '⚠️ Não foi possível carregar o conteúdo.<br>' +
+                        '<small style="color:#94a3b8;font-size:12px;">' +
+                        'Verifique se o ficheiro <code>sobre.js</code> existe na raiz.' +
+                        '</small></p>';
+                }
+            }
+
+            function abrirModalSobre() {
+                focoAnterior = document.activeElement;
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                renderizarSobre();
+                setTimeout(() => btnClose?.focus(), 50);
+            }
+
+            function fecharModalSobre() {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                if (focoAnterior && typeof focoAnterior.focus === 'function') {
+                    focoAnterior.focus();
+                }
+            }
+
+            btnAbout.addEventListener('click', abrirModalSobre);
+            btnClose?.addEventListener('click', fecharModalSobre);
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) fecharModalSobre();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('active')) {
+                    fecharModalSobre();
+                }
+            });
+        }
+    </script>
 </body>
 </html>
-```[cite: 3]
-
----
-
-### Orientação sobre os Novos Ficheiros e GitHub
-
-Para organizar o seu repositório atual e pôr a aplicação online em minutos, siga estas orientações:
-
-1. **Estrutura de Ficheiros Limpa:**
-   * Apague ou retire os ficheiros antigos de Python (`app.py`, etc.).
-   * Na raiz do repositório, deve existir apenas o ficheiro **`index.html`** (com este nome exato e em minúsculas). Como o HTML já traz todo o CSS e JavaScript embutidos, não precisa de gerir múltiplos ficheiros separados, facilitando imenso o alojamento.
-
-2. **Substituição no Repositório:**
-   * Faça o *commit* e *push* do novo ficheiro `index.html` para a branch principal do seu repositório no GitHub:
-     ```bash
-     git add index.html
-     git commit -m "Atualizando para versão web online multijogador com Firebase"
-     git push origin main
-     ```
-
-3. **Publicação Gratuita (GitHub Pages):**
-   * Vá ao seu repositório no site do GitHub.
-   * Clique em **Settings** (Definições) > **Pages** (no menu esquerdo).
-   * Em **Branch**, selecione a sua ramificação (`main` / `master`) e deixe na pasta `/ (root)`. Clique em **Save**.
-   * O GitHub fornecerá um link público. Sempre que aceder a esse link (ou partilhá-lo com um amigo), a aplicação abrirá diretamente no navegador, permitindo criar salas e jogar em tempo real de forma fluida.
