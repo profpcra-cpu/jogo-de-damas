@@ -454,6 +454,42 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
+        /* ========== PAINEL DE ERRO (DIAGNÓSTICO) ========== */
+        #__erro_painel {
+            position: fixed;
+            bottom: 12px;
+            left: 12px;
+            right: 12px;
+            background: rgba(127, 29, 29, 0.95);
+            color: #fee2e2;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            z-index: 99999;
+            max-height: 40vh;
+            overflow-y: auto;
+            border: 1px solid #ef4444;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+        #__erro_painel.visivel { display: block; }
+        #__erro_painel .fechar {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            background: transparent;
+            border: none;
+            color: #fee2e2;
+            cursor: pointer;
+            font-size: 14px;
+            width: auto;
+            padding: 2px 6px;
+            box-shadow: none;
+        }
+
         /* ========== MODAL SOBRE (README) ========== */
         .readme-overlay {
             position: fixed;
@@ -626,10 +662,10 @@
 
     <div class="container">
         <div class="top-bar">
-            <button class="btn-small" onclick="window.location.href='index.html'">🏠 Menu Hub</button>
+            <button id="btn-sair" class="btn-small" type="button" title="Sair da sala atual">🚪 Sair</button>
             <div style="display:flex; gap:6px;">
-                <button id="btn-about" class="btn-small" title="Sobre o jogo">📖 Sobre</button>
-                <button id="theme-toggle" class="btn-small">🌙 Tema</button>
+                <button id="btn-about" class="btn-small" type="button" title="Sobre o jogo">📖 Sobre</button>
+                <button id="theme-toggle" class="btn-small" type="button">🌙 Tema</button>
             </div>
         </div>
 
@@ -645,14 +681,14 @@
             <div class="lobby-box">
                 <h3>♟️ Jogo de Damas Multiplayer</h3>
                 <p>Jogue uma partida clássica de Damas 8x8 em turnos com um colega em tempo real. Crie sua sala e envie o convite pelo WhatsApp!</p>
-                <button id="btn-criar-sala">🚀 Criar Sala de Damas</button>
+                <button id="btn-criar-sala" type="button">🚀 Criar Sala de Damas</button>
             </div>
 
             <div class="lobby-box" style="margin-bottom: 0;">
                 <h3>🔗 Entrar com Código</h3>
                 <div style="display: flex; gap: 6px;">
                     <input type="text" id="input-codigo-sala" placeholder="Ex: DAMAS-7812" style="font-family: monospace;">
-                    <button id="btn-entrar-sala" style="width: 120px;">Entrar</button>
+                    <button id="btn-entrar-sala" type="button" style="width: 120px;">Entrar</button>
                 </div>
             </div>
         </div>
@@ -678,7 +714,7 @@
             <div class="checkers-grid" id="checkers-board" role="grid" aria-label="Tabuleiro de damas"></div>
 
             <div id="div-whatsapp" class="hidden">
-                <button id="btn-whatsapp" class="btn-whatsapp">💬 Convidar Colega pelo WhatsApp</button>
+                <button id="btn-whatsapp" class="btn-whatsapp" type="button">💬 Convidar Colega pelo WhatsApp</button>
             </div>
         </div>
     </div>
@@ -698,7 +734,7 @@
         <div class="readme-card">
             <header class="readme-header">
                 <h2 id="readme-title">📘 Sobre o Jogo de Damas</h2>
-                <button class="readme-close" id="btn-close-readme" aria-label="Fechar">✕</button>
+                <button class="readme-close" id="btn-close-readme" type="button" aria-label="Fechar">✕</button>
             </header>
             <div class="readme-content" id="readme-content">
                 <p style="text-align:center;color:#94a3b8;padding:24px 0;">A carregar…</p>
@@ -706,20 +742,170 @@
         </div>
     </div>
 
+    <!-- PAINEL DE ERRO (só aparece se houver crash) -->
+    <div id="__erro_painel">
+        <button class="fechar" onclick="document.getElementById('__erro_painel').classList.remove('visivel')" aria-label="Fechar painel de erro">✕</button>
+        <span id="__erro_conteudo"></span>
+    </div>
+
     <!-- TOASTS -->
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- LÓGICA DO JOGO -->
+    <!-- ==========================================================
+         SCRIPT 1 — PAINEL DE ERRO GLOBAL
+         ========================================================== -->
+    <script>
+        (function () {
+            'use strict';
+
+            function mostrarErroPainel(msg) {
+                const painel = document.getElementById('__erro_painel');
+                const conteudo = document.getElementById('__erro_conteudo');
+                if (!painel || !conteudo) return;
+                conteudo.textContent = '⚠️ ' + msg;
+                painel.classList.add('visivel');
+            }
+            window.mostrarErroPainel = mostrarErroPainel;
+
+            window.addEventListener('error', (e) => {
+                const info = `${e.message || 'Erro'}\n${e.filename || ''}:${e.lineno || '?'}`;
+                console.error('❌ Erro global:', info);
+                mostrarErroPainel(info);
+            });
+
+            window.addEventListener('unhandledrejection', (e) => {
+                const motivo = e.reason;
+                const info = `Promise rejeitada: ${(motivo && (motivo.message || motivo.toString())) || 'desconhecida'}`;
+                console.error('❌', info, motivo);
+                mostrarErroPainel(info);
+            });
+        })();
+    </script>
+
+    <!-- ==========================================================
+         SCRIPT 2 — MODAL "SOBRE" (independente, não bloqueia o jogo)
+         ========================================================== -->
+    <script>
+        (function () {
+            'use strict';
+
+            const modal = document.getElementById('readme-modal');
+            const conteudo = document.getElementById('readme-content');
+            const btnAbout = document.getElementById('btn-about');
+            const btnClose = document.getElementById('btn-close-readme');
+
+            if (!modal || !btnAbout || !conteudo) {
+                console.warn('[Sobre] Elementos do modal não encontrados.');
+                return;
+            }
+
+            let jaCarregado = false;
+            let focoAnterior = null;
+            let markedFn = null;
+
+            async function carregarMarked() {
+                if (markedFn) return markedFn;
+                try {
+                    const mod = await import('https://esm.sh/marked@12');
+                    markedFn = mod.marked || mod.default;
+                    return markedFn;
+                } catch (e) {
+                    console.warn('[Sobre] marked indisponível — usando fallback texto puro.', e);
+                    return null;
+                }
+            }
+
+            async function renderizarSobre() {
+                if (jaCarregado) return;
+
+                let md = '';
+                try {
+                    const mod = await import('./sobre.js');
+                    md = mod.CONTEUDO_SOBRE || mod.default || '';
+                } catch (e) {
+                    console.error('[Sobre] Falha ao importar sobre.js:', e);
+                    conteudo.innerHTML =
+                        '<p style="color:#ef4444;text-align:center;padding:20px;">' +
+                        '⚠️ Não foi possível carregar o conteúdo do "Sobre".<br>' +
+                        '<small style="color:#94a3b8;font-size:12px;">' +
+                        'Verifique se <code>sobre.js</code> existe na raiz.' +
+                        '</small></p>';
+                    return;
+                }
+
+                if (!md.trim()) {
+                    conteudo.innerHTML = '<p style="text-align:center;padding:20px;color:#ef4444;">⚠️ Conteúdo vazio.</p>';
+                    return;
+                }
+
+                const marked = await carregarMarked();
+
+                if (marked && typeof marked.parse === 'function') {
+                    conteudo.innerHTML = marked.parse(md);
+                    conteudo.querySelectorAll('a[href^="http"]').forEach((a) => {
+                        a.setAttribute('target', '_blank');
+                        a.setAttribute('rel', 'noopener noreferrer');
+                    });
+                } else {
+                    const pre = document.createElement('pre');
+                    pre.style.cssText = 'white-space:pre-wrap; font-family:JetBrains Mono,monospace; font-size:12.5px; color:var(--text-muted);';
+                    pre.textContent = md;
+                    conteudo.innerHTML = '';
+                    conteudo.appendChild(pre);
+                }
+
+                jaCarregado = true;
+            }
+
+            function abrirModalSobre() {
+                focoAnterior = document.activeElement;
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                renderizarSobre();
+                setTimeout(() => btnClose && btnClose.focus(), 50);
+            }
+
+            function fecharModalSobre() {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                if (focoAnterior && typeof focoAnterior.focus === 'function') {
+                    focoAnterior.focus();
+                }
+            }
+
+            btnAbout.addEventListener('click', abrirModalSobre);
+            if (btnClose) btnClose.addEventListener('click', fecharModalSobre);
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) fecharModalSobre();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('active')) {
+                    fecharModalSobre();
+                }
+            });
+        })();
+    </script>
+
+    <!-- ==========================================================
+         SCRIPT 3 — LÓGICA DO JOGO (módulo)
+         ========================================================== -->
     <script type="module">
         import { db } from "./firebase-config.js";
-        import { ref, get, set, update, onValue, runTransaction, onDisconnect, serverTimestamp, off }
+        import { ref, get, set, update, onValue, runTransaction, onDisconnect, serverTimestamp }
             from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         /* ==========================================================
            CONSTANTES
            ========================================================== */
-        const URL_BASE = 'index.html';
         const VALORES_PECA_VALIDOS = new Set([null, 'white', 'red', 'white-king', 'red-king']);
+
+        /* Recarrega a própria página SEM os parâmetros de sala (?sala=...&cor=...) */
+        function voltarAoLobby() {
+            limparSessao();
+            window.location.href = window.location.pathname;
+        }
 
         /* ==========================================================
            UI HELPERS
@@ -737,6 +923,7 @@
             modalActions.innerHTML = '';
             actions.forEach(acao => {
                 const btn = document.createElement('button');
+                btn.type = 'button';
                 btn.textContent = acao.label;
                 if (acao.secondary) btn.classList.add('btn-secondary');
                 btn.addEventListener('click', () => {
@@ -747,6 +934,7 @@
             });
             if (actions.length === 0) {
                 const btn = document.createElement('button');
+                btn.type = 'button';
                 btn.textContent = 'OK';
                 btn.addEventListener('click', fecharModal);
                 modalActions.appendChild(btn);
@@ -806,11 +994,20 @@
         }
 
         /* ==========================================================
-           SESSÃO
+           SESSÃO — com fallback para evitar loop de redirecionamento
            ========================================================== */
         let jogadorSessao = null;
         try { jogadorSessao = JSON.parse(localStorage.getItem('brain_hub_jogador')); } catch (_) {}
-        if (!jogadorSessao) window.location.href = URL_BASE;
+
+        if (!jogadorSessao || !jogadorSessao.chave || !jogadorSessao.nome) {
+            jogadorSessao = {
+                chave: 'anon_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now().toString(36),
+                nome: 'Jogador ' + Math.floor(Math.random() * 9000 + 1000),
+                avatar: '😀'
+            };
+            try { localStorage.setItem('brain_hub_jogador', JSON.stringify(jogadorSessao)); } catch (_) {}
+            console.log('👤 Sessão anónima criada automaticamente:', jogadorSessao.nome);
+        }
 
         document.getElementById('lobby-nome').textContent = jogadorSessao.nome;
         document.getElementById('lobby-avatar').textContent = jogadorSessao.avatar;
@@ -846,6 +1043,25 @@
             document.documentElement.setAttribute('data-theme', nxt);
             localStorage.setItem('brain_flow_theme', nxt);
             themeToggleBtn.textContent = nxt === 'dark' ? '☀️ Claro' : '🌙 Escuro';
+        });
+
+        /* ==========================================================
+           BOTÃO SAIR — limpa sessão da sala e volta ao lobby
+           ========================================================== */
+        document.getElementById('btn-sair').addEventListener('click', () => {
+            if (!salaConfirmada) {
+                // Já está no lobby — só limpa parâmetros residuais
+                limparSessao();
+                return;
+            }
+            if (!confirm('Deseja sair da sala atual? Sua sessão de sala será encerrada.')) return;
+
+            // Desconecta o listener antes de recarregar
+            if (unsubscribeFirebase) {
+                try { unsubscribeFirebase(); } catch (_) {}
+                unsubscribeFirebase = null;
+            }
+            voltarAoLobby();
         });
 
         /* ==========================================================
@@ -930,7 +1146,7 @@
                         title: 'Sala não encontrada',
                         message: 'O convite expirou ou a sala foi encerrada pelo anfitrião.',
                         actions: [
-                            { label: 'Ir ao lobby', onClick: () => { limparSessao(); location.href = URL_BASE; } }
+                            { label: 'Voltar ao lobby', onClick: voltarAoLobby }
                         ]
                     });
                     return false;
@@ -944,7 +1160,7 @@
                         icon: '🏁',
                         title: 'Partida encerrada',
                         message: 'Esta partida já foi encerrada. Peça ao anfitrião para criar uma nova.',
-                        actions: [{ label: 'Ir ao lobby', onClick: () => { limparSessao(); location.href = URL_BASE; } }]
+                        actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }]
                     });
                     return false;
                 }
@@ -977,7 +1193,7 @@
                         title: 'Sala cheia',
                         message: 'Esta sala já tem dois jogadores. Peça ao anfitrião para criar uma nova.',
                         actions: [
-                            { label: 'Ir ao lobby', onClick: () => { limparSessao(); location.href = URL_BASE; } },
+                            { label: 'Voltar ao lobby', onClick: voltarAoLobby },
                             { label: 'Fechar', secondary: true, onClick: limparSessao }
                         ]
                     });
@@ -1013,7 +1229,7 @@
                             icon: '👥',
                             title: 'Sala cheia',
                             message: 'Esta sala já tem dois jogadores.',
-                            actions: [{ label: 'Ir ao lobby', onClick: () => { limparSessao(); location.href = URL_BASE; } }]
+                            actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }]
                         });
                         return false;
                     }
@@ -1022,7 +1238,7 @@
                             icon: '🚫',
                             title: 'Sala não encontrada',
                             message: 'A sala foi removida pelo anfitrião.',
-                            actions: [{ label: 'Ir ao lobby', onClick: () => { limparSessao(); location.href = URL_BASE; } }]
+                            actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }]
                         });
                         return false;
                     }
@@ -1464,7 +1680,7 @@
                     title: 'Fim de jogo!',
                     message: mensagemFinal,
                     actions: [
-                        { label: 'Nova Partida', onClick: () => location.href = URL_BASE },
+                        { label: 'Nova Partida', onClick: voltarAoLobby },
                         { label: 'Fechar', secondary: true }
                     ]
                 }), 250);
@@ -1574,83 +1790,8 @@
                 try { unsubscribeFirebase(); } catch (_) {}
             }
         });
-    </script>
 
-    <!-- LÓGICA DO MODAL "SOBRE" — carrega conteúdo de sobre.js -->
-    <script type="module">
-        import { marked } from 'https://esm.sh/marked@12';
-
-        const modal = document.getElementById('readme-modal');
-        const conteudo = document.getElementById('readme-content');
-        const btnAbout = document.getElementById('btn-about');
-        const btnClose = document.getElementById('btn-close-readme');
-
-        if (!modal || !btnAbout || !conteudo) {
-            console.warn('[Sobre] Elementos do modal não encontrados.');
-        } else {
-            let jaCarregado = false;
-            let focoAnterior = null;
-
-            async function renderizarSobre() {
-                if (jaCarregado) return;
-                try {
-                    const modulo = await import('./sobre.js');
-                    const md = modulo.CONTEUDO_SOBRE || modulo.default || '';
-
-                    if (!md.trim()) {
-                        conteudo.innerHTML =
-                            '<p style="text-align:center;padding:20px;color:#ef4444;">⚠️ Conteúdo vazio.</p>';
-                        return;
-                    }
-
-                    conteudo.innerHTML = marked.parse(md);
-
-                    conteudo.querySelectorAll('a[href^="http"]').forEach((a) => {
-                        a.setAttribute('target', '_blank');
-                        a.setAttribute('rel', 'noopener noreferrer');
-                    });
-
-                    jaCarregado = true;
-                } catch (e) {
-                    console.error('[Sobre] Falha ao carregar sobre.js:', e);
-                    conteudo.innerHTML =
-                        '<p style="color:#ef4444;text-align:center;padding:20px;">' +
-                        '⚠️ Não foi possível carregar o conteúdo.<br>' +
-                        '<small style="color:#94a3b8;font-size:12px;">' +
-                        'Verifique se o ficheiro <code>sobre.js</code> existe na raiz.' +
-                        '</small></p>';
-                }
-            }
-
-            function abrirModalSobre() {
-                focoAnterior = document.activeElement;
-                modal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-                renderizarSobre();
-                setTimeout(() => btnClose?.focus(), 50);
-            }
-
-            function fecharModalSobre() {
-                modal.classList.remove('active');
-                document.body.style.overflow = '';
-                if (focoAnterior && typeof focoAnterior.focus === 'function') {
-                    focoAnterior.focus();
-                }
-            }
-
-            btnAbout.addEventListener('click', abrirModalSobre);
-            btnClose?.addEventListener('click', fecharModalSobre);
-
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) fecharModalSobre();
-            });
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && modal.classList.contains('active')) {
-                    fecharModalSobre();
-                }
-            });
-        }
+        console.log('✅ Jogo de Damas inicializado.');
     </script>
 </body>
 </html>
