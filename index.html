@@ -1067,15 +1067,6 @@
             window.history.replaceState({}, '', url.pathname);
         }
 
-        async function registrarPresenca(codigo) {
-            if (!jogadorSessao) return;
-            try {
-                const presencaRef = ref(db, `salas_damas/${codigo}/jogadores/${jogadorSessao.chave}/online`);
-                await set(presencaRef, true);
-                onDisconnect(presencaRef).set(false);
-            } catch (e) {}
-        }
-
         function detectarConviteNaURL() {
             const params = new URLSearchParams(window.location.search);
             const sala = params.get('sala');
@@ -1114,7 +1105,11 @@
                 tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
                 turnoAtual = dados.turno || 'white';
                 jogoEncerrado = dados.status === 'encerrado';
-                await registrarPresenca(codigo);
+                
+                const presencaRef = ref(db, `salas_damas/${codigo}/jogadores/${jogadorSessao.chave}/online`);
+                await set(presencaRef, true);
+                onDisconnect(presencaRef).set(false);
+
                 salaConfirmada = true;
                 salvarSessao();
                 entrarInterfaceJogo();
@@ -1129,13 +1124,12 @@
             }
 
             let corEscolhida = null;
-            let motivoFalha = null;
             const resultado = await runTransaction(ref(db, 'salas_damas/' + codigo), (atual) => {
-                if (!atual) { motivoFalha = 'REMOVIDA'; return; }
-                if (atual.status === 'encerrado') { motivoFalha = 'ENCERRADA'; return; }
+                if (!atual) return;
+                if (atual.status === 'encerrado') return;
                 atual.jogadores = atual.jogadores || {};
-                if (atual.jogadores[jogadorSessao.chave]) { motivoFalha = 'JA_ESTA'; return; }
-                if (Object.keys(atual.jogadores).length >= 2) { motivoFalha = 'CHEIA'; return; }
+                if (atual.jogadores[jogadorSessao.chave]) return;
+                if (Object.keys(atual.jogadores).length >= 2) return;
                 const cores = Object.values(atual.jogadores).map(j => j.cor);
                 corEscolhida = cores.includes('white') ? 'red' : 'white';
                 atual.jogadores[jogadorSessao.chave] = { nome: jogadorSessao.nome, cor: corEscolhida, online: true };
@@ -1153,7 +1147,11 @@
             tabuleiro = firebaseParaTabuleiro(dadosAtualizados.tabuleiro);
             turnoAtual = dadosAtualizados.turno || 'white';
             jogoEncerrado = false;
-            await registrarPresenca(codigo);
+
+            const presencaRef = ref(db, `salas_damas/${codigo}/jogadores/${jogadorSessao.chave}/online`);
+            await set(presencaRef, true);
+            onDisconnect(presencaRef).set(false);
+
             salaConfirmada = true;
             salvarSessao();
             entrarInterfaceJogo();
@@ -1188,7 +1186,8 @@
                 turnoAtual = 'white';
                 jogoEncerrado = false;
 
-                await set(ref(db, 'salas_damas/' + idSalaAtual), {
+                const salaRef = ref(db, 'salas_damas/' + idSalaAtual);
+                await set(salaRef, {
                     status: 'jogando',
                     turno: 'white',
                     tabuleiro: tabuleiroParaFirebase(tabuleiro),
@@ -1199,7 +1198,10 @@
                     }
                 });
 
-                await registrarPresenca(idSalaAtual);
+                const presencaRef = ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}/online`);
+                await set(presencaRef, true);
+                onDisconnect(presencaRef).set(false);
+
                 salaConfirmada = true;
                 salvarSessao();
                 entrarInterfaceJogo();
@@ -1467,6 +1469,14 @@
             unsubscribeFirebase = onValue(ref(db, 'salas_damas/' + idSalaAtual), (snapshot) => {
                 if (!snapshot.exists()) return;
                 const dados = snapshot.val();
+
+                if (dados.status === 'encerrado' && !jogoEncerrado) {
+                    const contagem = contarPecas(firebaseParaTabuleiro(dados.tabuleiro));
+                    if (contagem.white > 0 && contagem.red > 0 && temMovimentos('white') && temMovimentos('red')) {
+                        return;
+                    }
+                }
+
                 tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
                 turnoAtual = dados.turno || 'white';
                 jogoEncerrado = dados.status === 'encerrado';
