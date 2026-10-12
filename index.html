@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt" data-theme="dark" data-board-theme="default" data-a11y="off">
+<html lang="pt" data-theme="dark" data-board-theme="default" data-a11y="off" data-foco="off">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0">
@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0a0e1a">
     <meta name="description" content="Brain Damas — Jogo de Damas Brasileiras. Zero dados. Zero contas. Zero rastreio.">
-    <title>Brain Damas v6.1 — Zero Dados, Zero Contas</title>
+    <title>Brain Damas v6.2 — Onda 2 Visual</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,6 +29,7 @@
             --radius-sm: 10px; --radius-md: 14px; --radius-lg: 22px;
             --shadow-card: 0 24px 64px -24px rgba(0, 0, 0, 0.8);
             --t-base: 0.25s ease; --t-slow: 0.4s ease;
+            --t-anim: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             --board-frame-1: #4a2f1e; --board-frame-2: #2a1810;
             --board-light: #e8d4a8; --board-dark: #8b5a2b;
             --board-coord: rgba(232, 212, 168, 0.9); --board-coord-edge: #fbbf24;
@@ -128,8 +129,6 @@
             --space-sm: 10px; --space-md: 16px; --space-lg: 26px; --space-xl: 40px;
         }
         [data-a11y="on"] body { font-size: 20px; }
-        [data-a11y="on"] .btn-icon,
-        [data-a11y="on"] .action-btn { padding: 12px 16px !important; min-height: 56px !important; }
         [data-a11y="on"] .board-wrapper { padding: 26px !important; }
         [data-a11y="on"] .piece.king::after { font-size: 24px !important; }
 
@@ -157,28 +156,17 @@
         [data-theme="minimal"] body::before, [data-theme="minimal"] body::after { display: none; }
 
         /* ============================================================
-           CORREÇÃO: INDICADOR DE CONEXÃO (fix bug compressão de tela)
+           CONEXÃO (fix bug compressão de tela)
            ============================================================ */
         .connection-status {
-            position: fixed;
-            top: 12px;
-            left: 50%;
-            transform: translateX(-50%);
+            position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
             background: linear-gradient(135deg, #dc2626, #991b1b);
-            color: #fff;
-            font-size: var(--fs-sm);
-            font-weight: 700;
-            padding: 8px 16px;
-            border-radius: 999px;
+            color: #fff; font-size: var(--fs-sm); font-weight: 700;
+            padding: 8px 16px; border-radius: 999px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
-            z-index: 5500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            z-index: 5500; display: flex; align-items: center; gap: 8px;
             animation: connectionPulse 1s infinite;
-            pointer-events: none;
-            max-width: 90vw;
-            white-space: nowrap;
+            pointer-events: none; max-width: 90vw; white-space: nowrap;
         }
         @keyframes connectionPulse {
             0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
@@ -197,7 +185,62 @@
         }
         @keyframes cardIn { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-        /* TOP BAR */
+        /* ============================================================
+           MODO FOCO TOTAL
+           ============================================================ */
+        [data-foco="on"] .top-bar,
+        [data-foco="on"] #lobby-screen,
+        [data-foco="on"] .user-header,
+        [data-foco="on"] .torneio-bar,
+        [data-foco="on"] .match-info-bar,
+        [data-foco="on"] .clock-display,
+        [data-foco="on"] .placar-bar,
+        [data-foco="on"] #info-instrucao,
+        [data-foco="on"] .notacao-header,
+        [data-foco="on"] .notacao-panel,
+        [data-foco="on"] #chat-bar,
+        [data-foco="on"] #div-whatsapp,
+        [data-foco="on"] #div-pos-jogo,
+        [data-foco="on"] #div-revanche-pendente,
+        [data-foco="on"] #div-pausa-pendente,
+        [data-foco="on"] #div-empate-pendente,
+        [data-foco="on"] #div-handshake,
+        [data-foco="on"] #timer-bar-wrap {
+            display: none !important;
+        }
+        [data-foco="on"] body { padding: 0; }
+        [data-foco="on"] .container {
+            max-width: 100vw; width: 100vw; border-radius: 0; padding: 8px;
+            min-height: 100dvh; display: flex; align-items: center; justify-content: center;
+        }
+        [data-foco="on"] #game-screen { max-width: min(100vw, 100dvh); margin: 0 auto; width: 100%; }
+        [data-foco="on"] .board-wrapper { max-width: min(95vw, calc(100dvh - 40px)); margin: 0 auto; }
+        [data-foco="on"] .action-bar {
+            position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
+            display: flex !important; gap: 8px; z-index: 100;
+            background: var(--card-bg); padding: 8px 12px;
+            border-radius: 999px; border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            width: auto; grid-template-columns: none;
+        }
+        [data-foco="on"] .action-btn { min-height: 44px; min-width: 60px; padding: 6px 10px; }
+        [data-foco="on"] .action-btn span:last-child { display: none; }
+        [data-foco="on"] .action-icon { font-size: 22px; }
+        [data-foco="on"] .action-btn .action-icon { margin: 0; }
+        [data-foco="on"] #btn-sair-foco {
+            position: fixed; top: 12px; right: 12px;
+            width: 48px; height: 48px; border-radius: 50%;
+            background: rgba(15, 23, 42, 0.92); color: #fff;
+            border: 2px solid rgba(148, 163, 184, 0.4);
+            font-size: 20px; cursor: pointer; z-index: 200;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #btn-sair-foco { display: none; }
+        [data-foco="on"] #btn-sair-foco { display: flex; }
+
+        /* ============================================================
+           TOP BAR
+           ============================================================ */
         .top-bar {
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: var(--space-md); gap: var(--space-sm); flex-wrap: wrap;
@@ -297,7 +340,6 @@
             min-height: 44px;
         }
         .tab-btn.active { background: linear-gradient(135deg, var(--btn-primary), var(--btn-accent)); color: #fff; }
-        .tab-btn:focus-visible { outline: 2px solid var(--c-blue); outline-offset: 2px; }
 
         button, input, select {
             width: 100%; padding: 14px 16px;
@@ -313,9 +355,6 @@
         button:focus-visible { outline: 3px solid var(--c-blue); outline-offset: 2px; }
         .btn-secundario { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); }
         .btn-whatsapp { background: linear-gradient(135deg, #16a34a, #22c55e); margin-top: 6px; }
-
-        input, select { cursor: text; }
-        select { cursor: pointer; }
 
         .tipo-selector, .theme-selector, .tempo-selector {
             display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: var(--space-sm);
@@ -389,6 +428,7 @@
         .action-btn.btn-empate { border-color: rgba(245, 158, 11, 0.5); }
         .action-btn.btn-desistir { border-color: rgba(239, 68, 68, 0.5); }
         .action-btn.btn-rec { border-color: rgba(220, 38, 38, 0.5); }
+        .action-btn.btn-foco { border-color: rgba(139, 92, 246, 0.5); }
 
         .timer-bar-wrap {
             position: relative; width: 100%; height: 8px;
@@ -424,6 +464,9 @@
         .clock-player.active { color: var(--c-green); }
         .clock-player.danger { color: var(--c-red); animation: timerPulse 0.8s infinite; }
 
+        /* ============================================================
+           TABULEIRO — COM ANIMAÇÕES
+           ============================================================ */
         .board-wrapper {
             position: relative; width: 100%;
             max-width: min(100%, calc(100dvh - 420px));
@@ -438,7 +481,9 @@
             position: absolute; font-family: 'JetBrains Mono', monospace;
             font-size: var(--fs-xs); font-weight: 700; color: var(--board-coord);
             pointer-events: none; z-index: 2;
+            transition: opacity 0.3s;
         }
+        [data-ecra-limpo="on"] .board-ruler { opacity: 0; }
         .board-ruler-top { top: 0; left: 24px; right: 24px; height: 24px; display: grid; grid-template-columns: repeat(8, 1fr); align-items: center; }
         .board-ruler-bottom { bottom: 0; left: 24px; right: 24px; height: 24px; display: grid; grid-template-columns: repeat(8, 1fr); align-items: center; }
         .board-ruler-left { top: 24px; bottom: 24px; left: 0; width: 24px; display: grid; grid-template-rows: repeat(8, 1fr); align-items: center; }
@@ -455,26 +500,57 @@
         .square {
             display: flex; align-items: center; justify-content: center;
             position: relative; cursor: pointer;
-            transition: box-shadow 0.15s;
+            transition: box-shadow 0.2s;
         }
         .square.light { background-color: var(--board-light); }
         .square.dark { background-color: var(--board-dark); }
-        .square.selected { box-shadow: inset 0 0 0 4px rgba(99, 102, 241, 0.95) !important; }
-        .square.highlight { box-shadow: inset 0 0 0 4px rgba(74, 222, 128, 0.95) !important; }
-        .square.capture-target { box-shadow: inset 0 0 0 4px rgba(239, 68, 68, 0.95) !important; }
-        .square.ultimo-lance { box-shadow: inset 0 0 0 3px rgba(56, 189, 248, 0.75) !important; }
+
+        /* Estados de destaque (com animação) */
+        .square.selected {
+            box-shadow: inset 0 0 0 4px rgba(99, 102, 241, 0.95) !important;
+            animation: pulseSelect 1.5s infinite;
+        }
+        @keyframes pulseSelect {
+            0%, 100% { box-shadow: inset 0 0 0 4px rgba(99, 102, 241, 0.95), inset 0 0 0 0 rgba(99, 102, 241, 0) !important; }
+            50% { box-shadow: inset 0 0 0 4px rgba(99, 102, 241, 1), inset 0 0 0 10px rgba(99, 102, 241, 0.35) !important; }
+        }
+        .square.highlight {
+            box-shadow: inset 0 0 0 4px rgba(74, 222, 128, 0.95) !important;
+            animation: pulseHighlight 1.8s infinite;
+        }
+        @keyframes pulseHighlight {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+        .square.capture-target {
+            box-shadow: inset 0 0 0 4px rgba(239, 68, 68, 0.95) !important;
+            animation: pulseCapture 1.2s infinite;
+        }
+        @keyframes pulseCapture {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .square.ultimo-lance {
+            box-shadow: inset 0 0 0 3px rgba(56, 189, 248, 0.85), 0 0 16px rgba(56, 189, 248, 0.6) !important;
+            animation: pulseUltimo 0.5s ease 4;
+        }
+        @keyframes pulseUltimo {
+            0%, 100% { box-shadow: inset 0 0 0 3px rgba(56, 189, 248, 0.85), 0 0 16px rgba(56, 189, 248, 0.6) !important; }
+            50% { box-shadow: inset 0 0 0 5px rgba(56, 189, 248, 1), 0 0 28px rgba(56, 189, 248, 0.9) !important; }
+        }
         .square.capture-mandatory {
             box-shadow: inset 0 0 0 4px rgba(251, 191, 36, 0.95), 0 0 20px rgba(251, 191, 36, 0.8) !important;
             animation: mandatoryPulse 1.6s infinite;
         }
         @keyframes mandatoryPulse { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.35); } }
 
+        /* Peça com animação */
         .piece {
             width: 82%; height: 82%; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             position: relative;
             box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5), inset 0 -2px 4px rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.25);
-            transition: transform 0.15s;
+            transition: transform var(--t-anim);
         }
         .piece.white {
             background: radial-gradient(circle at 32% 28%, #ffffff 0%, #f0e6d2 60%, #c9b896 100%);
@@ -489,14 +565,51 @@
             color: var(--c-gold); font-weight: 900;
             text-shadow: 0 0 8px rgba(251, 191, 36, 0.9), 0 2px 3px rgba(0, 0, 0, 0.8);
         }
+        .piece.nova-dama {
+            animation: brilhoDama 1.5s ease-out;
+        }
+        @keyframes brilhoDama {
+            0% { transform: scale(1.5); filter: brightness(2.5) drop-shadow(0 0 30px #fbbf24); }
+            50% { transform: scale(1.15); filter: brightness(1.5) drop-shadow(0 0 20px #fbbf24); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
 
-        .piece-wrapper { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+        .piece-wrapper {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 100%;
+        }
+        .piece-wrapper.movendo {
+            animation: moverPeca var(--t-anim);
+        }
+        @keyframes moverPeca {
+            0% { transform: scale(0.85); opacity: 0.7; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .piece-wrapper.capturando {
+            animation: animarCaptura var(--t-anim);
+        }
+        @keyframes animarCaptura {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.3) rotate(-10deg); filter: brightness(1.5); }
+            60% { transform: scale(0.9) rotate(5deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
 
+        /* ============================================================
+           PAINÉIS COLAPSÁVEIS
+           ============================================================ */
         .notacao-header {
             display: flex; gap: 8px; align-items: center;
             margin-bottom: 6px; justify-content: space-between;
+            cursor: pointer; user-select: none;
         }
-        .notacao-header strong { font-size: var(--fs-sm); color: var(--c-blue); }
+        .notacao-header strong { font-size: var(--fs-sm); color: var(--c-blue); display: flex; align-items: center; gap: 6px; }
+        .notacao-toggle {
+            font-size: 14px; transition: transform 0.3s;
+            color: var(--text-muted);
+        }
+        .notacao-header.colapsada .notacao-toggle { transform: rotate(-90deg); }
         .notacao-copy-btn {
             width: auto; padding: 6px 12px;
             font-size: var(--fs-xs); font-weight: 700;
@@ -511,6 +624,10 @@
             max-height: 140px; overflow-y: auto;
             font-family: 'JetBrains Mono', monospace; font-size: var(--fs-sm);
             text-align: left; line-height: 1.7;
+            transition: max-height 0.3s, padding 0.3s, opacity 0.3s;
+        }
+        .notacao-panel.colapsada {
+            max-height: 0; padding: 0 14px; opacity: 0; margin-bottom: 0; overflow: hidden;
         }
         .notacao-panel .mov-num { color: var(--text-subtle); margin-right: 6px; font-weight: 700; }
         .notacao-panel .mov-branca { color: var(--c-blue); font-weight: 700; }
@@ -523,6 +640,11 @@
             margin: var(--space-md) 0; padding: 10px;
             background: var(--input-bg);
             border: 1px solid var(--border-color); border-radius: var(--radius-md);
+            transition: max-height 0.3s, padding 0.3s, opacity 0.3s;
+            max-height: 200px;
+        }
+        .chat-bar.colapsada {
+            max-height: 0; padding: 0 10px; opacity: 0; margin: 0; overflow: hidden;
         }
         .emoji-btn {
             width: auto; min-width: 48px; min-height: 48px;
@@ -534,7 +656,11 @@
             color: var(--text-color) !important;
         }
         .emoji-btn:hover { transform: scale(1.15); background: var(--card-bg) !important; }
+        .emoji-btn:active { transform: scale(0.95); }
 
+        /* ============================================================
+           BOLHAS
+           ============================================================ */
         .bubble-layer {
             position: absolute; inset: 0; pointer-events: none; z-index: 10;
             display: flex; flex-direction: column; align-items: center;
@@ -553,6 +679,9 @@
         @keyframes bubbleIn { from { opacity: 0; transform: translateY(-14px) scale(0.85); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes bubbleOut { to { opacity: 0; transform: translateY(-14px) scale(0.9); } }
 
+        /* ============================================================
+           PLACAR / TORNEIO
+           ============================================================ */
         .placar-bar {
             display: flex; justify-content: space-around; align-items: center;
             background: var(--input-bg); border: 1px solid var(--border-color);
@@ -596,6 +725,9 @@
             justify-content: space-between;
         }
 
+        /* ============================================================
+           MODAIS
+           ============================================================ */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75);
             display: flex; align-items: center; justify-content: center;
@@ -617,6 +749,9 @@
         .modal-actions { display: flex; gap: var(--space-sm); margin-top: var(--space-md); flex-wrap: wrap; }
         .modal-actions button { flex: 1; min-width: 120px; }
 
+        /* ============================================================
+           TOASTS
+           ============================================================ */
         .toast-container {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             z-index: 1100; display: flex; flex-direction: column; gap: 10px;
@@ -628,14 +763,17 @@
             padding: 12px 18px; border-radius: var(--radius-md);
             font-size: var(--fs-sm); font-weight: 600; color: var(--text-color);
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
-            animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: toastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             max-width: 420px;
         }
         .toast.success { border-left-color: var(--c-green); }
         .toast.error { border-left-color: var(--c-red); }
         .toast.warn { border-left-color: var(--c-amber); }
-        @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(20px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
+        /* ============================================================
+           ATÉ LOGO
+           ============================================================ */
         .ate-logo-screen {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             gap: var(--space-lg); padding: var(--space-xl) var(--space-md);
@@ -648,12 +786,60 @@
 
         .hidden { display: none !important; }
 
+        /* ============================================================
+           INDICADOR "PENSANDO"
+           ============================================================ */
+        .pensando-indicador {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: var(--fs-sm); color: var(--text-muted);
+            font-weight: 600;
+        }
+        .pensando-indicador .dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: currentColor;
+            animation: pensarPulso 1.2s infinite ease-in-out;
+        }
+        .pensando-indicador .dot:nth-child(2) { animation-delay: 0.15s; }
+        .pensando-indicador .dot:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes pensarPulso {
+            0%, 60%, 100% { opacity: 0.3; transform: scale(1); }
+            30% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* ============================================================
+           CONFETES
+           ============================================================ */
+        #confetes-container {
+            position: fixed; inset: 0; pointer-events: none; z-index: 2000;
+            overflow: hidden;
+        }
+        .confete {
+            position: absolute; width: 10px; height: 14px;
+            opacity: 0;
+            animation: cairConfete 2.5s ease-out forwards;
+        }
+        .confete.estrela {
+            width: 20px; height: 20px; font-size: 20px;
+            background: transparent !important;
+            color: var(--c-gold);
+            text-shadow: 0 0 10px rgba(251, 191, 36, 0.9);
+        }
+        @keyframes cairConfete {
+            0% { opacity: 1; transform: translateY(-100px) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(105vh) rotate(720deg); }
+        }
+
+        /* ============================================================
+           HISTÓRICO / RANKING / AGENDA / ACH
+           ============================================================ */
         .historico-item {
             display: flex; align-items: center; justify-content: space-between; gap: 8px;
             padding: 12px 14px; border-radius: var(--radius-sm); background: var(--input-bg);
             border: 1px solid var(--border-color); margin-bottom: 8px;
             font-size: var(--fs-sm);
+            transition: transform 0.15s;
         }
+        .historico-item:hover { transform: translateX(4px); }
         .historico-item.vitoria { border-left: 5px solid var(--c-green); }
         .historico-item.derrota { border-left: 5px solid var(--c-red); }
         .historico-item.empate { border-left: 5px solid var(--c-amber); }
@@ -679,12 +865,17 @@
             background: var(--input-bg); border: 1px solid var(--border-color);
             border-radius: var(--radius-md); padding: 6px;
             font-size: 26px; opacity: 0.35; filter: grayscale(1);
-            transition: all 0.2s; cursor: help;
+            transition: all 0.3s; cursor: help;
         }
         .ach-item.unlocked {
             opacity: 1; filter: none; border-color: var(--c-amber);
             background: rgba(245, 158, 11, 0.14);
             box-shadow: 0 0 16px rgba(245, 158, 11, 0.4);
+            animation: brilhoAch 2s ease-in-out infinite;
+        }
+        @keyframes brilhoAch {
+            0%, 100% { box-shadow: 0 0 16px rgba(245, 158, 11, 0.4); }
+            50% { box-shadow: 0 0 24px rgba(245, 158, 11, 0.7); }
         }
         .ach-item .ach-label {
             font-size: 9px; font-weight: 700; color: var(--text-muted);
@@ -714,32 +905,19 @@
         .replay-controls button { width: auto; padding: 10px 16px; font-size: var(--fs-sm); }
         .replay-move-info { text-align: center; font-size: var(--fs-sm); color: var(--text-muted); margin: 8px 0; font-family: 'JetBrains Mono', monospace; }
 
-        /* Termos de privacidade no modal */
         .privacy-list {
-            text-align: left;
-            padding: 0 var(--space-sm);
-            margin: var(--space-md) 0;
-            list-style: none;
+            text-align: left; padding: 0 var(--space-sm);
+            margin: var(--space-md) 0; list-style: none;
         }
         .privacy-list li {
-            padding: 8px 0;
-            font-size: var(--fs-sm);
+            padding: 8px 0; font-size: var(--fs-sm);
             color: var(--text-color);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: flex; align-items: center; gap: 10px;
         }
-        .privacy-list li::before {
-            content: "✅";
-            font-size: 18px;
-            flex-shrink: 0;
-        }
+        .privacy-list li::before { content: "✅"; font-size: 18px; flex-shrink: 0; }
         .privacy-note {
-            font-size: var(--fs-xs);
-            color: var(--text-muted);
-            margin-top: var(--space-md);
-            font-style: italic;
-            text-align: center;
+            font-size: var(--fs-xs); color: var(--text-muted);
+            margin-top: var(--space-md); font-style: italic; text-align: center;
         }
 
         @media (max-width: 640px) {
@@ -792,7 +970,10 @@
         <span id="connection-msg">Reconectando…</span>
     </div>
 
+    <div id="confetes-container"></div>
+
     <button class="fs-exit-btn" id="fs-exit" type="button" aria-label="Sair do modo tela cheia">✕</button>
+    <button id="btn-sair-foco" type="button" aria-label="Sair do modo foco">✕</button>
 
     <div class="container" id="main-container">
 
@@ -961,8 +1142,7 @@
 
             <div id="tab-ranking" class="hidden">
                 <div class="lobby-box" style="margin-bottom:0;">
-                    <h3>🌐 Ranking Global (Top 10)</h3>
-                    <p>🔒 Ranking pseudónimo. Sem contas, sem rastreio.</p>
+                    <h3>🌐 Ranking Global</h3>
                     <div id="ranking-list">
                         <div style="text-align:center; padding:20px; color:var(--text-muted); font-size:var(--fs-sm);">A carregar…</div>
                     </div>
@@ -989,6 +1169,10 @@
                         <button class="theme-opt" data-theme="contrast" type="button">🔲 Alto Contraste</button>
                         <button class="theme-opt" data-theme="daltonico" type="button">🌗 Daltónico</button>
                     </div>
+                </div>
+                <div class="lobby-box">
+                    <h3>👁️ Ecrã</h3>
+                    <button id="btn-ecra-limpo-toggle" type="button" class="btn-secundario" style="width:100%;">🅾️ Alternar Ecrã Limpo (esconder coordenadas)</button>
                 </div>
                 <div class="lobby-box">
                     <h3>🔍 Acessibilidade</h3>
@@ -1112,15 +1296,19 @@
                     <span class="action-icon" aria-hidden="true">🎥</span>
                     <span>Gravar</span>
                 </button>
+                <button id="btn-foco" class="action-btn btn-foco" type="button">
+                    <span class="action-icon" aria-hidden="true">🎯</span>
+                    <span>Foco</span>
+                </button>
                 <button id="btn-fullscreen-game" class="action-btn" type="button">
                     <span class="action-icon" aria-hidden="true">⛶</span>
                     <span>Tela Cheia</span>
                 </button>
             </div>
 
-            <div class="notacao-header">
-                <strong>📝 Notação</strong>
-                <button class="notacao-copy-btn" id="btn-copiar-notacao" type="button">📋 Copiar</button>
+            <div class="notacao-header" id="notacao-header" onclick="toggleNotacao()">
+                <strong><span>📝 Notação</span> <span class="notacao-toggle">▼</span></strong>
+                <button class="notacao-copy-btn" id="btn-copiar-notacao" type="button" onclick="event.stopPropagation(); copiarNotacao(event)">📋 Copiar</button>
             </div>
             <div class="notacao-panel" id="notacao-panel">
                 <span class="notacao-vazia">A partida ainda não começou…</span>
@@ -1168,7 +1356,7 @@
         </div>
     </div>
 
-    <!-- MODAL GENÉRICO -->
+    <!-- MODAIS -->
     <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true">
         <div class="modal-card">
             <div class="modal-icon" id="modal-icon">ℹ️</div>
@@ -1178,7 +1366,6 @@
         </div>
     </div>
 
-    <!-- MODAL: APELIDO -->
     <div class="modal-overlay" id="apelido-overlay" role="dialog" aria-modal="true">
         <div class="modal-card">
             <div class="modal-icon">👤</div>
@@ -1192,7 +1379,6 @@
         </div>
     </div>
 
-    <!-- MODAL: PRIVACIDADE -->
     <div class="modal-overlay" id="privacidade-overlay" role="dialog" aria-modal="true">
         <div class="modal-card">
             <div class="modal-icon">🔒</div>
@@ -1240,10 +1426,9 @@
 
     <div class="toast-container" id="toast-container"></div>
 
+    <!-- SCRIPT -->
     <script type="module">
-        // ============================================================
         // FIREBASE (OPCIONAL)
-        // ============================================================
         let db = null, auth = null;
         let fns = {};
         try {
@@ -1254,19 +1439,16 @@
             fns = {
                 ref: rtdb.ref, get: rtdb.get, set: rtdb.set, update: rtdb.update,
                 onValue: rtdb.onValue, runTransaction: rtdb.runTransaction, push: rtdb.push,
-                remove: rtdb.remove,
-                serverTimestamp: rtdb.serverTimestamp,
+                remove: rtdb.remove, serverTimestamp: rtdb.serverTimestamp,
                 signInAnonymously: fbauth.signInAnonymously,
                 onAuthStateChanged: fbauth.onAuthStateChanged
             };
         } catch (e) {
-            console.warn('[Firebase] Não carregado — modo offline ativado.', e.message);
+            console.warn('[Firebase] Não carregado — modo offline.', e.message);
         }
         const firebaseDisponivel = !!db;
 
-        // ============================================================
         // ESTADO
-        // ============================================================
         let jogadorSessao = null;
         let apelido = '';
         let idSalaAtual = null;
@@ -1278,9 +1460,7 @@
         let jogoEncerrado = false;
         let unsubscribeFirebase = null;
         let unsubscribeChat = null;
-        let unsubscribeMetaSala = null;
         let salaConfirmada = false;
-
         let vencedorDeclarado = null;
         let pedidoRevancheDe = null;
         let desistenciaProcessada = false;
@@ -1288,73 +1468,58 @@
         let placarSessao = { vitorias: 0, derrotas: 0 };
         let nomeOponente = 'Oponente';
         let ultimoChatTs = 0;
-
         let modoTorneio = 0;
         let torneioPlacar = { eu: 0, op: 0 };
         let torneioRodadaAtual = 1;
-
         let historicoMovimentos = [];
         let historicoPartidas = [];
         let notacaoAtual = [];
-
         let euPronto = false;
         let adversarioPronto = false;
         let ambosProntos = false;
         let ultimaRespostaFirebase = 0;
         let connectionCheckInterval = null;
-
         let tempoLimiteSegundos = 0;
         let timerIntervalId = null;
         let timerSegundosRestantes = 0;
         let timerAtivo = false;
         let aviso5sDisparado = false;
-
         let modoRelogio = 'none';
         let tempoInicialRelogio = 0;
         let incrementoRelogio = 0;
         let relogioBrancas = 0;
         let relogioPretas = 0;
         let relogioIntervalId = null;
-
         let lancesDamasSemCaptura = 0;
         let lancesFinaisEspeciais = 0;
         let posicoesRepetidas = {};
         let tipoFinalEspecial = null;
         let lancesTotais = 0;
-
         let empatePendenteDe = null;
         let empateOferecidoPorMim = false;
-
         let emPausa = false;
         let pausaPendenteDe = null;
         let pausaSolicitadaPorMim = false;
-
         let canvasRecorder = null;
         let canvasStream = null;
         let recordedChunks = [];
         let gravandoCanvas = false;
         let gravandoIntervalId = null;
-
         let sfxPack = 'classic';
-
         let modoIA = false;
         let modoHotSeat = false;
         let nivelIA = 3;
         let iaPensando = false;
-
         let hotSeatNome1 = 'Jogador 1';
         let hotSeatNome2 = 'Jogador 2';
         let hotSeatJogadorAtual = 'white';
-
         let ultimaJogadaDestino = null;
         let modoA11y = false;
-
-        // Monitor de sala efémera
+        let modoEcraLimpo = false;
         let salaCheckInterval = null;
+        let indicadorPensandoEl = null;
 
-        // ============================================================
         // CONQUISTAS
-        // ============================================================
         const CONQUISTAS = [
             { id: 'primeira_vitoria', emoji: '🥇', nome: 'Primeira Vitória', desc: 'Ganhe sua primeira partida', check: (s) => s.vitorias >= 1 },
             { id: 'veterano', emoji: '🎖️', nome: 'Veterano', desc: 'Ganhe 5 partidas', check: (s) => s.vitorias >= 5 },
@@ -1371,10 +1536,7 @@
                 const raw = JSON.parse(localStorage.getItem('brain_damas_conquistas') || '{}');
                 return {
                     unlocked: raw.unlocked || {},
-                    stats: raw.stats || {
-                        vitorias: 0, derrotas: 0, empates: 0, maiorStreak: 0, streakAtual: 0,
-                        hotseatJogado: 0
-                    }
+                    stats: raw.stats || { vitorias: 0, derrotas: 0, empates: 0, maiorStreak: 0, streakAtual: 0, hotseatJogado: 0 }
                 };
             } catch (_) {
                 return { unlocked: {}, stats: { vitorias: 0, derrotas: 0, empates: 0, maiorStreak: 0, streakAtual: 0, hotseatJogado: 0 } };
@@ -1385,9 +1547,7 @@
             const data = carregarConquistas();
             const novas = [];
             CONQUISTAS.forEach(c => {
-                if (!data.unlocked[c.id] && c.check(data.stats)) {
-                    data.unlocked[c.id] = true; novas.push(c);
-                }
+                if (!data.unlocked[c.id] && c.check(data.stats)) { data.unlocked[c.id] = true; novas.push(c); }
             });
             if (novas.length > 0) {
                 salvarConquistas(data);
@@ -1403,23 +1563,19 @@
             const data = carregarConquistas();
             grid.innerHTML = CONQUISTAS.map(c => {
                 const unlocked = !!data.unlocked[c.id];
-                return `<div class="ach-item ${unlocked ? 'unlocked' : ''}" title="${c.desc}" role="img" aria-label="${c.nome}: ${unlocked ? 'desbloqueada' : 'bloqueada'}">
-                    <span aria-hidden="true">${c.emoji}</span><span class="ach-label">${c.nome}</span>
+                return `<div class="ach-item ${unlocked ? 'unlocked' : ''}" title="${c.desc}">
+                    <span>${c.emoji}</span><span class="ach-label">${c.nome}</span>
                 </div>`;
             }).join('');
             const desb = Object.keys(data.unlocked).length;
             document.getElementById('ach-resumo').textContent = `${desb} / ${CONQUISTAS.length} desbloqueadas`;
         }
 
-        // ============================================================
         // SOM
-        // ============================================================
         const SoundFX = (() => {
             let ctx = null, ativo = true;
             function init() {
-                if (!ctx) {
-                    try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { ativo = false; }
-                }
+                if (!ctx) { try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { ativo = false; } }
                 if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
             }
             function beep({ freq = 440, type = 'sine', duration = 0.12, gain = 0.15, delay = 0 }) {
@@ -1472,14 +1628,37 @@
             };
         })();
 
+        // VIBRAÇÃO
         function vibrar(padrao = 30) {
             if (!('vibrate' in navigator)) return;
             try { navigator.vibrate(padrao); } catch (_) {}
         }
 
-        // ============================================================
+        // CONFETES
+        function lancarConfetes(estrelas = false) {
+            const container = document.getElementById('confetes-container');
+            if (!container) return;
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const cores = ['#fbbf24', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#10b981', '#f43f5e'];
+            const total = estrelas ? 20 : 40;
+            for (let i = 0; i < total; i++) {
+                const c = document.createElement('div');
+                c.className = 'confete' + (estrelas && i % 3 === 0 ? ' estrela' : '');
+                c.style.left = Math.random() * 100 + 'vw';
+                c.style.top = '-20px';
+                c.style.animationDelay = (Math.random() * 0.5) + 's';
+                c.style.animationDuration = (2 + Math.random() * 1.5) + 's';
+                if (!c.classList.contains('estrela')) {
+                    c.style.background = cores[Math.floor(Math.random() * cores.length)];
+                } else {
+                    c.textContent = ['★', '✦', '✧', '♛'][Math.floor(Math.random() * 4)];
+                }
+                container.appendChild(c);
+                setTimeout(() => c.remove(), 4000);
+            }
+        }
+
         // MÚSICA
-        // ============================================================
         const MusicaFundo = (() => {
             let ctx = null, masterGain = null, timerId = null, tocando = false, ativa = false;
             const acordes = [[220.00, 261.63, 329.63], [174.61, 220.00, 261.63], [130.81, 164.81, 196.00], [196.00, 246.94, 293.66]];
@@ -1535,16 +1714,12 @@
             };
         })();
 
-        // ============================================================
         // UTILITÁRIOS
-        // ============================================================
         function toast(mensagem, tipo = 'info') {
             const container = document.getElementById('toast-container');
             const el = document.createElement('div');
             el.className = `toast ${tipo}`;
             el.textContent = mensagem;
-            el.setAttribute('role', 'status');
-            el.setAttribute('aria-live', 'polite');
             container.appendChild(el);
             if (tipo === 'success' || tipo === 'error') SoundFX.notify();
             setTimeout(() => el.remove(), 3500);
@@ -1569,10 +1744,7 @@
             });
             document.getElementById('modal-overlay').classList.add('active');
             SoundFX.notify();
-            setTimeout(() => {
-                const firstBtn = container.querySelector('button');
-                if (firstBtn) firstBtn.focus();
-            }, 100);
+            setTimeout(() => container.querySelector('button')?.focus(), 100);
         }
 
         function abrirPromptApelido({ primeiraVez = false, atual = '' } = {}) {
@@ -1582,7 +1754,7 @@
             const msg = document.getElementById('apelido-message');
             if (primeiraVez) {
                 title.textContent = '👋 Bem-vindo ao Brain Damas';
-                msg.textContent = 'Como queres ser chamado? Este apelido fica guardado APENAS no teu aparelho. Não pedimos email, senha, nem qualquer dado pessoal.';
+                msg.textContent = 'Como queres ser chamado? Este apelido fica guardado APENAS no teu aparelho.';
             } else {
                 title.textContent = '✏️ Alterar Apelido';
                 msg.textContent = 'Muda o teu apelido. Não pedimos qualquer dado pessoal.';
@@ -1592,9 +1764,7 @@
             setTimeout(() => input.focus(), 100);
         }
 
-        // ============================================================
-        // ESTADO DE DADOS
-        // ============================================================
+        // TABULEIRO
         function criarTabuleiroInicial() {
             const t = Array.from({ length: 8 }, () => Array(8).fill(null));
             for (let r = 0; r < 3; r++) for (let c = 0; c < 8; c++) if ((r + c) % 2 === 1) t[r][c] = 'red';
@@ -1625,58 +1795,31 @@
             pararMonitorSala();
         }
 
-        // ============================================================
-        // SALAS EFÉMERAS — auto-destruição
-        // ============================================================
-        const TEMPO_INATIVIDADE_SALA_MS = 30 * 60 * 1000; // 30 min
-
+        // SALA EFÉMERA
+        const TEMPO_INATIVIDADE_SALA_MS = 30 * 60 * 1000;
         function marcarAtividadeSala() {
             if (!firebaseDisponivel || !idSalaAtual) return;
-            try {
-                fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), {
-                    ultimaAtividade: Date.now()
-                }).catch(() => {});
-            } catch (_) {}
+            try { fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { ultimaAtividade: Date.now() }).catch(() => {}); } catch (_) {}
         }
-
         function pararMonitorSala() {
             if (salaCheckInterval) { clearInterval(salaCheckInterval); salaCheckInterval = null; }
         }
-
         function iniciarMonitorSala() {
             pararMonitorSala();
             if (!firebaseDisponivel || !idSalaAtual) return;
-            // Verifica a cada 2 minutos se a sala expirou
             salaCheckInterval = setInterval(async () => {
                 if (!idSalaAtual || !firebaseDisponivel) { pararMonitorSala(); return; }
                 try {
                     const snap = await fns.get(fns.ref(db, `salas_damas/${idSalaAtual}/ultimaAtividade`));
-                    if (snap.exists()) {
-                        const ultima = snap.val();
-                        if (Date.now() - ultima > TEMPO_INATIVIDADE_SALA_MS) {
-                            await apagarSala(idSalaAtual);
-                        }
+                    if (snap.exists() && Date.now() - snap.val() > TEMPO_INATIVIDADE_SALA_MS) {
+                        await fns.remove(fns.ref(db, 'salas_damas/' + idSalaAtual));
                     }
                 } catch (_) {}
             }, 2 * 60 * 1000);
         }
 
-        async function apagarSala(salaId) {
-            if (!firebaseDisponivel || !salaId) return;
-            try {
-                await fns.remove(fns.ref(db, 'salas_damas/' + salaId));
-                console.log('[Sala efémera] Sala apagada:', salaId);
-            } catch (_) {}
-        }
-
-        // ============================================================
         // NOTAÇÃO
-        // ============================================================
-        function casaParaNotacao(r, c) {
-            const col = String.fromCharCode(97 + c);
-            const lin = 8 - r;
-            return col + lin;
-        }
+        function casaParaNotacao(r, c) { return String.fromCharCode(97 + c) + (8 - r); }
         function adicionarNotacao(cor, de, para, captura, isDama, caminhoCompleto) {
             let texto = '';
             const prefixo = isDama ? 'D' : '';
@@ -1726,10 +1869,27 @@
             }
             return linhas.join('\n');
         }
+        window.copiarNotacao = async function(e) {
+            if (e) e.stopPropagation();
+            const txt = exportarNotacao();
+            if (!txt) { toast('Sem lances para copiar.', 'warn'); return; }
+            try { await navigator.clipboard.writeText(txt); toast('📋 Notação copiada!', 'success'); }
+            catch (_) {
+                const ta = document.createElement('textarea');
+                ta.value = txt; document.body.appendChild(ta); ta.select();
+                try { document.execCommand('copy'); toast('📋 Notação copiada!', 'success'); } catch (_) {}
+                ta.remove();
+            }
+        };
+        window.toggleNotacao = function() {
+            SoundFX.click();
+            const h = document.getElementById('notacao-header');
+            const p = document.getElementById('notacao-panel');
+            h.classList.toggle('colapsada');
+            p.classList.toggle('colapsada');
+        };
 
-        // ============================================================
-        // INDICADOR DE CONEXÃO
-        // ============================================================
+        // CONEXÃO
         function marcarFirebaseVivo() {
             ultimaRespostaFirebase = Date.now();
             const statusEl = document.getElementById('connection-status');
@@ -1759,9 +1919,7 @@
             document.getElementById('connection-status')?.classList.add('hidden');
         }
 
-        // ============================================================
         // HANDSHAKE
-        // ============================================================
         function marcarPronto() {
             if (euPronto) return;
             euPronto = true;
@@ -1796,16 +1954,10 @@
         async function updateSeguro(path, dados) {
             if (!firebaseDisponivel) return { ok: false };
             try { await fns.update(fns.ref(db, path), dados); return { ok: true }; }
-            catch (err) {
-                console.error('[Firebase] Erro:', path, err);
-                toast('⚠️ Falha de comunicação.', 'error');
-                return { ok: false, err };
-            }
+            catch (err) { console.error('[Firebase] Erro:', path, err); toast('⚠️ Falha de comunicação.', 'error'); return { ok: false, err }; }
         }
 
-        // ============================================================
         // TIMER
-        // ============================================================
         function pararTimer() {
             if (timerIntervalId) { clearInterval(timerIntervalId); timerIntervalId = null; }
             timerAtivo = false;
@@ -1825,10 +1977,7 @@
             const barWrap = document.getElementById('timer-bar-wrap');
             const display = document.getElementById('timer-display');
             if (barWrap) barWrap.classList.remove('hidden');
-            if (display) {
-                display.classList.remove('hidden', 'warn', 'danger');
-                display.textContent = `⏱️ ${timerSegundosRestantes}s`;
-            }
+            if (display) { display.classList.remove('hidden', 'warn', 'danger'); display.textContent = `⏱️ ${timerSegundosRestantes}s`; }
             atualizarBarraTimer();
             timerIntervalId = setInterval(() => {
                 if (jogoEncerrado || emPausa) { pararTimer(); return; }
@@ -1866,20 +2015,11 @@
             toast('⏱️ Tempo esgotado!', 'error');
             const corPerdedora = modoHotSeat ? turnoAtual : minhaCor;
             const corAdversaria = corPerdedora === 'white' ? 'red' : 'white';
-            if (modoIA || modoHotSeat) {
-                jogoEncerrado = true;
-                tratarFimDeJogo(corAdversaria, 'timeout');
-                return;
-            }
-            updateSeguro(`salas_damas/${idSalaAtual}`, {
-                status: 'encerrado', vencedor: corAdversaria,
-                motivoFim: 'timeout', perdedor: jogadorSessao.chave
-            });
+            if (modoIA || modoHotSeat) { jogoEncerrado = true; tratarFimDeJogo(corAdversaria, 'timeout'); return; }
+            updateSeguro(`salas_damas/${idSalaAtual}`, { status: 'encerrado', vencedor: corAdversaria, motivoFim: 'timeout', perdedor: jogadorSessao.chave });
         }
 
-        // ============================================================
         // RELÓGIO
-        // ============================================================
         function formatarTempo(ms) {
             const totalSeg = Math.max(0, Math.floor(ms / 1000));
             const m = Math.floor(totalSeg / 60);
@@ -1903,21 +2043,12 @@
                     SoundFX.timeout();
                     toast('⏱️ Tempo do relógio esgotado!', 'error');
                     const corAdversaria = minhaCor === 'white' ? 'red' : 'white';
-                    if (modoIA) {
-                        jogoEncerrado = true;
-                        tratarFimDeJogo(corAdversaria, 'timeout');
-                        return;
-                    }
-                    updateSeguro(`salas_damas/${idSalaAtual}`, {
-                        status: 'encerrado', vencedor: corAdversaria,
-                        motivoFim: 'timeout', perdedor: jogadorSessao.chave
-                    });
+                    if (modoIA) { jogoEncerrado = true; tratarFimDeJogo(corAdversaria, 'timeout'); return; }
+                    updateSeguro(`salas_damas/${idSalaAtual}`, { status: 'encerrado', vencedor: corAdversaria, motivoFim: 'timeout', perdedor: jogadorSessao.chave });
                 }
             }, 200);
         }
-        function pararRelogio() {
-            if (relogioIntervalId) { clearInterval(relogioIntervalId); relogioIntervalId = null; }
-        }
+        function pararRelogio() { if (relogioIntervalId) { clearInterval(relogioIntervalId); relogioIntervalId = null; } }
         function atualizarRelogioUI() {
             const elW = document.getElementById('clock-white');
             const elR = document.getElementById('clock-red');
@@ -1928,13 +2059,8 @@
             if (r) r.textContent = formatarTempo(relogioPretas);
             elW.classList.remove('active', 'danger');
             elR.classList.remove('active', 'danger');
-            if (turnoAtual === 'white') {
-                elW.classList.add('active');
-                if (relogioBrancas < 30000) elW.classList.add('danger');
-            } else {
-                elR.classList.add('active');
-                if (relogioPretas < 30000) elR.classList.add('danger');
-            }
+            if (turnoAtual === 'white') { elW.classList.add('active'); if (relogioBrancas < 30000) elW.classList.add('danger'); }
+            else { elR.classList.add('active'); if (relogioPretas < 30000) elR.classList.add('danger'); }
         }
         function aplicarIncremento(cor) {
             if (modoRelogio === 'none') return;
@@ -1942,17 +2068,13 @@
             else relogioPretas += incrementoRelogio;
         }
 
-        // ============================================================
         // PAUSA
-        // ============================================================
         function pedirPausa() {
             if (modoEspectador || jogoEncerrado || emPausa) return;
-            if (modoIA || modoHotSeat) { toast('Pausa indisponível neste modo.', 'info'); return; }
+            if (modoIA || modoHotSeat) { toast('Pausa indisponível.', 'info'); return; }
             SoundFX.click();
             pausaSolicitadaPorMim = true;
-            updateSeguro(`salas_damas/${idSalaAtual}`, {
-                pausaPedido: { de: jogadorSessao.chave, nome: apelido, em: Date.now() }
-            });
+            updateSeguro(`salas_damas/${idSalaAtual}`, { pausaPedido: { de: jogadorSessao.chave, nome: apelido, em: Date.now() } });
             toast('⏸️ Pedido de pausa enviado...', 'info');
         }
         function ativarPausaLocal(porQuem) {
@@ -1997,9 +2119,7 @@
         }
         async function recusarPausa() {
             SoundFX.click();
-            if (firebaseDisponivel) {
-                try { await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { pausaPedido: null }); } catch (e) {}
-            }
+            if (firebaseDisponivel) { try { await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { pausaPedido: null }); } catch (e) {} }
             toast('Pausa recusada.', 'info');
             document.getElementById('div-pausa-pendente')?.classList.add('hidden');
         }
@@ -2011,28 +2131,22 @@
             } else pedirPausa();
         }
 
-        // ============================================================
         // EMPATE
-        // ============================================================
         function podeOferecerEmpate() { return lancesTotais >= 10; }
         function pedirEmpate() {
             if (modoEspectador || jogoEncerrado) return;
-            if (!podeOferecerEmpate()) {
-                toast('⏳ Não pode oferecer empate nos primeiros 10 lances.', 'warn');
-                SoundFX.error();
-                return;
-            }
+            if (!podeOferecerEmpate()) { toast('⏳ Aguarde 10 lances.', 'warn'); SoundFX.error(); return; }
             SoundFX.click();
             if (modoIA || modoHotSeat) {
                 abrirModal({
                     icon: '🤝', title: 'Oferecer Empate?',
-                    message: modoIA ? 'A IA decide se aceita.' : 'O outro jogador decide.',
+                    message: modoIA ? 'A IA decide.' : 'O outro jogador decide.',
                     actions: [
                         { label: 'Cancelar', onClick: () => {}, className: 'btn-secundario' },
                         { label: '🤝 Oferecer', onClick: () => {
                             if (modoIA) {
-                                const avaliacao = avaliarPosicaoSimples();
-                                if (avaliacao >= 0) toast('🤖 IA recusou o empate.', 'info');
+                                const av = avaliarPosicaoSimples();
+                                if (av >= 0) toast('🤖 IA recusou.', 'info');
                                 else { jogoEncerrado = true; tratarFimDeJogo('empate', 'empate'); }
                             } else { jogoEncerrado = true; tratarFimDeJogo('empate', 'empate'); }
                         } }
@@ -2041,10 +2155,8 @@
                 return;
             }
             empateOferecidoPorMim = true;
-            updateSeguro(`salas_damas/${idSalaAtual}`, {
-                empatePedido: { de: jogadorSessao.chave, nome: apelido, em: Date.now() }
-            });
-            toast('🤝 Oferta de empate enviada...', 'info');
+            updateSeguro(`salas_damas/${idSalaAtual}`, { empatePedido: { de: jogadorSessao.chave, nome: apelido, em: Date.now() } });
+            toast('🤝 Oferta enviada...', 'info');
         }
         function avaliarPosicaoSimples() {
             let score = 0;
@@ -2066,27 +2178,18 @@
         async function aceitarEmpate() {
             SoundFX.click();
             if (firebaseDisponivel) {
-                try {
-                    await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), {
-                        status: 'encerrado', vencedor: 'empate', motivoFim: 'empate',
-                        empatePedido: null
-                    });
-                } catch (e) {}
+                try { await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { status: 'encerrado', vencedor: 'empate', motivoFim: 'empate', empatePedido: null }); } catch (e) {}
             }
             document.getElementById('div-empate-pendente')?.classList.add('hidden');
         }
         async function recusarEmpate() {
             SoundFX.click();
-            if (firebaseDisponivel) {
-                try { await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { empatePedido: null }); } catch (e) {}
-            }
+            if (firebaseDisponivel) { try { await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { empatePedido: null }); } catch (e) {} }
             toast('Empate recusado.', 'info');
             document.getElementById('div-empate-pendente')?.classList.add('hidden');
         }
 
-        // ============================================================
         // GRAVAÇÃO
-        // ============================================================
         function desenharTabuleiroNoCanvas(ctx, canvas, tab) {
             const size = canvas.width;
             const cell = size / 8;
@@ -2100,11 +2203,8 @@
                 const p = tab[r][c]; if (!p) continue;
                 const cx = c * cell + cell / 2, cy = r * cell + cell / 2, radius = cell * 0.4;
                 const grad = ctx.createRadialGradient(cx - radius*0.3, cy - radius*0.3, radius*0.1, cx, cy, radius);
-                if (p.startsWith('white')) {
-                    grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.75, '#cdb896'); grad.addColorStop(1, '#a08768');
-                } else {
-                    grad.addColorStop(0, '#dc2626'); grad.addColorStop(0.8, '#6b0f0f'); grad.addColorStop(1, '#450808');
-                }
+                if (p.startsWith('white')) { grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.75, '#cdb896'); grad.addColorStop(1, '#a08768'); }
+                else { grad.addColorStop(0, '#dc2626'); grad.addColorStop(0.8, '#6b0f0f'); grad.addColorStop(1, '#450808'); }
                 ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.fill();
                 if (p.includes('king')) {
                     ctx.fillStyle = '#fbbf24'; ctx.font = `bold ${cell*0.5}px sans-serif`;
@@ -2138,8 +2238,7 @@
                     const blob = new Blob(recordedChunks, { type: 'video/webm' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `brain-damas-${Date.now()}.webm`;
+                    a.href = url; a.download = `brain-damas-${Date.now()}.webm`;
                     document.body.appendChild(a); a.click();
                     setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
                     toast('🎥 Vídeo guardado!', 'success');
@@ -2155,18 +2254,12 @@
                     gravandoIntervalId = requestAnimationFrame(drawLoop);
                 }
                 drawLoop();
-            } catch (e) {
-                toast('Erro ao iniciar gravação.', 'error');
-                gravandoCanvas = false;
-            }
+            } catch (e) { toast('Erro ao iniciar gravação.', 'error'); gravandoCanvas = false; }
         }
 
-        // ============================================================
-        // HISTÓRICO + REPLAY
-        // ============================================================
+        // HISTÓRICO
         function carregarHistorico() {
-            try { historicoPartidas = JSON.parse(localStorage.getItem('brain_damas_historico') || '[]'); }
-            catch (_) { historicoPartidas = []; }
+            try { historicoPartidas = JSON.parse(localStorage.getItem('brain_damas_historico') || '[]'); } catch (_) { historicoPartidas = []; }
         }
         function salvarHistorico() {
             if (historicoPartidas.length > 20) historicoPartidas = historicoPartidas.slice(0, 20);
@@ -2187,7 +2280,7 @@
             const list = document.getElementById('historico-list');
             if (!list) return;
             if (historicoPartidas.length === 0) {
-                list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:var(--fs-sm);">Nenhuma partida registada ainda.</div>';
+                list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:var(--fs-sm);">Nenhuma partida registada.</div>';
                 return;
             }
             list.innerHTML = historicoPartidas.map((p, i) => {
@@ -2210,7 +2303,7 @@
         }
         let replayState = { movimentos: [], idx: 0, timer: null };
         function abrirReplay(partida) {
-            if (!partida.movimentos || partida.movimentos.length === 0) { toast('Sem movimentos gravados.', 'info'); return; }
+            if (!partida.movimentos || partida.movimentos.length === 0) { toast('Sem movimentos.', 'info'); return; }
             replayState.movimentos = partida.movimentos;
             replayState.idx = 0;
             document.getElementById('replay-overlay').classList.add('active');
@@ -2246,31 +2339,19 @@
             }
         }
         function replayPlay() {
-            if (replayState.timer) {
-                clearInterval(replayState.timer); replayState.timer = null;
-                document.getElementById('replay-play').textContent = '▶️ Play';
-                return;
-            }
+            if (replayState.timer) { clearInterval(replayState.timer); replayState.timer = null; document.getElementById('replay-play').textContent = '▶️ Play'; return; }
             if (replayState.idx >= replayState.movimentos.length) replayState.idx = 0;
             document.getElementById('replay-play').textContent = '⏸️ Pause';
             replayState.timer = setInterval(() => {
-                if (replayState.idx < replayState.movimentos.length) {
-                    replayState.idx++; renderizarReplay(); SoundFX.move();
-                } else {
-                    clearInterval(replayState.timer); replayState.timer = null;
-                    document.getElementById('replay-play').textContent = '▶️ Play';
-                }
+                if (replayState.idx < replayState.movimentos.length) { replayState.idx++; renderizarReplay(); SoundFX.move(); }
+                else { clearInterval(replayState.timer); replayState.timer = null; document.getElementById('replay-play').textContent = '▶️ Play'; }
             }, 850);
         }
 
-        // ============================================================
-        // PLACAR LOCAL
-        // ============================================================
+        // PLACAR
         function carregarPlacarLocal() {
-            try {
-                const raw = JSON.parse(localStorage.getItem('brain_damas_placar') || '{}');
-                placarSessao = { vitorias: raw.vitorias || 0, derrotas: raw.derrotas || 0 };
-            } catch (_) { placarSessao = { vitorias: 0, derrotas: 0 }; }
+            try { const raw = JSON.parse(localStorage.getItem('brain_damas_placar') || '{}'); placarSessao = { vitorias: raw.vitorias || 0, derrotas: raw.derrotas || 0 }; }
+            catch (_) { placarSessao = { vitorias: 0, derrotas: 0 }; }
             atualizarPlacarUI();
         }
         function salvarPlacarLocal() { localStorage.setItem('brain_damas_placar', JSON.stringify(placarSessao)); }
@@ -2283,19 +2364,14 @@
             if (vop) vop.textContent = placarSessao.derrotas;
         }
 
-        // ============================================================
-        // RANKING (só leitura, sem escrita)
-        // ============================================================
+        // RANKING (desabilitado)
         async function carregarRanking() {
             const container = document.getElementById('ranking-list');
             if (!container) return;
-            // Ranking desabilitado nesta versão (zero dados)
-            container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:var(--fs-sm);">Ranking global desativado.<br><br>Nesta versão, <strong>nenhum dado é enviado para servidores</strong>.<br>O ranking será reativado quando implementarmos identidade pseudónima.</div>';
+            container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:var(--fs-sm);">Ranking global desativado.<br><br>Nesta versão, <strong>nenhum dado é enviado para servidores</strong>.</div>';
         }
 
-        // ============================================================
         // AGENDA
-        // ============================================================
         function carregarAgenda() {
             let agenda = [];
             try { agenda = JSON.parse(localStorage.getItem('brain_damas_agenda') || '[]'); } catch (_) {}
@@ -2304,10 +2380,7 @@
             const agora = Date.now();
             agenda = agenda.filter(a => a.timestamp > agora - 600000);
             localStorage.setItem('brain_damas_agenda', JSON.stringify(agenda));
-            if (agenda.length === 0) {
-                list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:var(--fs-sm);">Nenhum torneio agendado.</div>';
-                return;
-            }
+            if (agenda.length === 0) { list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:var(--fs-sm);">Nenhum torneio agendado.</div>'; return; }
             agenda.sort((a, b) => a.timestamp - b.timestamp);
             list.innerHTML = agenda.map((a, i) => {
                 const d = new Date(a.timestamp);
@@ -2341,7 +2414,7 @@
             const dataStr = document.getElementById('agenda-data').value;
             const md = parseInt(document.getElementById('agenda-md').value);
             const tempo = parseInt(document.getElementById('agenda-tempo').value);
-            if (!titulo) { toast('Dê um nome ao torneio.', 'warn'); SoundFX.error(); return; }
+            if (!titulo) { toast('Dê um nome.', 'warn'); SoundFX.error(); return; }
             if (!dataStr) { toast('Escolha uma data.', 'warn'); SoundFX.error(); return; }
             const timestamp = new Date(dataStr).getTime();
             if (isNaN(timestamp)) { toast('Data inválida.', 'error'); return; }
@@ -2356,9 +2429,7 @@
             toast(`📅 "${titulo}" agendado!`, 'success');
         });
 
-        // ============================================================
-        // AUTENTICAÇÃO ANÓNIMA (obrigatória para Firebase, invisível ao utilizador)
-        // ============================================================
+        // AUTENTICAÇÃO ANÓNIMA
         async function garantirAutenticacao() {
             if (!firebaseDisponivel || !auth) return 'local_' + Math.random().toString(36).slice(2, 12);
             if (auth.currentUser) return auth.currentUser.uid;
@@ -2366,37 +2437,25 @@
             catch (e) { return 'local_' + Math.random().toString(36).slice(2, 12); }
         }
 
-        // ============================================================
         // ENTRADA VIA LINK
-        // ============================================================
         async function processarEntradaViaLink() {
             const params = new URLSearchParams(window.location.search);
             const codigoSala = params.get('sala');
             const modo = params.get('modo');
             if (!codigoSala) return false;
-            if (!firebaseDisponivel) {
-                abrirModal({ icon: '📡', title: 'Modo Online Indisponível', message: 'Firebase não configurado.', actions: [{ label: 'OK', onClick: () => {} }] });
-                return false;
-            }
+            if (!firebaseDisponivel) { abrirModal({ icon: '📡', title: 'Modo Online Indisponível', message: 'Firebase não configurado.', actions: [{ label: 'OK', onClick: () => {} }] }); return false; }
             const querEspectador = (modo === 'assistir');
             modoEspectador = querEspectador;
-            toast(querEspectador ? '👁️ Entrando como espectador...' : '⏳ A entrar...', 'info');
+            toast(querEspectador ? '👁️ Entrando...' : '⏳ A entrar...', 'info');
             const uid = await garantirAutenticacao();
             const nomeUser = apelido || 'Visitante';
             jogadorSessao = { chave: uid, nome: nomeUser };
             let dados = null;
             for (let i = 1; i <= 15; i++) {
-                try {
-                    const snap = await fns.get(fns.ref(db, 'salas_damas/' + codigoSala));
-                    if (snap.exists()) { dados = snap.val(); break; }
-                } catch (e) {}
+                try { const snap = await fns.get(fns.ref(db, 'salas_damas/' + codigoSala)); if (snap.exists()) { dados = snap.val(); break; } } catch (e) {}
                 await new Promise(r => setTimeout(r, 400));
             }
-            if (!dados) {
-                abrirModal({ icon: '🚫', title: 'Sala não encontrada', message: 'O link expirou ou a sala foi apagada (salas efémeras duram 30 min).',
-                    actions: [{ label: 'Voltar', onClick: () => { limparSessao(); window.location.href = window.location.pathname; } }] });
-                return true;
-            }
+            if (!dados) { abrirModal({ icon: '🚫', title: 'Sala não encontrada', message: 'O link expirou ou a sala foi apagada (efémera).', actions: [{ label: 'Voltar', onClick: () => { limparSessao(); window.location.href = window.location.pathname; } }] }); return true; }
             if (dados.tempoLimite !== undefined) tempoLimiteSegundos = dados.tempoLimite;
             if (dados.melhorDe) modoTorneio = dados.melhorDe;
             continuarEntradaSala(uid, nomeUser, codigoSala, dados, querEspectador);
@@ -2430,11 +2489,7 @@
             if (Object.keys(jogadores).length >= 2) {
                 abrirModal({ icon: '👥', title: 'Sala Cheia', message: 'Deseja assistir?',
                     actions: [
-                        { label: '👁️ Assistir', onClick: () => {
-                            const url = new URL(window.location.href);
-                            url.searchParams.set('modo', 'assistir');
-                            window.location.href = url.toString();
-                        } },
+                        { label: '👁️ Assistir', onClick: () => { const url = new URL(window.location.href); url.searchParams.set('modo', 'assistir'); window.location.href = url.toString(); } },
                         { label: 'Voltar', onClick: () => { limparSessao(); window.location.href = window.location.pathname; } }
                     ] });
                 return;
@@ -2454,20 +2509,19 @@
             } catch (e) { toast('Erro ao entrar.', 'error'); }
         }
 
-        // ============================================================
         // INICIALIZAÇÃO
-        // ============================================================
         (async function() {
             carregarPlacarLocal(); carregarConquistas(); atualizarGridConquistas();
             carregarHistorico(); renderizarHistorico();
             carregarAgenda();
 
-            // Carrega apelido
             apelido = localStorage.getItem('brain_damas_apelido') || '';
-            // Carrega a11y
             const a11ySalvo = localStorage.getItem('brain_damas_a11y') === 'on';
             if (a11ySalvo) aplicarA11y(true);
-            // Tema
+            const ecraLimpoSalvo = localStorage.getItem('brain_damas_ecra_limpo') === 'on';
+            if (ecraLimpoSalvo) aplicarEcraLimpo(true);
+            const focoSalvo = localStorage.getItem('brain_damas_foco') === 'on';
+            if (focoSalvo) aplicarFoco(true);
             const temaSalvo = localStorage.getItem('brain_damas_tema') || 'dark';
             document.documentElement.setAttribute('data-theme', temaSalvo); atualizarSeletorTema();
             const sfxSalvo = localStorage.getItem('brain_damas_sfx') || 'classic';
@@ -2476,26 +2530,19 @@
             if (tempoSalvo !== null) tempoLimiteSegundos = parseInt(tempoSalvo);
             atualizarSeletorTempo();
 
-            // ========================================================
-            // PRIMEIRA VEZ — Aviso de privacidade + pedir apelido
-            // ========================================================
             if (!apelido) {
-                // Mostra aviso de privacidade
                 document.getElementById('privacidade-overlay').classList.add('active');
-                // Depois pede apelido
                 document.getElementById('btn-fechar-privacidade').onclick = () => {
                     SoundFX.click();
                     document.getElementById('privacidade-overlay').classList.remove('active');
                     abrirPromptApelido({ primeiraVez: true });
                 };
-                // Handler do botão confirmar apelido
                 const confirmarApelidoHandler = () => {
                     const inp = document.getElementById('apelido-input');
                     let val = (inp.value || '').trim().slice(0, 20);
                     if (!val) {
-                        // Gera apelido automático
-                        const adjetivos = ['Rápido', 'Forte', 'Astuto', 'Bravo', 'Veloz', 'Feroz', 'Sábio', 'Corajoso'];
-                        const animais = ['Tigre', 'Lobo', 'Águia', 'Falcão', 'Leão', 'Tubarão', 'Dragão', 'Pantera'];
+                        const adjetivos = ['Rápido', 'Forte', 'Astuto', 'Bravo', 'Veloz', 'Feroz'];
+                        const animais = ['Tigre', 'Lobo', 'Águia', 'Falcão', 'Leão', 'Dragão'];
                         val = adjetivos[Math.floor(Math.random() * adjetivos.length)] + animais[Math.floor(Math.random() * animais.length)] + Math.floor(Math.random() * 99);
                     }
                     apelido = val;
@@ -2506,13 +2553,9 @@
                     toast(`👋 Bem-vindo, ${apelido}!`, 'success');
                 };
                 document.getElementById('btn-confirmar-apelido').onclick = confirmarApelidoHandler;
-                document.getElementById('apelido-input').addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') confirmarApelidoHandler();
-                });
+                document.getElementById('apelido-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') confirmarApelidoHandler(); });
                 return;
             }
-
-            // Se já tem apelido, carrega
             atualizarApelidoUI();
             inicializarSessao();
         })();
@@ -2524,8 +2567,6 @@
             jogadorSessao = { chave: uid, nome: apelido };
             document.getElementById('lobby-nome').textContent = apelido;
             document.getElementById('display-nome').textContent = apelido;
-            document.getElementById('lobby-avatar').textContent = '😀';
-            document.getElementById('display-avatar').textContent = '😀';
         }
 
         function atualizarApelidoUI() {
@@ -2540,17 +2581,24 @@
             modoA11y = ativo;
             document.documentElement.setAttribute('data-a11y', ativo ? 'on' : 'off');
             const btnA11y = document.getElementById('btn-a11y');
-            if (btnA11y) {
-                btnA11y.classList.toggle('ativo', ativo);
-                btnA11y.setAttribute('aria-pressed', ativo ? 'true' : 'false');
-            }
+            if (btnA11y) { btnA11y.classList.toggle('ativo', ativo); btnA11y.setAttribute('aria-pressed', ativo ? 'true' : 'false'); }
             localStorage.setItem('brain_damas_a11y', ativo ? 'on' : 'off');
-            toast(ativo ? '🔍 Modo Acessibilidade ativado' : '🔍 Modo Acessibilidade desativado', 'info');
+            toast(ativo ? '🔍 Acessibilidade ON' : '🔍 Acessibilidade OFF', 'info');
         }
 
-        // ============================================================
+        function aplicarEcraLimpo(ativo) {
+            modoEcraLimpo = ativo;
+            document.documentElement.setAttribute('data-ecra-limpo', ativo ? 'on' : 'off');
+            localStorage.setItem('brain_damas_ecra_limpo', ativo ? 'on' : 'off');
+            toast(ativo ? '🅾️ Ecrã Limpo ON' : '🅾️ Ecrã Limpo OFF', 'info');
+        }
+
+        function aplicarFoco(ativo) {
+            document.documentElement.setAttribute('data-foco', ativo ? 'on' : 'off');
+            localStorage.setItem('brain_damas_foco', ativo ? 'on' : 'off');
+        }
+
         // TABS
-        // ============================================================
         document.querySelectorAll('#lobby-tabs .tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 SoundFX.click();
@@ -2567,9 +2615,7 @@
             });
         });
 
-        // ============================================================
         // MENU INICIAL
-        // ============================================================
         document.getElementById('menu-btn-hotseat').addEventListener('click', () => {
             SoundFX.click();
             document.getElementById('menu-inicial').classList.add('hidden');
@@ -2582,29 +2628,15 @@
         });
         document.getElementById('menu-btn-online').addEventListener('click', () => {
             SoundFX.click();
-            if (!firebaseDisponivel) { toast('Firebase indisponível offline.', 'warn'); return; }
+            if (!firebaseDisponivel) { toast('Firebase indisponível.', 'warn'); return; }
             document.getElementById('menu-inicial').classList.add('hidden');
             document.getElementById('painel-online').classList.remove('hidden');
         });
-        document.getElementById('btn-voltar-menu-1').addEventListener('click', () => {
-            SoundFX.click();
-            document.getElementById('painel-ia').classList.add('hidden');
-            document.getElementById('menu-inicial').classList.remove('hidden');
-        });
-        document.getElementById('btn-voltar-menu-2').addEventListener('click', () => {
-            SoundFX.click();
-            document.getElementById('painel-hotseat').classList.add('hidden');
-            document.getElementById('menu-inicial').classList.remove('hidden');
-        });
-        document.getElementById('btn-voltar-menu-3').addEventListener('click', () => {
-            SoundFX.click();
-            document.getElementById('painel-online').classList.add('hidden');
-            document.getElementById('menu-inicial').classList.remove('hidden');
-        });
+        document.getElementById('btn-voltar-menu-1').addEventListener('click', () => { SoundFX.click(); document.getElementById('painel-ia').classList.add('hidden'); document.getElementById('menu-inicial').classList.remove('hidden'); });
+        document.getElementById('btn-voltar-menu-2').addEventListener('click', () => { SoundFX.click(); document.getElementById('painel-hotseat').classList.add('hidden'); document.getElementById('menu-inicial').classList.remove('hidden'); });
+        document.getElementById('btn-voltar-menu-3').addEventListener('click', () => { SoundFX.click(); document.getElementById('painel-online').classList.add('hidden'); document.getElementById('menu-inicial').classList.remove('hidden'); });
 
-        // ============================================================
         // SELETORES
-        // ============================================================
         function atualizarSeletorTempo() {
             document.querySelectorAll('#tempo-selector .tempo-opt').forEach(btn => {
                 const t = parseInt(btn.dataset.tempo);
@@ -2616,10 +2648,9 @@
                 tempoLimiteSegundos = parseInt(btn.dataset.tempo);
                 localStorage.setItem('brain_damas_tempo', String(tempoLimiteSegundos));
                 atualizarSeletorTempo(); SoundFX.click();
-                toast(tempoLimiteSegundos === 0 ? '⏱️ Sem tempo por lance' : `⏱️ ${tempoLimiteSegundos}s por lance`, 'info');
+                toast(tempoLimiteSegundos === 0 ? '⏱️ Sem tempo' : `⏱️ ${tempoLimiteSegundos}s`, 'info');
             });
         });
-
         document.querySelectorAll('#clock-selector .clock-opt').forEach(btn => {
             btn.addEventListener('click', () => {
                 SoundFX.click();
@@ -2636,7 +2667,6 @@
                 }
             });
         });
-
         let nivelIASelecionado = 3;
         document.querySelectorAll('#ia-selector .tipo-opt').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -2649,9 +2679,7 @@
         });
         document.getElementById('btn-jogar-ia').addEventListener('click', () => jogarContraIA(nivelIASelecionado));
 
-        // ============================================================
         // HOT-SEAT
-        // ============================================================
         document.getElementById('btn-iniciar-hotseat').addEventListener('click', () => {
             const n1 = document.getElementById('hotseat-nome-1').value.trim() || 'Jogador 1';
             const n2 = document.getElementById('hotseat-nome-2').value.trim() || 'Jogador 2';
@@ -2667,32 +2695,23 @@
             minhaCor = 'white';
             tabuleiro = criarTabuleiroInicial();
             turnoAtual = 'white';
-            jogoEncerrado = false; vencedorDeclarado = null;
-            desistenciaProcessada = false;
+            jogoEncerrado = false; vencedorDeclarado = null; desistenciaProcessada = false;
             lancesDamasSemCaptura = 0; lancesFinaisEspeciais = 0; lancesTotais = 0;
             posicoesRepetidas = {}; tipoFinalEspecial = null;
             celulaSelecionada = null; movimentosValidos = [];
-            emPausa = false;
-            iaPensando = false;
-            notacaoAtual = [];
-            historicoMovimentos = [{
-                tabuleiro: tabuleiroParaFirebase(tabuleiro),
-                turno: 'white', cor: 'white', de: '—', para: '—'
-            }];
+            emPausa = false; iaPensando = false; notacaoAtual = [];
             ultimaJogadaDestino = null;
             if (modoRelogio !== 'none') { relogioBrancas = tempoInicialRelogio; relogioPretas = tempoInicialRelogio; }
+            historicoMovimentos = [{ tabuleiro: tabuleiroParaFirebase(tabuleiro), turno: 'white', cor: 'white', de: '—', para: '—' }];
             salaConfirmada = true;
             const cc = carregarConquistas();
             cc.stats.hotseatJogado = (cc.stats.hotseatJogado || 0) + 1;
-            salvarConquistas(cc);
-            desbloquearConquistas();
+            salvarConquistas(cc); desbloquearConquistas();
             entrarInterfaceJogo();
             toast(`👥 Hot-Seat: ${nome1} vs ${nome2}`, 'success');
         }
 
-        // ============================================================
-        // CRIAR SALA (EFÉMERA)
-        // ============================================================
+        // CRIAR SALA
         async function criarSala({ melhorDe = 0 } = {}) {
             if (!firebaseDisponivel) { toast('Firebase indisponível.', 'error'); return; }
             SoundFX.click();
@@ -2709,17 +2728,13 @@
                 lancesDamasSemCaptura = 0; lancesFinaisEspeciais = 0; lancesTotais = 0;
                 posicoesRepetidas = {}; tipoFinalEspecial = null;
                 notacaoAtual = [];
-                historicoMovimentos = [{
-                    tabuleiro: tabuleiroParaFirebase(tabuleiro),
-                    turno: 'white', cor: 'white', de: '—', para: '—'
-                }];
+                historicoMovimentos = [{ tabuleiro: tabuleiroParaFirebase(tabuleiro), turno: 'white', cor: 'white', de: '—', para: '—' }];
                 ultimaJogadaDestino = null;
                 if (modoRelogio !== 'none') { relogioBrancas = tempoInicialRelogio; relogioPretas = tempoInicialRelogio; }
                 const dados = {
                     status: 'jogando', turno: 'white',
                     tabuleiro: tabuleiroParaFirebase(tabuleiro),
-                    criadaEm: Date.now(),
-                    ultimaAtividade: Date.now(),
+                    criadaEm: Date.now(), ultimaAtividade: Date.now(),
                     tempoLimite: tempoLimiteSegundos,
                     jogadores: { [jogadorSessao.chave]: { nome: apelido, cor: 'white', online: true } }
                 };
@@ -2735,7 +2750,6 @@
             } catch (e) { toast('Erro ao criar sala.', 'error'); }
         }
         document.getElementById('btn-criar-sala').addEventListener('click', () => criarSala());
-
         document.getElementById('btn-entrar-sala').addEventListener('click', async () => {
             const codigo = document.getElementById('input-codigo-sala').value.trim().toUpperCase();
             if (!codigo) { toast('Digite o código.', 'warn'); SoundFX.error(); return; }
@@ -2749,16 +2763,12 @@
             window.location.href = `${window.location.pathname}?sala=${codigo}&modo=assistir`;
         });
 
-        // ============================================================
         // ENTRAR INTERFACE
-        // ============================================================
         function entrarInterfaceJogo() {
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
             document.getElementById('ate-logo-screen').classList.add('hidden');
-            document.getElementById('display-sala-tag').textContent = modoIA
-                ? `🤖 ${IA.NIVEIS[nivelIA].nome}`
-                : (modoHotSeat ? `👥 Hot-Seat` : `Sala: ${idSalaAtual}`);
+            document.getElementById('display-sala-tag').textContent = modoIA ? `🤖 ${IA.NIVEIS[nivelIA].nome}` : (modoHotSeat ? `👥 Hot-Seat` : `Sala: ${idSalaAtual}`);
             const badge = document.getElementById('badge-espectador');
             const badgeIA = document.getElementById('badge-ia');
             const badgeHS = document.getElementById('badge-hotseat');
@@ -2770,21 +2780,15 @@
             const chatBar = document.getElementById('chat-bar');
             const torneioBar = document.getElementById('torneio-bar');
             const clockDisplay = document.getElementById('clock-display');
-
             if (modoTorneio > 0 && !modoEspectador && !modoIA && !modoHotSeat) {
                 torneioBar.classList.remove('hidden');
                 document.getElementById('torneio-melhor-de').textContent = modoTorneio;
                 document.getElementById('torneio-eu').textContent = torneioPlacar.eu;
                 document.getElementById('torneio-op').textContent = torneioPlacar.op;
             } else torneioBar.classList.add('hidden');
-
             if (modoRelogio !== 'none' && !modoEspectador) clockDisplay.classList.remove('hidden');
             else clockDisplay.classList.add('hidden');
-
-            badge.classList.add('hidden');
-            badgeIA.classList.add('hidden');
-            badgeHS.classList.add('hidden');
-
+            badge.classList.add('hidden'); badgeIA.classList.add('hidden'); badgeHS.classList.add('hidden');
             if (modoEspectador) {
                 badge.classList.remove('hidden');
                 desistirBtn.classList.add('hidden'); pausaBtn.classList.add('hidden');
@@ -2803,9 +2807,7 @@
                 document.getElementById('display-nome').textContent = apelido;
                 document.getElementById('oponente-status').className = 'status-dot online';
                 document.getElementById('placar-nome-op').textContent = IA.NIVEIS[nivelIA].nome;
-                pausaBtn.classList.add('hidden');
-                empateBtn.classList.remove('hidden');
-                recBtn.classList.remove('hidden');
+                pausaBtn.classList.add('hidden'); empateBtn.classList.remove('hidden'); recBtn.classList.remove('hidden');
                 desistirLabel.textContent = 'Sair';
                 chatBar.style.opacity = '0.4'; chatBar.style.pointerEvents = 'none';
                 document.getElementById('div-whatsapp').classList.add('hidden');
@@ -2816,9 +2818,7 @@
                 document.getElementById('display-avatar').textContent = '👥';
                 document.getElementById('display-nome').textContent = 'Hot-Seat';
                 document.getElementById('oponente-status').className = 'status-dot online';
-                pausaBtn.classList.add('hidden');
-                empateBtn.classList.remove('hidden');
-                recBtn.classList.remove('hidden');
+                pausaBtn.classList.add('hidden'); empateBtn.classList.remove('hidden'); recBtn.classList.remove('hidden');
                 desistirLabel.textContent = 'Sair';
                 chatBar.style.opacity = '0.4'; chatBar.style.pointerEvents = 'none';
                 document.getElementById('div-whatsapp').classList.add('hidden');
@@ -2826,9 +2826,7 @@
                 document.getElementById('info-minha-cor-wrap').style.display = '';
                 document.getElementById('info-minha-cor').textContent = minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
                 desistirLabel.textContent = 'Desistir';
-                pausaBtn.classList.remove('hidden');
-                empateBtn.classList.remove('hidden');
-                recBtn.classList.remove('hidden');
+                pausaBtn.classList.remove('hidden'); empateBtn.classList.remove('hidden'); recBtn.classList.remove('hidden');
                 chatBar.style.opacity = ''; chatBar.style.pointerEvents = '';
             }
             renderizarTabuleiro();
@@ -2841,13 +2839,10 @@
         }
 
         function atualizarCorHotSeat() {
-            document.getElementById('info-minha-cor').textContent = hotSeatJogadorAtual === 'white'
-                ? `⚪ ${hotSeatNome1}` : `🔴 ${hotSeatNome2}`;
+            document.getElementById('info-minha-cor').textContent = hotSeatJogadorAtual === 'white' ? `⚪ ${hotSeatNome1}` : `🔴 ${hotSeatNome2}`;
         }
 
-        // ============================================================
         // RENDERIZAÇÃO
-        // ============================================================
         function renderizarReguas() {
             const invertido = (minhaCor === 'red');
             const colunas = ['a','b','c','d','e','f','g','h'];
@@ -2872,8 +2867,7 @@
             grid.innerHTML = '';
             const invertido = (minhaCor === 'red');
             const corDaVez = turnoAtual;
-            const capsObrig = (!jogoEncerrado && !modoEspectador && !emPausa && !iaPensando &&
-                (modoHotSeat || turnoAtual === minhaCor))
+            const capsObrig = (!jogoEncerrado && !modoEspectador && !emPausa && !iaPensando && (modoHotSeat || turnoAtual === minhaCor))
                 ? capturasObrigatorias(corDaVez) : [];
             const pecasObrigadas = new Set(capsObrig.map(o => `${o.r},${o.c}`));
             const temObrigatoria = pecasObrigadas.size > 0;
@@ -2895,6 +2889,9 @@
                     if (peca) {
                         const wrapper = document.createElement('div');
                         wrapper.className = 'piece-wrapper';
+                        if (peca.includes('king') && peca.endsWith('-nova')) {
+                            wrapper.classList.add('nova-dama');
+                        }
                         const pieceEl = document.createElement('div');
                         const corClasse = peca.startsWith('white') ? 'white' : 'red';
                         const isDama = peca.includes('king') ? ' king' : '';
@@ -2902,8 +2899,7 @@
                         wrapper.appendChild(pieceEl);
                         square.appendChild(wrapper);
                     }
-                    if (isDark && !modoEspectador && !emPausa && !iaPensando &&
-                        (modoHotSeat || turnoAtual === minhaCor)) {
+                    if (isDark && !modoEspectador && !emPausa && !iaPensando && (modoHotSeat || turnoAtual === minhaCor)) {
                         square.addEventListener('click', () => clicarCasa(r, c));
                     }
                     grid.appendChild(square);
@@ -2922,7 +2918,7 @@
             if (turnoEl) {
                 if (jogoEncerrado) turnoEl.textContent = '🏁 Fim';
                 else if (emPausa) turnoEl.textContent = '⏸️ Em pausa';
-                else if (iaPensando) turnoEl.textContent = '🤖 IA pensando…';
+                else if (iaPensando) turnoEl.innerHTML = '<span class="pensando-indicador">🤖 IA pensando <span class="dot"></span><span class="dot"></span><span class="dot"></span></span>';
                 else if (modoEspectador) turnoEl.textContent = turnoAtual === 'white' ? '⚪ Brancas jogam' : '🔴 Vermelhas jogam';
                 else if (modoHotSeat) turnoEl.textContent = turnoAtual === 'white' ? `⚪ ${hotSeatNome1}` : `🔴 ${hotSeatNome2}`;
                 else turnoEl.textContent = (turnoAtual === minhaCor ? 'Sua vez!' : 'Vez do oponente...');
@@ -2930,9 +2926,7 @@
             document.getElementById('div-pos-jogo')?.classList.toggle('hidden', !jogoEncerrado);
         }
 
-        // ============================================================
         // INTERAÇÃO
-        // ============================================================
         function clicarCasa(r, c) {
             if (modoEspectador || emPausa || iaPensando) return;
             if (jogoEncerrado) return;
@@ -2945,11 +2939,7 @@
                 const movs = calcularMovimentos(r, c);
                 if (temObrigatoria) {
                     const caps = movs.filter(m => m.captura);
-                    if (caps.length === 0) {
-                        toast('⚡ Você é obrigado a capturar!', 'error');
-                        SoundFX.error(); vibrar(80);
-                        return;
-                    }
+                    if (caps.length === 0) { toast('⚡ Você é obrigado a capturar!', 'error'); SoundFX.error(); vibrar(80); return; }
                     SoundFX.select(); vibrar(20);
                     celulaSelecionada = { r, c };
                     movimentosValidos = caps;
@@ -2971,13 +2961,10 @@
             renderizarTabuleiro();
         }
 
-        // ============================================================
-        // REGRAS BRASILEIRAS (CBD)
-        // ============================================================
+        // REGRAS
         function explorarCapturas(r, c, cor, tab, capturadasSet = new Set(), profundidade = 0) {
             if (profundidade > 20) return [];
-            const peca = tab[r][c];
-            if (!peca) return [];
+            const peca = tab[r][c]; if (!peca) return [];
             const isDama = peca.includes('king');
             const caminhos = [];
             const caps = [];
@@ -3016,9 +3003,7 @@
                 novaTab[cap.capturada.r][cap.capturada.c] = null;
                 const isPeao = !pecaAtual.includes('king');
                 const corDaPeca = pecaAtual.startsWith('white') ? 'white' : 'red';
-                const promoveuAgora =
-                    (isPeao && corDaPeca === 'white' && cap.r === 0) ||
-                    (isPeao && corDaPeca === 'red'   && cap.r === 7);
+                const promoveuAgora = (isPeao && corDaPeca === 'white' && cap.r === 0) || (isPeao && corDaPeca === 'red' && cap.r === 7);
                 if (promoveuAgora) novaTab[cap.r][cap.c] = corDaPeca + '-king';
                 const novasCapturadas = new Set(capturadasSet);
                 novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
@@ -3060,8 +3045,7 @@
         }
         function jogadorTemCapturaObrigatoria(cor) { return maxCapturasGlobais(cor) > 0; }
         function calcularMovimentos(r, c) {
-            const peca = tabuleiro[r][c];
-            if (!peca) return [];
+            const peca = tabuleiro[r][c]; if (!peca) return [];
             const cor = peca.startsWith('white') ? 'white' : 'red';
             const obrig = capturasObrigatorias(cor);
             if (obrig.length > 0) {
@@ -3078,10 +3062,7 @@
             if (isDama) {
                 for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
                     let nr = r + dr, nc = c + dc;
-                    while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tabuleiro[nr][nc]) {
-                        movs.push({ r: nr, c: nc });
-                        nr += dr; nc += dc;
-                    }
+                    while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tabuleiro[nr][nc]) { movs.push({ r: nr, c: nc }); nr += dr; nc += dc; }
                 }
             } else {
                 const dirs = cor === 'white' ? [-1] : [+1];
@@ -3093,22 +3074,17 @@
             return movs;
         }
 
-        // ============================================================
         // EMPATE
-        // ============================================================
         function contarPecas(cor) {
             let pedras = 0, damas = 0;
             for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
                 const p = tabuleiro[r][c];
-                if (p && p.startsWith(cor)) {
-                    if (p.includes('king')) damas++; else pedras++;
-                }
+                if (p && p.startsWith(cor)) { if (p.includes('king')) damas++; else pedras++; }
             }
             return { pedras, damas };
         }
         function detectarFinalEspecial() {
-            const b = contarPecas('white');
-            const p = contarPecas('red');
+            const b = contarPecas('white'); const p = contarPecas('red');
             if (b.damas + b.pedras === 0 || p.damas + p.pedras === 0) return null;
             if (b.damas === 2 && p.damas === 2 && b.pedras === 0 && p.pedras === 0) return '2v2damas';
             if (b.damas === 2 && p.damas === 1 && b.pedras === 0 && p.pedras === 0) return '2v1dama';
@@ -3119,20 +3095,15 @@
             return null;
         }
         function verificarDamaPresaCanto() {
-            const b = contarPecas('white');
-            const p = contarPecas('red');
+            const b = contarPecas('white'); const p = contarPecas('red');
             if (b.damas === 1 && p.damas === 2 && b.pedras === 0 && p.pedras === 0) {
                 for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-                    if (tabuleiro[r][c] === 'white-king') {
-                        if ((r === 0 || r === 7) && (c === 0 || c === 7)) return true;
-                    }
+                    if (tabuleiro[r][c] === 'white-king' && (r === 0 || r === 7) && (c === 0 || c === 7)) return true;
                 }
             }
             if (p.damas === 1 && b.damas === 2 && p.pedras === 0 && b.pedras === 0) {
                 for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-                    if (tabuleiro[r][c] === 'red-king') {
-                        if ((r === 0 || r === 7) && (c === 0 || c === 7)) return true;
-                    }
+                    if (tabuleiro[r][c] === 'red-king' && (r === 0 || r === 7) && (c === 0 || c === 7)) return true;
                 }
             }
             return false;
@@ -3144,10 +3115,7 @@
                 tipoFinalEspecial = final;
                 const limite = (final === '3v1dama' || final === '1v3dama') ? 12 : 5;
                 if (lancesFinaisEspeciais >= limite) return { empate: true, motivo: `Final ${final} após ${limite} lances` };
-            } else {
-                tipoFinalEspecial = null;
-                lancesFinaisEspeciais = 0;
-            }
+            } else { tipoFinalEspecial = null; lancesFinaisEspeciais = 0; }
             if (verificarDamaPresaCanto() && lancesFinaisEspeciais >= 5) return { empate: true, motivo: 'dama presa no canto' };
             const chave = JSON.stringify(tabuleiro) + '|' + turnoAtual;
             posicoesRepetidas[chave] = (posicoesRepetidas[chave] || 0) + 1;
@@ -3160,10 +3128,8 @@
             const pecaMovida = mov && mov.pecaOriginal;
             const eraDama = pecaMovida && pecaMovida.includes('king');
             lancesTotais++;
-            if (!capturou) {
-                if (eraDama) lancesDamasSemCaptura++;
-                else lancesDamasSemCaptura = 0;
-            } else lancesDamasSemCaptura = 0;
+            if (!capturou) { if (eraDama) lancesDamasSemCaptura++; else lancesDamasSemCaptura = 0; }
+            else lancesDamasSemCaptura = 0;
             const final = detectarFinalEspecial();
             if (final || verificarDamaPresaCanto()) {
                 if (final !== tipoFinalEspecial) { tipoFinalEspecial = final; lancesFinaisEspeciais = 0; }
@@ -3171,9 +3137,7 @@
             } else { tipoFinalEspecial = null; lancesFinaisEspeciais = 0; }
         }
 
-        // ============================================================
         // EXECUTAR MOVIMENTO
-        // ============================================================
         async function executarMovimento(deR, deC, paraR, paraC) {
             const mov = movimentosValidos.find(m => m.r === paraR && m.c === paraC);
             if (!mov) return;
@@ -3196,7 +3160,10 @@
                     if (isPeao && pecaAqui === 'red' && posAtual.r === 7) { tabuleiro[posAtual.r][posAtual.c] = 'red-king'; promoveu = true; }
                 }
                 SoundFX.capture(); vibrar(60);
-                if (promoveu) { SoundFX.king(); vibrar([40, 40, 80]); }
+                if (promoveu) {
+                    SoundFX.king(); vibrar([40, 40, 80]);
+                    lancarConfetes(true);
+                }
                 toast(`⚡ Capturou ${passosExecutados}${promoveu ? ' 👑 Promovida!' : ''}`, 'success');
             } else {
                 tabuleiro[paraR][paraC] = pecaMovida;
@@ -3204,7 +3171,10 @@
                 if (pecaMovida === 'white' && paraR === 0) { tabuleiro[paraR][paraC] = 'white-king'; promoveu = true; }
                 if (pecaMovida === 'red' && paraR === 7) { tabuleiro[paraR][paraC] = 'red-king'; promoveu = true; }
                 SoundFX.move(); vibrar(20);
-                if (promoveu) { SoundFX.king(); vibrar([40, 40, 80]); }
+                if (promoveu) {
+                    SoundFX.king(); vibrar([40, 40, 80]);
+                    lancarConfetes(true);
+                }
             }
             ultimaJogadaDestino = { r: paraR, c: paraC };
             historicoMovimentos.push({
@@ -3224,18 +3194,20 @@
                 return;
             }
             turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
-            if (modoHotSeat) {
-                hotSeatJogadorAtual = turnoAtual;
-                minhaCor = turnoAtual;
-                atualizarCorHotSeat();
-            }
-            celulaSelecionada = null;
-            movimentosValidos = [];
+            if (modoHotSeat) { hotSeatJogadorAtual = turnoAtual; minhaCor = turnoAtual; atualizarCorHotSeat(); }
+            celulaSelecionada = null; movimentosValidos = [];
             renderizarTabuleiro();
-            pararTimer();
-            pararRelogio();
+            pararTimer(); pararRelogio();
             aplicarIncremento(corPeca);
             atualizarRelogioUI();
+            // Remove marca "nova" após animação
+            setTimeout(() => {
+                for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                    if (tabuleiro[r][c] && tabuleiro[r][c].endsWith('-nova')) {
+                        tabuleiro[r][c] = tabuleiro[r][c].replace('-nova', '');
+                    }
+                }
+            }, 1600);
             const vencedorPorTabuleiro = verificarFimDeJogo();
             if (modoIA) {
                 if (vencedorPorTabuleiro) { jogoEncerrado = true; tratarFimDeJogo(vencedorPorTabuleiro, 'sem-movimentos'); return; }
@@ -3253,18 +3225,14 @@
                 status: vencedorPorTabuleiro ? 'encerrado' : 'jogando',
                 ultimaAtividade: Date.now()
             };
-            if (vencedorPorTabuleiro) {
-                payload.vencedor = vencedorPorTabuleiro;
-                payload.motivoFim = 'sem-movimentos';
-            }
+            if (vencedorPorTabuleiro) { payload.vencedor = vencedorPorTabuleiro; payload.motivoFim = 'sem-movimentos'; }
             await updateSeguro(`salas_damas/${idSalaAtual}`, payload);
         }
 
         function verificarFimDeJogo() {
             let temWhite = false, temRed = false;
             for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-                const p = tabuleiro[r][c];
-                if (!p) continue;
+                const p = tabuleiro[r][c]; if (!p) continue;
                 if (p.startsWith('white')) temWhite = true;
                 if (p.startsWith('red')) temRed = true;
             }
@@ -3273,21 +3241,16 @@
             const corDaVez = turnoAtual;
             for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
                 const p = tabuleiro[r][c];
-                if (p && p.startsWith(corDaVez)) {
-                    if (calcularMovimentos(r, c).length > 0) return null;
-                }
+                if (p && p.startsWith(corDaVez)) { if (calcularMovimentos(r, c).length > 0) return null; }
             }
             return corDaVez === 'white' ? 'red' : 'white';
         }
 
-        // ============================================================
         // FIM DE JOGO
-        // ============================================================
         function tratarFimDeJogo(vencedor, motivo) {
             if (desistenciaProcessada) return;
             desistenciaProcessada = true;
-            pararTimer();
-            pararRelogio();
+            pararTimer(); pararRelogio();
             let euVenci, empate = (vencedor === 'empate');
             if (modoHotSeat) euVenci = (vencedor === hotSeatJogadorAtual);
             else euVenci = (vencedor === minhaCor);
@@ -3297,6 +3260,7 @@
                 if (!modoHotSeat) adicionarAoHistorico('empate', nomeOponente || 'Oponente');
             } else if (euVenci) {
                 SoundFX.win(); vibrar([100, 50, 100, 50, 200]);
+                lancarConfetes(false);
                 registrarVitoria();
                 toast('🏆 Você venceu!', 'success');
                 if (!modoHotSeat) adicionarAoHistorico('vitoria', nomeOponente || 'Oponente');
@@ -3346,20 +3310,14 @@
         function registrarVitoria() { placarSessao.vitorias++; salvarPlacarLocal(); atualizarPlacarUI(); }
         function registrarDerrota() { placarSessao.derrotas++; salvarPlacarLocal(); atualizarPlacarUI(); }
 
-        // ============================================================
         // REVANCHE
-        // ============================================================
         async function enviarPedidoRevanche() {
             SoundFX.click();
             if (modoIA) { jogarContraIA(nivelIA); return; }
             if (modoHotSeat) { iniciarHotSeat(hotSeatNome1, hotSeatNome2); return; }
             if (!firebaseDisponivel) return;
-            try {
-                await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), {
-                    pedidoRevanche: { de: jogadorSessao.chave, nome: apelido, em: Date.now() }
-                });
-                toast('⏳ Pedido enviado...', 'info');
-            } catch (e) { toast('Erro ao enviar.', 'error'); }
+            try { await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { pedidoRevanche: { de: jogadorSessao.chave, nome: apelido, em: Date.now() } }); toast('⏳ Pedido enviado...', 'info'); }
+            catch (e) { toast('Erro.', 'error'); }
         }
         function mostrarPedidoRevanche(nome) {
             const div = document.getElementById('div-revanche-pendente');
@@ -3382,27 +3340,22 @@
                 const jogadoresSnap = await fns.get(fns.ref(db, `salas_damas/${idSalaAtual}/jogadores`));
                 const jogadores = jogadoresSnap.val() || {};
                 const novasCores = {};
-                Object.entries(jogadores).forEach(([uid, j]) => {
-                    novasCores[uid] = { ...j, cor: j.cor === 'white' ? 'red' : 'white' };
-                });
+                Object.entries(jogadores).forEach(([uid, j]) => { novasCores[uid] = { ...j, cor: j.cor === 'white' ? 'red' : 'white' }; });
                 const updates = {
                     status: 'jogando', turno: 'white',
                     tabuleiro: tabuleiroParaFirebase(criarTabuleiroInicial()),
                     vencedor: null, motivoFim: null, desistente: null,
                     pedidoRevanche: null, empatePedido: null, jogadores: novasCores,
-                    pausaAtiva: null, pausaPedido: null,
-                    ultimaAtividade: Date.now()
+                    pausaAtiva: null, pausaPedido: null, ultimaAtividade: Date.now()
                 };
                 if (modoTorneio > 0) torneioRodadaAtual++;
                 await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), updates);
                 toast('🎮 Nova partida!', 'success');
-            } catch (e) { toast('Erro ao aceitar.', 'error'); }
+            } catch (e) { toast('Erro.', 'error'); }
         }
         async function recusarRevanche() {
             SoundFX.click();
-            if (firebaseDisponivel) {
-                try { await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { pedidoRevanche: null }); } catch (e) {}
-            }
+            if (firebaseDisponivel) { try { await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { pedidoRevanche: null }); } catch (e) {} }
             toast('Recusada.', 'info');
         }
         function resetarParaNovaPartida(dados) {
@@ -3414,12 +3367,8 @@
             empatePendenteDe = null; empateOferecidoPorMim = false;
             lancesDamasSemCaptura = 0; lancesFinaisEspeciais = 0; lancesTotais = 0;
             posicoesRepetidas = {}; tipoFinalEspecial = null;
-            notacaoAtual = [];
-            ultimaJogadaDestino = null;
-            historicoMovimentos = [{
-                tabuleiro: tabuleiroParaFirebase(dados.tabuleiro),
-                turno: 'white', cor: 'white', de: '—', para: '—'
-            }];
+            notacaoAtual = []; ultimaJogadaDestino = null;
+            historicoMovimentos = [{ tabuleiro: tabuleiroParaFirebase(dados.tabuleiro), turno: 'white', cor: 'white', de: '—', para: '—' }];
             tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
             turnoAtual = dados.turno || 'white';
             if (modoRelogio !== 'none') { relogioBrancas = tempoInicialRelogio; relogioPretas = tempoInicialRelogio; }
@@ -3430,9 +3379,7 @@
             }
             document.getElementById('div-pos-jogo')?.classList.add('hidden');
             esconderPedidoRevanche();
-            renderizarTabuleiro();
-            renderizarNotacao();
-            atualizarRelogioUI();
+            renderizarTabuleiro(); renderizarNotacao(); atualizarRelogioUI();
             SoundFX.notify();
             toast('🎮 Nova partida!', 'success');
             setTimeout(() => marcarPronto(), 400);
@@ -3442,53 +3389,40 @@
             SoundFX.click();
             if (modoIA || modoHotSeat) {
                 abrirModal({
-                    icon: '🏳️', title: 'Sair da partida?',
-                    message: 'O progresso será perdido.',
-                    actions: [
-                        { label: 'Cancelar', onClick: () => {}, className: 'btn-secundario' },
-                        { label: 'Sair', onClick: irParaInicio }
-                    ]
+                    icon: '🏳️', title: 'Sair?', message: 'O progresso será perdido.',
+                    actions: [{ label: 'Cancelar', onClick: () => {}, className: 'btn-secundario' }, { label: 'Sair', onClick: irParaInicio }]
                 });
                 return;
             }
             abrirModal({
-                icon: '🏳️', title: 'Desistir da partida?',
-                message: 'Se você desistir, seu adversário será declarado vencedor.',
+                icon: '🏳️', title: 'Desistir?', message: 'Se desistir, o adversário vence.',
                 actions: [
                     { label: 'Cancelar', onClick: () => {}, className: 'btn-secundario' },
                     { label: 'Sim, desistir', onClick: async () => {
                         try {
                             pararTimer(); pararRelogio();
                             const corAdversaria = minhaCor === 'white' ? 'red' : 'white';
-                            await updateSeguro(`salas_damas/${idSalaAtual}`, {
-                                status: 'encerrado', vencedor: corAdversaria,
-                                motivoFim: 'desistencia', desistente: jogadorSessao.chave
-                            });
-                        } catch (e) { toast('Erro ao desistir.', 'error'); }
+                            await updateSeguro(`salas_damas/${idSalaAtual}`, { status: 'encerrado', vencedor: corAdversaria, motivoFim: 'desistencia', desistente: jogadorSessao.chave });
+                        } catch (e) { toast('Erro.', 'error'); }
                     } }
                 ]
             });
         }
 
-        // ============================================================
         // IA
-        // ============================================================
         const IA = (() => {
             const NIVEIS = {
                 1: { nome: '🐣 Iniciante', profundidade: 1, aleatoriedade: 0.60, usaPosicao: false },
-                2: { nome: '🐤 Fácil',     profundidade: 1, aleatoriedade: 0.30, usaPosicao: true  },
-                3: { nome: '🦊 Médio',     profundidade: 3, aleatoriedade: 0.10, usaPosicao: true  },
-                4: { nome: '🐺 Difícil',   profundidade: 5, aleatoriedade: 0.03, usaPosicao: true  },
-                5: { nome: '🐉 Mestre',    profundidade: 7, aleatoriedade: 0.00, usaPosicao: true  }
+                2: { nome: '🐤 Fácil', profundidade: 1, aleatoriedade: 0.30, usaPosicao: true },
+                3: { nome: '🦊 Médio', profundidade: 3, aleatoriedade: 0.10, usaPosicao: true },
+                4: { nome: '🐺 Difícil', profundidade: 5, aleatoriedade: 0.03, usaPosicao: true },
+                5: { nome: '🐉 Mestre', profundidade: 7, aleatoriedade: 0.00, usaPosicao: true }
             };
             function clonarTabuleiro(t) { return t.map(r => r.slice()); }
             function explorarCapturasIA(r, c, cor, tab, capturadasSet = new Set(), profundidade = 0) {
                 if (profundidade > 20) return [];
-                const peca = tab[r][c];
-                if (!peca) return [];
-                const isDama = peca.includes('king');
-                const caminhos = [];
-                const caps = [];
+                const peca = tab[r][c]; if (!peca) return [];
+                const isDama = peca.includes('king'); const caminhos = []; const caps = [];
                 if (isDama) {
                     for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
                         let nr = r + dr, nc = c + dc;
@@ -3498,20 +3432,14 @@
                         if (!alvo || alvo.startsWith(cor)) continue;
                         if (capturadasSet.has(`${nr},${nc}`)) continue;
                         let tr = nr + dr, tc = nc + dc;
-                        while (tr >= 0 && tr < 8 && tc >= 0 && tc < 8 && !tab[tr][tc]) {
-                            caps.push({ r: tr, c: tc, capturada: { r: nr, c: nc } });
-                            tr += dr; tc += dc;
-                        }
+                        while (tr >= 0 && tr < 8 && tc >= 0 && tc < 8 && !tab[tr][tc]) { caps.push({ r: tr, c: tc, capturada: { r: nr, c: nc } }); tr += dr; tc += dc; }
                     }
                 } else {
                     for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
-                        const mr = r + dr, mc = c + dc;
-                        const jr = r + 2 * dr, jc = c + 2 * dc;
+                        const mr = r + dr, mc = c + dc; const jr = r + 2 * dr, jc = c + 2 * dc;
                         if (jr < 0 || jr >= 8 || jc < 0 || jc >= 8) continue;
                         const meio = tab[mr][mc];
-                        if (meio && !meio.startsWith(cor) && !tab[jr][jc] && !capturadasSet.has(`${mr},${mc}`)) {
-                            caps.push({ r: jr, c: jc, capturada: { r: mr, c: mc } });
-                        }
+                        if (meio && !meio.startsWith(cor) && !tab[jr][jc] && !capturadasSet.has(`${mr},${mc}`)) caps.push({ r: jr, c: jc, capturada: { r: mr, c: mc } });
                     }
                 }
                 if (caps.length === 0) return [];
@@ -3519,30 +3447,22 @@
                     const novaTab = tab.map(row => row.slice());
                     const pecaAtual = novaTab[r][c];
                     const capturadaOriginal = novaTab[cap.capturada.r][cap.capturada.c];
-                    novaTab[cap.r][cap.c] = pecaAtual;
-                    novaTab[r][c] = null;
-                    novaTab[cap.capturada.r][cap.capturada.c] = null;
+                    novaTab[cap.r][cap.c] = pecaAtual; novaTab[r][c] = null; novaTab[cap.capturada.r][cap.capturada.c] = null;
                     const isPeao = !pecaAtual.includes('king');
                     const corDaPeca = pecaAtual.startsWith('white') ? 'white' : 'red';
-                    const promoveuAgora =
-                        (isPeao && corDaPeca === 'white' && cap.r === 0) ||
-                        (isPeao && corDaPeca === 'red'   && cap.r === 7);
+                    const promoveuAgora = (isPeao && corDaPeca === 'white' && cap.r === 0) || (isPeao && corDaPeca === 'red' && cap.r === 7);
                     if (promoveuAgora) novaTab[cap.r][cap.c] = corDaPeca + '-king';
-                    const novasCapturadas = new Set(capturadasSet);
-                    novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
+                    const novasCapturadas = new Set(capturadasSet); novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
                     const continuacoes = explorarCapturasIA(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
-                    if (continuacoes.length === 0) caminhos.push([cap]);
-                    else for (const cont of continuacoes) caminhos.push([cap, ...cont]);
+                    if (continuacoes.length === 0) caminhos.push([cap]); else for (const cont of continuacoes) caminhos.push([cap, ...cont]);
                 }
                 return caminhos;
             }
             function gerarMovimentos(tab, cor) {
-                const movs = [];
-                let maxCapt = 0;
+                const movs = []; let maxCapt = 0;
                 const capturasPorPeca = [];
                 for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-                    const p = tab[r][c];
-                    if (!p || !p.startsWith(cor)) continue;
+                    const p = tab[r][c]; if (!p || !p.startsWith(cor)) continue;
                     const caminhos = explorarCapturasIA(r, c, cor, tab);
                     if (caminhos.length > 0) {
                         const max = Math.max(...caminhos.map(x => x.length));
@@ -3562,24 +3482,18 @@
                     return movs;
                 }
                 for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-                    const p = tab[r][c];
-                    if (!p || !p.startsWith(cor)) continue;
+                    const p = tab[r][c]; if (!p || !p.startsWith(cor)) continue;
                     const isDama = p.includes('king');
                     if (isDama) {
                         for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
                             let nr = r + dr, nc = c + dc;
-                            while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tab[nr][nc]) {
-                                movs.push({ de: { r, c }, para: { r: nr, c: nc }, captura: false });
-                                nr += dr; nc += dc;
-                            }
+                            while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tab[nr][nc]) { movs.push({ de: { r, c }, para: { r: nr, c: nc }, captura: false }); nr += dr; nc += dc; }
                         }
                     } else {
                         const dirs = cor === 'white' ? [-1] : [+1];
                         for (const dr of dirs) for (const dc of [-1, +1]) {
                             const nr = r + dr, nc = c + dc;
-                            if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tab[nr][nc]) {
-                                movs.push({ de: { r, c }, para: { r: nr, c: nc }, captura: false });
-                            }
+                            if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tab[nr][nc]) movs.push({ de: { r, c }, para: { r: nr, c: nc }, captura: false });
                         }
                     }
                 }
@@ -3592,17 +3506,14 @@
                     let pos = { r: mov.de.r, c: mov.de.c };
                     for (const passo of mov.caminho) {
                         const pecaAqui = novo[pos.r][pos.c];
-                        novo[passo.r][passo.c] = pecaAqui;
-                        novo[pos.r][pos.c] = null;
-                        novo[passo.capturada.r][passo.capturada.c] = null;
+                        novo[passo.r][passo.c] = pecaAqui; novo[pos.r][pos.c] = null; novo[passo.capturada.r][passo.capturada.c] = null;
                         pos = { r: passo.r, c: passo.c };
                         const isPeao = pecaAqui && !pecaAqui.includes('king');
                         if (isPeao && pecaAqui === 'white' && pos.r === 0) novo[pos.r][pos.c] = 'white-king';
                         if (isPeao && pecaAqui === 'red' && pos.r === 7) novo[pos.r][pos.c] = 'red-king';
                     }
                 } else {
-                    novo[mov.para.r][mov.para.c] = peca;
-                    novo[mov.de.r][mov.de.c] = null;
+                    novo[mov.para.r][mov.para.c] = peca; novo[mov.de.r][mov.de.c] = null;
                     if (peca === 'white' && mov.para.r === 0) novo[mov.para.r][mov.para.c] = 'white-king';
                     if (peca === 'red' && mov.para.r === 7) novo[mov.para.r][mov.para.c] = 'red-king';
                 }
@@ -3612,22 +3523,14 @@
                 const oponente = cor === 'white' ? 'red' : 'white';
                 let score = 0;
                 for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-                    const p = tab[r][c];
-                    if (!p) continue;
-                    const isDama = p.includes('king');
-                    const valor = isDama ? 5 : 1;
+                    const p = tab[r][c]; if (!p) continue;
+                    const isDama = p.includes('king'); const valor = isDama ? 5 : 1;
                     if (p.startsWith(cor)) {
                         score += valor;
-                        if (usaPosicao) {
-                            if (!isDama) score += (cor === 'white' ? (7 - r) : r) * 0.08;
-                            if (c >= 2 && c <= 5) score += 0.05;
-                        }
+                        if (usaPosicao) { if (!isDama) score += (cor === 'white' ? (7 - r) : r) * 0.08; if (c >= 2 && c <= 5) score += 0.05; }
                     } else {
                         score -= valor;
-                        if (usaPosicao) {
-                            if (!isDama) score -= (oponente === 'white' ? (7 - r) : r) * 0.08;
-                            if (c >= 2 && c <= 5) score -= 0.05;
-                        }
+                        if (usaPosicao) { if (!isDama) score -= (oponente === 'white' ? (7 - r) : r) * 0.08; if (c >= 2 && c <= 5) score -= 0.05; }
                     }
                 }
                 return score;
@@ -3640,8 +3543,7 @@
                 if (maximizando) {
                     let melhor = -Infinity;
                     for (const mov of movs) {
-                        const val = minimax(aplicarMovimento(tab, mov), profundidade - 1, alpha, beta,
-                            corAtual === 'white' ? 'red' : 'white', corIA, usaPosicao);
+                        const val = minimax(aplicarMovimento(tab, mov), profundidade - 1, alpha, beta, corAtual === 'white' ? 'red' : 'white', corIA, usaPosicao);
                         if (val > melhor) melhor = val;
                         if (melhor > alpha) alpha = melhor;
                         if (beta <= alpha) break;
@@ -3650,8 +3552,7 @@
                 } else {
                     let melhor = Infinity;
                     for (const mov of movs) {
-                        const val = minimax(aplicarMovimento(tab, mov), profundidade - 1, alpha, beta,
-                            corAtual === 'white' ? 'red' : 'white', corIA, usaPosicao);
+                        const val = minimax(aplicarMovimento(tab, mov), profundidade - 1, alpha, beta, corAtual === 'white' ? 'red' : 'white', corIA, usaPosicao);
                         if (val < melhor) melhor = val;
                         if (melhor < beta) beta = melhor;
                         if (beta <= alpha) break;
@@ -3666,8 +3567,7 @@
                 if (Math.random() < cfg.aleatoriedade) return movs[Math.floor(Math.random() * movs.length)];
                 let melhorMov = movs[0]; let melhorVal = -Infinity;
                 for (const mov of movs) {
-                    const val = minimax(aplicarMovimento(tab, mov), cfg.profundidade - 1, -Infinity, Infinity,
-                        cor === 'white' ? 'red' : 'white', cor, cfg.usaPosicao);
+                    const val = minimax(aplicarMovimento(tab, mov), cfg.profundidade - 1, -Infinity, Infinity, cor === 'white' ? 'red' : 'white', cor, cfg.usaPosicao);
                     if (val > melhorVal) { melhorVal = val; melhorMov = mov; }
                 }
                 return melhorMov;
@@ -3677,28 +3577,19 @@
 
         function jogarContraIA(nivel) {
             SoundFX.click();
-            modoIA = true; modoHotSeat = false;
-            nivelIA = nivel;
+            modoIA = true; modoHotSeat = false; nivelIA = nivel;
             modoEspectador = false; modoTorneio = 0;
             idSalaAtual = 'IA-' + Date.now().toString(36).toUpperCase();
             minhaCor = 'white';
             tabuleiro = criarTabuleiroInicial();
-            turnoAtual = 'white';
-            jogoEncerrado = false; vencedorDeclarado = null;
-            desistenciaProcessada = false;
+            turnoAtual = 'white'; jogoEncerrado = false; vencedorDeclarado = null; desistenciaProcessada = false;
             lancesDamasSemCaptura = 0; lancesFinaisEspeciais = 0; lancesTotais = 0;
             posicoesRepetidas = {}; tipoFinalEspecial = null;
             celulaSelecionada = null; movimentosValidos = [];
-            emPausa = false;
-            iaPensando = false;
-            notacaoAtual = [];
-            nomeOponente = IA.NIVEIS[nivel].nome;
-            ultimaJogadaDestino = null;
+            emPausa = false; iaPensando = false; notacaoAtual = [];
+            nomeOponente = IA.NIVEIS[nivel].nome; ultimaJogadaDestino = null;
             if (modoRelogio !== 'none') { relogioBrancas = tempoInicialRelogio; relogioPretas = tempoInicialRelogio; }
-            historicoMovimentos = [{
-                tabuleiro: tabuleiroParaFirebase(tabuleiro),
-                turno: 'white', cor: 'white', de: '—', para: '—'
-            }];
+            historicoMovimentos = [{ tabuleiro: tabuleiroParaFirebase(tabuleiro), turno: 'white', cor: 'white', de: '—', para: '—' }];
             salaConfirmada = true;
             entrarInterfaceJogo();
             toast(`🤖 Modo IA: ${IA.NIVEIS[nivel].nome}`, 'success');
@@ -3724,26 +3615,22 @@
                 let pos = { r: mov.de.r, c: mov.de.c };
                 for (const passo of mov.caminho) {
                     const pecaAqui = tabuleiro[pos.r][pos.c];
-                    tabuleiro[passo.r][passo.c] = pecaAqui;
-                    tabuleiro[pos.r][pos.c] = null;
-                    tabuleiro[passo.capturada.r][passo.capturada.c] = null;
+                    tabuleiro[passo.r][passo.c] = pecaAqui; tabuleiro[pos.r][pos.c] = null; tabuleiro[passo.capturada.r][passo.capturada.c] = null;
                     pos = { r: passo.r, c: passo.c };
                     const isPeao = pecaAqui && !pecaAqui.includes('king');
                     if (isPeao && pecaAqui === 'red' && pos.r === 7) { tabuleiro[pos.r][pos.c] = 'red-king'; promoveuIA = true; }
                 }
                 SoundFX.capture();
-                if (promoveuIA) SoundFX.king();
+                if (promoveuIA) { SoundFX.king(); lancarConfetes(true); }
             } else {
-                tabuleiro[mov.para.r][mov.para.c] = pecaMovida;
-                tabuleiro[mov.de.r][mov.de.c] = null;
+                tabuleiro[mov.para.r][mov.para.c] = pecaMovida; tabuleiro[mov.de.r][mov.de.c] = null;
                 if (pecaMovida === 'red' && mov.para.r === 7) { tabuleiro[mov.para.r][mov.para.c] = 'red-king'; promoveuIA = true; }
                 SoundFX.move();
-                if (promoveuIA) SoundFX.king();
+                if (promoveuIA) { SoundFX.king(); lancarConfetes(true); }
             }
             ultimaJogadaDestino = { r: mov.para.r, c: mov.para.c };
             historicoMovimentos.push({
-                tabuleiro: tabuleiroParaFirebase(tabuleiro),
-                turno: 'red', cor: 'red',
+                tabuleiro: tabuleiroParaFirebase(tabuleiro), turno: 'red', cor: 'red',
                 de: `(${mov.de.r},${mov.de.c})`, para: `(${mov.para.r},${mov.para.c})`,
                 captura: mov.captura ? 'sim' : null
             });
@@ -3764,17 +3651,14 @@
             else { iniciarTimer(); iniciarRelogio(); }
         }
 
-        // ============================================================
         // ESCUTA FIREBASE
-        // ============================================================
         function escutarFirebase() {
             if (!firebaseDisponivel) return;
             if (unsubscribeFirebase) unsubscribeFirebase();
             unsubscribeFirebase = fns.onValue(fns.ref(db, 'salas_damas/' + idSalaAtual), (snapshot) => {
                 if (!snapshot.exists()) {
-                    // Sala apagada (efémera)
                     if (idSalaAtual && salaConfirmada && !jogoEncerrado) {
-                        toast('⏳ Sala expirou (30 min de inatividade).', 'warn');
+                        toast('⏳ Sala expirou (30 min inativa).', 'warn');
                         setTimeout(() => irParaInicio(), 1500);
                     }
                     return;
@@ -3792,25 +3676,12 @@
                 else if (!pausaAtivaRemota && emPausa) retomarPausaLocal();
                 const pedidoPausa = dados.pausaPedido;
                 if (pedidoPausa && pedidoPausa.de !== jogadorSessao.chave && !modoEspectador) {
-                    if (pausaPendenteDe !== pedidoPausa.de) {
-                        pausaPendenteDe = pedidoPausa.de;
-                        SoundFX.notify();
-                        mostrarPedidoPausa(pedidoPausa.nome || 'Adversário');
-                    }
-                } else if (!pedidoPausa) {
-                    pausaPendenteDe = null;
-                    document.getElementById('div-pausa-pendente')?.classList.add('hidden');
-                }
+                    if (pausaPendenteDe !== pedidoPausa.de) { pausaPendenteDe = pedidoPausa.de; SoundFX.notify(); mostrarPedidoPausa(pedidoPausa.nome || 'Adversário'); }
+                } else if (!pedidoPausa) { pausaPendenteDe = null; document.getElementById('div-pausa-pendente')?.classList.add('hidden'); }
                 const pedidoEmpate = dados.empatePedido;
                 if (pedidoEmpate && pedidoEmpate.de !== jogadorSessao.chave && !modoEspectador) {
-                    if (empatePendenteDe !== pedidoEmpate.de) {
-                        empatePendenteDe = pedidoEmpate.de;
-                        mostrarPedidoEmpate(pedidoEmpate.nome || 'Adversário');
-                    }
-                } else if (!pedidoEmpate) {
-                    empatePendenteDe = null;
-                    document.getElementById('div-empate-pendente')?.classList.add('hidden');
-                }
+                    if (empatePendenteDe !== pedidoEmpate.de) { empatePendenteDe = pedidoEmpate.de; mostrarPedidoEmpate(pedidoEmpate.nome || 'Adversário'); }
+                } else if (!pedidoEmpate) { empatePendenteDe = null; document.getElementById('div-empate-pendente')?.classList.add('hidden'); }
                 const jogadores = dados.jogadores || {};
                 const uids = Object.keys(jogadores);
                 const uidOponente = uids.find(u => u !== jogadorSessao.chave);
@@ -3822,25 +3693,13 @@
                 document.getElementById('placar-nome-eu').textContent = modoEspectador ? '⚪ Brancas' : apelido;
                 marcarFirebaseVivo();
                 atualizarHandshake(dados, uids);
-                if (jogoEncerrado && dados.motivoFim === 'desistencia' && !desistenciaProcessada && !modoEspectador) {
-                    desistenciaProcessada = true; tratarFimDeJogo(vencedorDeclarado, 'desistencia');
-                }
-                if (jogoEncerrado && dados.motivoFim === 'sem-movimentos' && !desistenciaProcessada && !modoEspectador) {
-                    desistenciaProcessada = true; tratarFimDeJogo(vencedorDeclarado, 'sem-movimentos');
-                }
-                if (jogoEncerrado && dados.motivoFim === 'timeout' && !desistenciaProcessada && !modoEspectador) {
-                    desistenciaProcessada = true; tratarFimDeJogo(vencedorDeclarado, 'timeout');
-                }
-                if (jogoEncerrado && dados.motivoFim === 'empate' && !desistenciaProcessada && !modoEspectador) {
-                    desistenciaProcessada = true; tratarFimDeJogo('empate', 'empate');
-                }
+                if (jogoEncerrado && dados.motivoFim === 'desistencia' && !desistenciaProcessada && !modoEspectador) { desistenciaProcessada = true; tratarFimDeJogo(vencedorDeclarado, 'desistencia'); }
+                if (jogoEncerrado && dados.motivoFim === 'sem-movimentos' && !desistenciaProcessada && !modoEspectador) { desistenciaProcessada = true; tratarFimDeJogo(vencedorDeclarado, 'sem-movimentos'); }
+                if (jogoEncerrado && dados.motivoFim === 'timeout' && !desistenciaProcessada && !modoEspectador) { desistenciaProcessada = true; tratarFimDeJogo(vencedorDeclarado, 'timeout'); }
+                if (jogoEncerrado && dados.motivoFim === 'empate' && !desistenciaProcessada && !modoEspectador) { desistenciaProcessada = true; tratarFimDeJogo('empate', 'empate'); }
                 const pedido = dados.pedidoRevanche || null;
                 if (pedido && pedido.de !== jogadorSessao.chave && !modoEspectador) {
-                    if (pedidoRevancheDe !== pedido.de) {
-                        pedidoRevancheDe = pedido.de;
-                        SoundFX.notify();
-                        mostrarPedidoRevanche(pedido.nome || 'Oponente');
-                    }
+                    if (pedidoRevancheDe !== pedido.de) { pedidoRevancheDe = pedido.de; SoundFX.notify(); mostrarPedidoRevanche(pedido.nome || 'Oponente'); }
                 } else if (!pedido) { pedidoRevancheDe = null; esconderPedidoRevanche(); }
                 if (dados.status === 'jogando' && statusAnteriorEncerrado) resetarParaNovaPartida(dados);
                 if (jogadores[jogadorSessao.chave]?.cor) {
@@ -3853,36 +3712,25 @@
                 if (turnoAnterior !== turnoAtual) {
                     celulaSelecionada = null; movimentosValidos = [];
                     if (!jogoEncerrado && !modoEspectador && !emPausa) {
-                        if (turnoAtual === minhaCor) {
-                            setTimeout(() => SoundFX.notify(), 150);
-                            iniciarTimer(); iniciarRelogio();
-                        } else { pararTimer(); pararRelogio(); }
+                        if (turnoAtual === minhaCor) { setTimeout(() => SoundFX.notify(), 150); iniciarTimer(); iniciarRelogio(); }
+                        else { pararTimer(); pararRelogio(); }
                     }
                 }
                 renderizarTabuleiro();
             });
         }
 
-        // ============================================================
-        // CHAT — APENAS EMOJIS
-        // ============================================================
+        // CHAT
         function escutarChat() {
             if (!firebaseDisponivel) return;
             if (unsubscribeChat) unsubscribeChat();
             const chatRef = fns.ref(db, `salas_damas/${idSalaAtual}/chat`);
             unsubscribeChat = fns.onValue(chatRef, (snapshot) => {
-                const dados = snapshot.val();
-                if (!dados) return;
-                const entradas = Object.entries(dados)
-                    .map(([k, v]) => ({ id: k, ...v }))
-                    .filter(m => (m.ts || 0) > ultimoChatTs)
-                    .sort((a, b) => (a.ts || 0) - (b.ts || 0));
+                const dados = snapshot.val(); if (!dados) return;
+                const entradas = Object.entries(dados).map(([k, v]) => ({ id: k, ...v })).filter(m => (m.ts || 0) > ultimoChatTs).sort((a, b) => (a.ts || 0) - (b.ts || 0));
                 entradas.forEach(msg => {
                     ultimoChatTs = Math.max(ultimoChatTs, msg.ts || 0);
-                    if (msg.de !== jogadorSessao.chave && msg.emoji) {
-                        mostrarBalao(msg.emoji, msg.nome || 'Oponente');
-                        SoundFX.chat();
-                    }
+                    if (msg.de !== jogadorSessao.chave && msg.emoji) { mostrarBalao(msg.emoji, msg.nome || 'Oponente'); SoundFX.chat(); }
                 });
             });
         }
@@ -3914,9 +3762,7 @@
             });
         });
 
-        // ============================================================
         // TELA CHEIA
-        // ============================================================
         function isFullscreen() { return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement); }
         async function entrarTelaCheia() {
             const el = document.documentElement;
@@ -3924,7 +3770,7 @@
                 if (el.requestFullscreen) await el.requestFullscreen({ navigationUI: 'hide' });
                 else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
                 else if (el.msRequestFullscreen) el.msRequestFullscreen();
-                else { document.body.classList.add('is-fullscreen'); toast('Modo imersivo ativado (iOS).', 'info'); return; }
+                else { document.body.classList.add('is-fullscreen'); toast('Modo imersivo (iOS).', 'info'); return; }
                 document.body.classList.add('is-fullscreen'); SoundFX.click();
             } catch (e) { document.body.classList.add('is-fullscreen'); }
         }
@@ -3947,9 +3793,20 @@
         document.getElementById('btn-fullscreen-game').addEventListener('click', alternarTelaCheia);
         document.getElementById('fs-exit').addEventListener('click', () => { SoundFX.click(); sairTelaCheia(); });
 
-        // ============================================================
+        // MODO FOCO
+        document.getElementById('btn-foco').addEventListener('click', () => {
+            SoundFX.click();
+            const ativo = document.documentElement.getAttribute('data-foco') === 'on';
+            aplicarFoco(!ativo);
+            toast(!ativo ? '🎯 Modo Foco ativado' : '🎯 Modo Foco desativado', 'info');
+        });
+        document.getElementById('btn-sair-foco').addEventListener('click', () => {
+            SoundFX.click();
+            aplicarFoco(false);
+            toast('🎯 Modo Foco desativado', 'info');
+        });
+
         // SOM / MÚSICA
-        // ============================================================
         const btnSom = document.getElementById('btn-som');
         const somPreferido = localStorage.getItem('brain_damas_som');
         if (somPreferido === 'off') { SoundFX.toggle(); btnSom.textContent = '🔇'; }
@@ -3967,69 +3824,44 @@
             btnMusica.textContent = tocando ? '🎵' : '🔇';
             btnMusica.style.color = tocando ? 'var(--c-green)' : '';
             localStorage.setItem('brain_damas_musica', tocando ? 'on' : 'off');
-            toast(tocando ? '🎵 Música ligada' : '🔇 Música desligada', 'info');
+            toast(tocando ? '🎵 Música ON' : '🔇 Música OFF', 'info');
         });
 
-        // ============================================================
         // A11Y
-        // ============================================================
-        document.getElementById('btn-a11y').addEventListener('click', () => {
+        document.getElementById('btn-a11y').addEventListener('click', () => { SoundFX.click(); aplicarA11y(!modoA11y); });
+        document.getElementById('btn-a11y-config').addEventListener('click', () => { SoundFX.click(); aplicarA11y(!modoA11y); });
+
+        // ECRÃ LIMPO
+        document.getElementById('btn-ecra-limpo-toggle').addEventListener('click', () => {
             SoundFX.click();
-            aplicarA11y(!modoA11y);
-        });
-        document.getElementById('btn-a11y-config').addEventListener('click', () => {
-            SoundFX.click();
-            aplicarA11y(!modoA11y);
+            aplicarEcraLimpo(!modoEcraLimpo);
         });
 
-        // ============================================================
         // APELIDO
-        // ============================================================
-        document.getElementById('btn-apelido').addEventListener('click', () => {
-            SoundFX.click();
-            abrirPromptApelido({ primeiraVez: false, atual: apelido });
-        });
-        // Handler global para o botão confirmar apelido
-        // (também está no fluxo de primeira vez; aqui trata o caso de mudança)
+        document.getElementById('btn-apelido').addEventListener('click', () => { SoundFX.click(); abrirPromptApelido({ primeiraVez: false, atual: apelido }); });
         document.addEventListener('click', (e) => {
-            if (e.target && e.target.id === 'btn-confirmar-apelido') {
-                // Se estiver no fluxo de primeira vez, o handler é sobrescrito
-                // Este handler só é chamado depois
-                if (apelido) {
-                    const inp = document.getElementById('apelido-input');
-                    const val = (inp.value || '').trim().slice(0, 20);
-                    if (val) {
-                        apelido = val;
-                        localStorage.setItem('brain_damas_apelido', apelido);
-                        document.getElementById('apelido-overlay').classList.remove('active');
-                        atualizarApelidoUI();
-                        if (jogadorSessao) jogadorSessao.nome = apelido;
-                        toast(`✏️ Apelido alterado para ${apelido}`, 'success');
-                    }
+            if (e.target && e.target.id === 'btn-confirmar-apelido' && apelido) {
+                const inp = document.getElementById('apelido-input');
+                const val = (inp.value || '').trim().slice(0, 20);
+                if (val) {
+                    apelido = val;
+                    localStorage.setItem('brain_damas_apelido', apelido);
+                    document.getElementById('apelido-overlay').classList.remove('active');
+                    atualizarApelidoUI();
+                    if (jogadorSessao) jogadorSessao.nome = apelido;
+                    toast(`✏️ Apelido: ${apelido}`, 'success');
                 }
             }
         });
 
-        // ============================================================
         // PRIVACIDADE
-        // ============================================================
-        document.getElementById('btn-ver-privacidade').addEventListener('click', () => {
-            SoundFX.click();
-            document.getElementById('privacidade-overlay').classList.add('active');
-        });
-        document.getElementById('btn-fechar-privacidade').addEventListener('click', () => {
-            SoundFX.click();
-            document.getElementById('privacidade-overlay').classList.remove('active');
-        });
+        document.getElementById('btn-ver-privacidade').addEventListener('click', () => { SoundFX.click(); document.getElementById('privacidade-overlay').classList.add('active'); });
+        document.getElementById('btn-fechar-privacidade').addEventListener('click', () => { SoundFX.click(); document.getElementById('privacidade-overlay').classList.remove('active'); });
 
-        // ============================================================
         // TEMA / SFX
-        // ============================================================
         function atualizarSeletorTema() {
             const atual = document.documentElement.getAttribute('data-theme') || 'dark';
-            document.querySelectorAll('#theme-selector .theme-opt').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.theme === atual);
-            });
+            document.querySelectorAll('#theme-selector .theme-opt').forEach(btn => { btn.classList.toggle('active', btn.dataset.theme === atual); });
         }
         document.querySelectorAll('#theme-selector .theme-opt').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -4041,9 +3873,7 @@
             });
         });
         function atualizarSeletorSfx() {
-            document.querySelectorAll('#sfx-selector .theme-opt').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.sfx === sfxPack);
-            });
+            document.querySelectorAll('#sfx-selector .theme-opt').forEach(btn => { btn.classList.toggle('active', btn.dataset.sfx === sfxPack); });
         }
         document.querySelectorAll('#sfx-selector .theme-opt').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -4055,28 +3885,7 @@
             });
         });
 
-        // ============================================================
-        // NOTAÇÃO — COPIAR
-        // ============================================================
-        document.getElementById('btn-copiar-notacao').addEventListener('click', async () => {
-            const txt = exportarNotacao();
-            if (!txt) { toast('Sem lances para copiar.', 'warn'); return; }
-            try {
-                await navigator.clipboard.writeText(txt);
-                toast('📋 Notação copiada!', 'success');
-            } catch (e) {
-                const ta = document.createElement('textarea');
-                ta.value = txt;
-                document.body.appendChild(ta); ta.select();
-                try { document.execCommand('copy'); toast('📋 Notação copiada!', 'success'); }
-                catch (_) { toast('Erro ao copiar.', 'error'); }
-                ta.remove();
-            }
-        });
-
-        // ============================================================
         // NAVEGAÇÃO
-        // ============================================================
         function irParaInicio() {
             SoundFX.click();
             if (firebaseDisponivel && idSalaAtual && jogadorSessao?.chave && !modoEspectador && !modoIA && !modoHotSeat) {
@@ -4090,59 +3899,33 @@
             SoundFX.click();
             if (!idSalaAtual && !modoIA && !modoHotSeat && !modoEspectador) return;
             if (modoEspectador) {
-                abrirModal({
-                    icon: '👁️', title: 'Parar de assistir?',
-                    message: 'Você vai voltar ao menu principal.',
-                    actions: [
-                        { label: 'Continuar assistindo', onClick: () => {}, className: 'btn-secundario' },
-                        { label: 'Sair', onClick: irParaInicio }
-                    ]
-                });
+                abrirModal({ icon: '👁️', title: 'Parar de assistir?', message: 'Vai voltar ao menu principal.',
+                    actions: [{ label: 'Continuar', onClick: () => {}, className: 'btn-secundario' }, { label: 'Sair', onClick: irParaInicio }] });
                 return;
             }
             if (!jogoEncerrado && (modoIA || modoHotSeat || idSalaAtual)) {
                 let msg = 'Você vai perder o progresso da partida atual.';
                 if (modoTorneio > 0) msg = '⚠️ Você está num torneio! Vai perder TODO o progresso.';
-                abrirModal({
-                    icon: '⚠️', title: 'Sair da partida?',
-                    message: msg,
-                    actions: [
-                        { label: 'Continuar', onClick: () => {}, className: 'btn-secundario' },
-                        { label: 'Sair', onClick: irParaInicio }
-                    ]
-                });
+                abrirModal({ icon: '⚠️', title: 'Sair da partida?', message: msg,
+                    actions: [{ label: 'Continuar', onClick: () => {}, className: 'btn-secundario' }, { label: 'Sair', onClick: irParaInicio }] });
                 return;
             }
             if (jogoEncerrado) {
-                abrirModal({
-                    icon: '🏠', title: 'Voltar ao início?',
-                    message: 'A partida já terminou.',
-                    actions: [
-                        { label: 'Cancelar', onClick: () => {}, className: 'btn-secundario' },
-                        { label: 'Início', onClick: irParaInicio }
-                    ]
-                });
+                abrirModal({ icon: '🏠', title: 'Voltar?', message: 'A partida já terminou.',
+                    actions: [{ label: 'Cancelar', onClick: () => {}, className: 'btn-secundario' }, { label: 'Início', onClick: irParaInicio }] });
                 return;
             }
             irParaInicio();
         });
 
-        // ============================================================
         // FECHAR JOGO
-        // ============================================================
         document.getElementById('btn-fechar').addEventListener('click', () => {
             SoundFX.click();
             const temPartidaEmCurso = (!jogoEncerrado && (modoIA || modoHotSeat || idSalaAtual));
             let msg = 'A sessão será encerrada. As tuas conquistas e histórico ficam guardados.\n\n🔒 Nada é enviado para servidores.';
             if (temPartidaEmCurso) msg = '⚠️ Há uma partida em curso. Vais perdê-la!\n\nAs conquistas e histórico ficam guardados.';
-            abrirModal({
-                icon: '✖️', title: 'Fechar o Jogo?',
-                message: msg,
-                actions: [
-                    { label: 'Cancelar', onClick: () => {}, className: 'btn-secundario' },
-                    { label: 'Sim, fechar', onClick: () => executarFecharJogo() }
-                ]
-            });
+            abrirModal({ icon: '✖️', title: 'Fechar o Jogo?', message: msg,
+                actions: [{ label: 'Cancelar', onClick: () => {}, className: 'btn-secundario' }, { label: 'Sim, fechar', onClick: () => executarFecharJogo() }] });
         });
 
         function executarFecharJogo() {
@@ -4151,8 +3934,7 @@
                     fns.update(fns.ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), { online: false }).catch(() => {});
                 }
             } catch (_) {}
-            limparSessao();
-            pararTimer(); pararRelogio();
+            limparSessao(); pararTimer(); pararRelogio();
             try { window.close(); } catch (_) {}
             setTimeout(() => {
                 document.getElementById('lobby-screen').classList.add('hidden');
@@ -4161,14 +3943,9 @@
             }, 200);
         }
 
-        document.getElementById('btn-reabrir').addEventListener('click', () => {
-            SoundFX.click();
-            window.location.reload();
-        });
+        document.getElementById('btn-reabrir').addEventListener('click', () => { SoundFX.click(); window.location.reload(); });
 
-        // ============================================================
         // BOTÕES FINAIS
-        // ============================================================
         document.getElementById('btn-desistir').addEventListener('click', confirmarDesistencia);
         document.getElementById('btn-pausa').addEventListener('click', togglePausa);
         document.getElementById('btn-empate').addEventListener('click', pedirEmpate);
@@ -4185,7 +3962,7 @@
             SoundFX.click();
             if (!idSalaAtual || modoIA || modoHotSeat) return;
             const link = `${window.location.origin}${window.location.pathname}?sala=${encodeURIComponent(idSalaAtual)}`;
-            const msg = encodeURIComponent(`♟️ *Convite para Damas*\n\nDesafiado por *${apelido}*!\n\n🔒 Sala efémera (30 min). Nada fica guardado.\n\n👉 ${link}`);
+            const msg = encodeURIComponent(`♟️ *Convite para Damas*\n\nDesafiado por *${apelido}*!\n\n🔒 Sala efémera (30 min).\n\n👉 ${link}`);
             window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
         });
         document.getElementById('btn-whatsapp-assistir').addEventListener('click', () => {
@@ -4198,8 +3975,7 @@
         document.getElementById('btn-limpar-historico').addEventListener('click', () => {
             SoundFX.click();
             abrirModal({
-                icon: '🗑️', title: 'Limpar histórico?',
-                message: 'Isso apaga todas as partidas gravadas no teu aparelho.',
+                icon: '🗑️', title: 'Limpar histórico?', message: 'Apaga todas as partidas gravadas no teu aparelho.',
                 actions: [
                     { label: 'Cancelar', onClick: () => {}, className: 'btn-secundario' },
                     { label: 'Limpar', onClick: () => {
@@ -4221,9 +3997,7 @@
             document.getElementById('replay-overlay').classList.remove('active');
         });
 
-        // ============================================================
         // NAVEGAÇÃO POR TECLADO
-        // ============================================================
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 document.getElementById('modal-overlay').classList.remove('active');
