@@ -206,10 +206,21 @@
         }
         #turno-status { color: var(--c-amber); }
 
+        /* === PLACAR === */
+        .placar-bar {
+            display: flex; justify-content: space-around; align-items: center;
+            background: var(--input-bg); border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); padding: 6px 10px; margin-bottom: 10px;
+            font-size: 12px; font-weight: 700;
+        }
+        .placar-item { display: flex; align-items: center; gap: 6px; }
+        .placar-emoji { font-size: 14px; }
+        .placar-num { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--c-amber); }
+
         .board-wrapper {
             position: relative;
             width: 100%;
-            max-width: min(100%, calc(100dvh - 280px));
+            max-width: min(100%, calc(100dvh - 300px));
             aspect-ratio: 1 / 1;
             padding: 22px;
             background: linear-gradient(145deg, var(--board-frame-1) 0%, var(--board-frame-2) 100%);
@@ -217,7 +228,7 @@
             margin: 0 auto 12px; user-select: none;
         }
 
-        /* === REGRAS / COORDENADAS DO TABULEIRO === */
+        /* === REGRAS / COORDENADAS === */
         .board-ruler {
             position: absolute; font-family: 'JetBrains Mono', monospace;
             font-size: 11px; font-weight: 700; color: var(--board-coord);
@@ -270,6 +281,7 @@
         button { border: none; color: #fff; background: linear-gradient(135deg, var(--btn-primary), var(--btn-accent)); }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-whatsapp { background: linear-gradient(135deg, #16a34a, #22c55e); display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; }
+        .btn-secundario { background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); }
 
         .hidden { display: none !important; }
 
@@ -287,7 +299,55 @@
         .toast.success { border-left-color: var(--c-green); }
         .toast.error { border-left-color: var(--c-red); }
 
-        /* === RESPONSIVO: OCUPAÇÃO MÁXIMA NO CELULAR === */
+        /* === CHAT RÁPIDO === */
+        .chat-bar {
+            display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+            margin: 8px 0; padding: 8px; background: var(--input-bg);
+            border: 1px solid var(--border-color); border-radius: var(--radius-md);
+        }
+        .emoji-btn {
+            width: auto; padding: 6px 10px; font-size: 18px; line-height: 1;
+            background: transparent !important; border: 1px solid var(--border-color) !important;
+            border-radius: 10px; cursor: pointer; transition: transform 0.12s, background 0.12s;
+        }
+        .emoji-btn:hover { transform: scale(1.15); background: var(--card-bg) !important; }
+
+        /* Balões flutuantes sobre o tabuleiro */
+        .bubble-layer {
+            position: absolute; inset: 0; pointer-events: none; z-index: 10;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            padding-top: 8px; gap: 6px;
+        }
+        .bubble {
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid var(--border-strong);
+            color: #fff; font-size: 26px; line-height: 1;
+            padding: 8px 14px; border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
+            animation: bubbleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1), bubbleOut 0.4s 2.1s forwards;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .bubble .bubble-nome {
+            font-size: 11px; font-weight: 700; color: var(--c-blue);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        @keyframes bubbleIn {
+            from { opacity: 0; transform: translateY(-14px) scale(0.85); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes bubbleOut {
+            to { opacity: 0; transform: translateY(-14px) scale(0.9); }
+        }
+
+        /* Modo espectador */
+        .espectador-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff; font-size: 10.5px; font-weight: 800;
+            padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px;
+        }
+
+        /* === RESPONSIVO === */
         @media (max-width: 600px) {
             body { padding: 6px; align-items: flex-start; }
             .container { padding: 12px; max-width: 100vw; border-radius: 16px; }
@@ -300,6 +360,9 @@
             .match-info-bar { padding: 6px 10px; font-size: 11.5px; margin-bottom: 8px; }
             .instructions { font-size: 11.5px; margin: 4px 0 8px; }
             .piece.king::after { font-size: 14px; }
+            .chat-bar { padding: 6px; gap: 4px; }
+            .emoji-btn { font-size: 16px; padding: 5px 8px; }
+            .bubble { font-size: 22px; padding: 6px 12px; }
         }
 
         @media (max-width: 380px) {
@@ -313,7 +376,7 @@
             body { padding: 4px; }
             .container { padding: 8px; max-width: 100vw; }
             .board-wrapper { max-width: min(100%, calc(100dvh - 120px)); }
-            .user-header, .match-info-bar { display: none; }
+            .user-header, .match-info-bar, .placar-bar { display: none; }
         }
     </style>
 </head>
@@ -324,8 +387,9 @@
     <div class="container" id="main-container">
         <div class="top-bar">
             <button id="btn-sair" class="btn-small" type="button">🚪 Sair</button>
-            <div style="display:flex; gap:6px;">
+            <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
                 <button id="btn-google" class="btn-small" type="button">🌐 Google</button>
+                <button id="btn-musica" class="btn-small" type="button" title="Música de fundo">🎵</button>
                 <button id="btn-som" class="btn-small" type="button" title="Ativar/Desativar som">🔊</button>
                 <button id="btn-fullscreen" class="btn-small" type="button">⛶</button>
                 <button id="theme-toggle" class="btn-small" type="button">🌙</button>
@@ -347,11 +411,28 @@
                 <button id="btn-criar-sala" type="button" disabled>🚀 Criar Sala de Damas</button>
             </div>
 
-            <div class="lobby-box" style="margin-bottom: 0;">
+            <div class="lobby-box">
                 <h3>🔗 Entrar com Código</h3>
                 <div style="display: flex; gap: 6px;">
                     <input type="text" id="input-codigo-sala" placeholder="Ex: DAMAS-7812" style="font-family: monospace;">
                     <button id="btn-entrar-sala" type="button" style="width: 120px;" disabled>Entrar</button>
+                </div>
+                <button id="btn-assistir-sala" type="button" class="btn-secundario" style="margin-top:8px; font-size:12.5px;">👁️ Assistir (espectador)</button>
+            </div>
+
+            <div class="lobby-box" style="margin-bottom: 0;">
+                <h3>📈 Placar da Sessão</h3>
+                <div class="placar-bar" style="margin:0;">
+                    <div class="placar-item">
+                        <span class="placar-emoji">🏆</span>
+                        <span>Você:</span>
+                        <span class="placar-num" id="placar-vitorias">0</span>
+                    </div>
+                    <div class="placar-item">
+                        <span class="placar-emoji">💔</span>
+                        <span>Derrotas:</span>
+                        <span class="placar-num" id="placar-derrotas">0</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -363,12 +444,13 @@
                     <span id="display-avatar" class="user-avatar-display">😀</span>
                     <strong id="display-nome"></strong>
                     <span id="oponente-status" class="status-dot"></span>
+                    <span id="badge-espectador" class="espectador-badge hidden">👁️ ASSISTINDO</span>
                 </div>
                 <span id="display-sala-tag" style="font-size: 11px; color: var(--c-blue);">Sala</span>
             </div>
 
             <div class="match-info-bar">
-                <span>Sua Peça: <strong id="info-minha-cor" style="color: var(--c-blue);">--</strong></span>
+                <span id="info-minha-cor-wrap">Sua Peça: <strong id="info-minha-cor" style="color: var(--c-blue);">--</strong></span>
                 <span id="turno-status">Aguardando...</span>
                 <div style="display:flex; gap:6px;">
                     <button id="btn-desistir" class="btn-small" type="button" style="padding: 4px 10px; font-size: 11px;">🏳️ Desistir</button>
@@ -376,14 +458,43 @@
                 </div>
             </div>
 
+            <!-- Placar em jogo -->
+            <div class="placar-bar">
+                <div class="placar-item">
+                    <span class="placar-emoji">🏆</span>
+                    <span id="placar-nome-eu">Você</span>
+                    <span class="placar-num" id="placar-vitorias-jogo">0</span>
+                </div>
+                <div class="placar-item">
+                    <span class="placar-emoji">⚔️</span>
+                    <span id="placar-nome-op">Oponente</span>
+                    <span class="placar-num" id="placar-vitorias-op">0</span>
+                </div>
+            </div>
+
             <p class="instructions" id="info-instrucao">Toque em sua peça e depois na casa de destino válida.</p>
 
             <div class="board-wrapper">
+                <div class="bubble-layer" id="bubble-layer"></div>
                 <div class="board-ruler board-ruler-top" id="labels-top"></div>
                 <div class="board-ruler board-ruler-bottom" id="labels-bottom"></div>
                 <div class="board-ruler board-ruler-left" id="labels-left"></div>
                 <div class="board-ruler board-ruler-right" id="labels-right"></div>
                 <div class="checkers-grid" id="checkers-board"></div>
+            </div>
+
+            <!-- Chat rápido -->
+            <div id="chat-bar" class="chat-bar">
+                <button class="emoji-btn" data-emoji="👍" type="button" title="Boa!">👍</button>
+                <button class="emoji-btn" data-emoji="😄" type="button" title="Boa jogada!">😄</button>
+                <button class="emoji-btn" data-emoji="🔥" type="button" title="Boa!">🔥</button>
+                <button class="emoji-btn" data-emoji="😅" type="button" title="Ufa!">😅</button>
+                <button class="emoji-btn" data-emoji="😱" type="button" title="Uau!">😱</button>
+                <button class="emoji-btn" data-emoji="🤔" type="button" title="Pensando...">🤔</button>
+                <button class="emoji-btn" data-emoji="😎" type="button" title="Tranquilo!">😎</button>
+                <button class="emoji-btn" data-emoji="👏" type="button" title="Aplausos!">👏</button>
+                <button class="emoji-btn" data-emoji="😂" type="button" title="Haha!">😂</button>
+                <button class="emoji-btn" data-emoji="💪" type="button" title="Vamos!">💪</button>
             </div>
 
             <!-- Barra pós-jogo -->
@@ -403,6 +514,7 @@
 
             <div id="div-whatsapp" class="hidden">
                 <button id="btn-whatsapp" class="btn-whatsapp" type="button">💬 Convidar Colega pelo WhatsApp</button>
+                <button id="btn-whatsapp-assistir" class="btn-whatsapp" type="button" style="background: linear-gradient(135deg, #d97706, #f59e0b);">👁️ Convidar Espectador</button>
             </div>
         </div>
     </div>
@@ -422,7 +534,7 @@
     <script type="module">
         import { db, auth } from "./firebase-config.js";
         import {
-            ref, get, set, update, onValue, runTransaction, onDisconnect, serverTimestamp
+            ref, get, set, update, onValue, runTransaction, onDisconnect, serverTimestamp, push, remove, off
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import {
             signInAnonymously,
@@ -431,6 +543,9 @@
             signInWithPopup
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+        // ============================================================
+        // ================ ESTADO GLOBAL =============================
+        // ============================================================
         let jogadorSessao = null;
         let idSalaAtual = null;
         let minhaCor = null;
@@ -440,18 +555,31 @@
         let turnoAtual = 'white';
         let jogoEncerrado = false;
         let unsubscribeFirebase = null;
+        let unsubscribeChat = null;
         let oponenteConectado = false;
         let capturaMultiplaEmAndamento = false;
         let salaConfirmada = false;
 
-        // Estados pós-jogo
+        // Pós-jogo / revanche
         let vencedorDeclarado = null;
         let pedidoRevancheDe = null;
         let revancheAceita = false;
         let desistenciaProcessada = false;
 
+        // Espectador
+        let modoEspectador = false;
+
+        // Placar local (sessão)
+        let placarSessao = { vitorias: 0, derrotas: 0 };
+
+        // Nomes dos jogadores
+        let nomeOponente = 'Oponente';
+
+        // Último timestamp de mensagem do chat processada
+        let ultimoChatTs = 0;
+
         // ============================================================
-        // ============== SISTEMA DE SOM (Web Audio API) ==============
+        // ================ SISTEMA DE SOM ============================
         // ============================================================
         const SoundFX = (() => {
             let ctx = null;
@@ -485,6 +613,7 @@
 
             return {
                 get ativo() { return ativo; },
+                get ctxAtivo() { return !!ctx; },
                 toggle() { ativo = !ativo; if (ativo) { init(); this.click(); } return ativo; },
                 click() { beep({ freq: 600, type: 'triangle', duration: 0.05, gain: 0.06 }); },
                 select() { beep({ freq: 880, type: 'sine', duration: 0.08, gain: 0.08 }); },
@@ -502,23 +631,123 @@
                     beep({ freq: 784, type: 'sine', duration: 0.16, gain: 0.12, delay: 0.20 });
                 },
                 win() {
-                    const notas = [523, 659, 784, 1046];
-                    notas.forEach((f, i) => beep({ freq: f, type: 'sine', duration: 0.18, gain: 0.12, delay: i * 0.13 }));
+                    [523, 659, 784, 1046].forEach((f, i) => beep({ freq: f, type: 'sine', duration: 0.18, gain: 0.12, delay: i * 0.13 }));
                 },
                 lose() {
-                    const notas = [440, 392, 330, 262];
-                    notas.forEach((f, i) => beep({ freq: f, type: 'triangle', duration: 0.20, gain: 0.11, delay: i * 0.15 }));
+                    [440, 392, 330, 262].forEach((f, i) => beep({ freq: f, type: 'triangle', duration: 0.20, gain: 0.11, delay: i * 0.15 }));
                 },
                 notify() {
                     beep({ freq: 740, type: 'sine', duration: 0.09, gain: 0.09 });
                     beep({ freq: 880, type: 'sine', duration: 0.11, gain: 0.09, delay: 0.09 });
                 },
-                error() {
-                    beep({ freq: 200, type: 'square', duration: 0.16, gain: 0.10 });
+                error() { beep({ freq: 200, type: 'square', duration: 0.16, gain: 0.10 }); },
+                chat() {
+                    beep({ freq: 980, type: 'sine', duration: 0.06, gain: 0.07 });
+                    beep({ freq: 1240, type: 'sine', duration: 0.09, gain: 0.07, delay: 0.06 });
                 }
             };
         })();
 
+        // ============================================================
+        // ================ MÚSICA DE FUNDO ===========================
+        // ============================================================
+        const MusicaFundo = (() => {
+            let ctx = null;
+            let masterGain = null;
+            let timerId = null;
+            let tocando = false;
+            let ativa = false;
+
+            // Progressão de acordes (Am - F - C - G)
+            const acordes = [
+                [220.00, 261.63, 329.63], // Am
+                [174.61, 220.00, 261.63], // F
+                [130.81, 164.81, 196.00], // C (baixo)
+                [196.00, 246.94, 293.66]  // G
+            ];
+            let acordeIdx = 0;
+
+            function init() {
+                if (!ctx) {
+                    try {
+                        ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        masterGain = ctx.createGain();
+                        masterGain.gain.value = 0.045; // bem baixinho
+                        masterGain.connect(ctx.destination);
+                    } catch (e) { return false; }
+                }
+                if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+                return true;
+            }
+
+            function tocaAcorde(freqs, duracao = 3.2) {
+                if (!ctx || !masterGain) return;
+                const now = ctx.currentTime;
+                freqs.forEach((f, i) => {
+                    const osc = ctx.createOscillator();
+                    const g = ctx.createGain();
+                    osc.type = i === 0 ? 'triangle' : 'sine';
+                    osc.frequency.value = f;
+                    g.gain.setValueAtTime(0.0001, now);
+                    g.gain.exponentialRampToValueAtTime(0.14, now + 0.6);
+                    g.gain.exponentialRampToValueAtTime(0.0001, now + duracao);
+                    osc.connect(g); g.connect(masterGain);
+                    osc.start(now); osc.stop(now + duracao + 0.1);
+                });
+            }
+
+            function tocaNotaMelodia() {
+                if (!ctx || !masterGain) return;
+                const escala = [523.25, 587.33, 659.25, 783.99, 880.00]; // C D E G A
+                const f = escala[Math.floor(Math.random() * escala.length)];
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = f;
+                g.gain.setValueAtTime(0.0001, now);
+                g.gain.exponentialRampToValueAtTime(0.08, now + 0.15);
+                g.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
+                osc.connect(g); g.connect(masterGain);
+                osc.start(now); osc.stop(now + 1.5);
+            }
+
+            function loop() {
+                if (!tocando) return;
+                const ac = acordes[acordeIdx % acordes.length];
+                tocaAcorde(ac, 3.2);
+                // Nota de melodia aleatória no meio do acorde
+                setTimeout(() => { if (tocando) tocaNotaMelodia(); }, 1400);
+                acordeIdx++;
+                timerId = setTimeout(loop, 3000);
+            }
+
+            return {
+                get tocando() { return tocando; },
+                get ativa() { return ativa; },
+                toggle() {
+                    ativa = !ativa;
+                    if (ativa) this.start();
+                    else this.stop();
+                    return ativa;
+                },
+                start() {
+                    if (tocando) return;
+                    if (!init()) { ativa = false; return; }
+                    tocando = true;
+                    acordeIdx = 0;
+                    loop();
+                },
+                stop() {
+                    tocando = false;
+                    if (timerId) { clearTimeout(timerId); timerId = null; }
+                }
+            };
+        })();
+
+        // ============================================================
+        // ================ UTILITÁRIOS ===============================
+        // ============================================================
         function toast(mensagem, tipo = 'info') {
             const container = document.getElementById('toast-container');
             const el = document.createElement('div');
@@ -576,10 +805,52 @@
             localStorage.removeItem('brain_damas_sessao');
             const url = new URL(window.location.href);
             url.searchParams.delete('sala');
+            url.searchParams.delete('modo');
             window.history.replaceState({}, '', url.pathname);
         }
 
-        // --- AUTENTICAÇÃO INSTANTÂNEA ---
+        // ============================================================
+        // ================ PLACAR ====================================
+        // ============================================================
+        function carregarPlacarLocal() {
+            try {
+                const raw = JSON.parse(localStorage.getItem('brain_damas_placar') || '{}');
+                placarSessao = { vitorias: raw.vitorias || 0, derrotas: raw.derrotas || 0 };
+            } catch (_) {
+                placarSessao = { vitorias: 0, derrotas: 0 };
+            }
+            atualizarPlacarUI();
+        }
+
+        function salvarPlacarLocal() {
+            localStorage.setItem('brain_damas_placar', JSON.stringify(placarSessao));
+        }
+
+        function atualizarPlacarUI() {
+            const v = document.getElementById('placar-vitorias');
+            const d = document.getElementById('placar-derrotas');
+            if (v) v.textContent = placarSessao.vitorias;
+            if (d) d.textContent = placarSessao.derrotas;
+            const vj = document.getElementById('placar-vitorias-jogo');
+            const vop = document.getElementById('placar-vitorias-op');
+            if (vj) vj.textContent = placarSessao.vitorias;
+            if (vop) vop.textContent = placarSessao.derrotas; // derrotas locais == vitórias do oponente nesta sessão
+        }
+
+        function registrarVitoria() {
+            placarSessao.vitorias++;
+            salvarPlacarLocal();
+            atualizarPlacarUI();
+        }
+        function registrarDerrota() {
+            placarSessao.derrotas++;
+            salvarPlacarLocal();
+            atualizarPlacarUI();
+        }
+
+        // ============================================================
+        // ================ AUTENTICAÇÃO ==============================
+        // ============================================================
         async function garantirAutenticacao() {
             if (auth.currentUser) return auth.currentUser.uid;
             try {
@@ -590,16 +861,23 @@
             }
         }
 
-        // --- ENTRADA AUTOMÁTICA VIA LINK ---
+        // ============================================================
+        // ============ ENTRADA VIA LINK (jogador ou espectador) ======
+        // ============================================================
         async function processarEntradaViaLink() {
             const params = new URLSearchParams(window.location.search);
             const codigoSala = params.get('sala');
+            const modo = params.get('modo');
             if (!codigoSala) return false;
 
-            toast('⏳ A entrar automaticamente na sala...', 'info');
+            const querEspectador = (modo === 'assistir' || modo === 'assistir');
+            modoEspectador = querEspectador;
+
+            toast(querEspectador ? '👁️ Entrando como espectador...' : '⏳ A entrar automaticamente na sala...', 'info');
+
             const uid = await garantirAutenticacao();
             const nomeUser = auth.currentUser?.displayName || ('Jogador ' + Math.floor(Math.random() * 9000 + 1000));
-            jogadorSessao = { chave: uid, nome: nomeUser, avatar: '😀', isAnonimo: true };
+            jogadorSessao = { chave: uid, nome: nomeUser, avatar: querEspectador ? '👁️' : '😀', isAnonimo: true };
 
             let dados = null;
             for (let i = 1; i <= 15; i++) {
@@ -620,7 +898,8 @@
             }
 
             const jogadores = dados.jogadores || {};
-            if (jogadores[uid]) {
+            if (jogadores[uid] && !querEspectador) {
+                // Reconectar como jogador
                 idSalaAtual = codigoSala;
                 minhaCor = jogadores[uid].cor;
                 tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
@@ -631,19 +910,45 @@
                 salvarSessao();
                 entrarInterfaceJogo();
                 escutarFirebase();
+                escutarChat();
                 toast('✅ Reconectado com sucesso!', 'success');
+                return true;
+            }
+
+            if (querEspectador) {
+                // Entra como espectador (não ocupa vaga)
+                idSalaAtual = codigoSala;
+                minhaCor = null;
+                modoEspectador = true;
+                tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
+                turnoAtual = dados.turno || 'white';
+                jogoEncerrado = dados.status === 'encerrado';
+                vencedorDeclarado = dados.vencedor || null;
+                salaConfirmada = true;
+                entrarInterfaceJogo();
+                escutarFirebase();
+                escutarChat();
+                toast('👁️ Você está assistindo à partida.', 'info');
                 return true;
             }
 
             if (Object.keys(jogadores).length >= 2) {
                 abrirModal({
                     icon: '👥', title: 'Sala Cheia',
-                    message: 'Esta sala já tem dois jogadores a participar.',
-                    actions: [{ label: 'Voltar ao Início', onClick: () => { limparSessao(); window.location.href = window.location.pathname; } }]
+                    message: 'Esta sala já tem dois jogadores. Deseja assistir à partida?',
+                    actions: [
+                        { label: '👁️ Assistir', onClick: () => {
+                            const url = new URL(window.location.href);
+                            url.searchParams.set('modo', 'assistir');
+                            window.location.href = url.toString();
+                        } },
+                        { label: 'Voltar', onClick: () => { limparSessao(); window.location.href = window.location.pathname; } }
+                    ]
                 });
                 return true;
             }
 
+            // Entra como jogador
             const coresExistentes = Object.values(jogadores).map(j => j.cor);
             const corEscolhida = coresExistentes.includes('white') ? 'red' : 'white';
 
@@ -661,6 +966,7 @@
                 salvarSessao();
                 entrarInterfaceJogo();
                 escutarFirebase();
+                escutarChat();
                 toast(`🎉 Entrou na partida como ${minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas'}!`, 'success');
                 return true;
             } catch (e) {
@@ -669,8 +975,12 @@
             }
         }
 
-        // Inicialização Principal
+        // ============================================================
+        // ================ INICIALIZAÇÃO =============================
+        // ============================================================
         (async function() {
+            carregarPlacarLocal();
+
             const entrouPeloLink = await processarEntradaViaLink();
             if (entrouPeloLink) return;
 
@@ -686,12 +996,15 @@
             document.getElementById('btn-entrar-sala').disabled = false;
         })();
 
-        // === CRIAR SALA ===
+        // ============================================================
+        // ================ CRIAR / ENTRAR SALA =======================
+        // ============================================================
         document.getElementById('btn-criar-sala').addEventListener('click', async () => {
             SoundFX.click();
             try {
                 idSalaAtual = 'DAMAS-' + Date.now().toString(36).toUpperCase();
                 minhaCor = 'white';
+                modoEspectador = false;
                 tabuleiro = criarTabuleiroInicial();
                 turnoAtual = 'white';
                 jogoEncerrado = false;
@@ -704,7 +1017,7 @@
                     criador: jogadorSessao.chave,
                     criadaEm: serverTimestamp(),
                     jogadores: {
-                        [jogadorSessao.chave]: { nome: jogadorSessao.nome, cor: 'white', online: true }
+                        [jogadorSessao.chave]: { nome: jogadorSessao.nome, cor: 'white', online: true, vitorias: 0 }
                     }
                 });
 
@@ -713,13 +1026,13 @@
                 entrarInterfaceJogo();
                 document.getElementById('div-whatsapp').classList.remove('hidden');
                 escutarFirebase();
+                escutarChat();
                 toast('Sala criada com sucesso!', 'success');
             } catch (e) {
                 toast('Erro ao criar sala.', 'error');
             }
         });
 
-        // === ENTRAR POR CÓDIGO ===
         document.getElementById('btn-entrar-sala').addEventListener('click', async () => {
             const codigo = document.getElementById('input-codigo-sala').value.trim().toUpperCase();
             if (!codigo) { toast('Digite o código da sala.', 'warn'); SoundFX.error(); return; }
@@ -727,23 +1040,48 @@
             window.location.href = `${window.location.pathname}?sala=${codigo}`;
         });
 
+        document.getElementById('btn-assistir-sala').addEventListener('click', () => {
+            const codigo = document.getElementById('input-codigo-sala').value.trim().toUpperCase();
+            if (!codigo) { toast('Digite o código da sala.', 'warn'); SoundFX.error(); return; }
+            SoundFX.click();
+            window.location.href = `${window.location.pathname}?sala=${codigo}&modo=assistir`;
+        });
+
+        // ============================================================
+        // ================ ENTRAR INTERFACE ==========================
+        // ============================================================
         function entrarInterfaceJogo() {
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
             document.getElementById('display-sala-tag').textContent = `Sala: ${idSalaAtual}`;
-            document.getElementById('info-minha-cor').textContent = minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
+
+            const badge = document.getElementById('badge-espectador');
+            const desistirBtn = document.getElementById('btn-desistir');
+            const chatBar = document.getElementById('chat-bar');
+
+            if (modoEspectador) {
+                badge.classList.remove('hidden');
+                desistirBtn.classList.add('hidden');
+                document.getElementById('info-minha-cor-wrap').style.display = 'none';
+                document.getElementById('display-avatar').textContent = '👁️';
+                document.getElementById('display-nome').textContent = 'Espectador';
+                document.getElementById('div-whatsapp').classList.remove('hidden');
+                // Esconde botões de ação que exigem ser jogador
+                document.getElementById('div-pos-jogo').classList.add('hidden');
+                // Chat em modo espectador: só visualiza
+                chatBar.style.opacity = '0.5';
+                chatBar.style.pointerEvents = 'none';
+            } else {
+                badge.classList.add('hidden');
+                document.getElementById('info-minha-cor-wrap').style.display = '';
+                document.getElementById('info-minha-cor').textContent = minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
+            }
+
             renderizarTabuleiro();
         }
 
-        document.getElementById('btn-whatsapp').addEventListener('click', () => {
-            SoundFX.click();
-            const link = `${window.location.origin}${window.location.pathname}?sala=${encodeURIComponent(idSalaAtual)}`;
-            const msg = encodeURIComponent(`♟️ *Convite para Damas*\n\nDesafiado(a) por *${jogadorSessao.nome}*!\n\n👉 Clique para entrar direto:\n${link}`);
-            window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
-        });
-
         // ============================================================
-        // =============== RENDERIZAÇÃO DAS REGRAS ====================
+        // ================ RENDERIZAÇÃO DAS REGRAS ===================
         // ============================================================
         function renderizarReguas() {
             const invertido = (minhaCor === 'red');
@@ -806,16 +1144,20 @@
                         square.appendChild(wrapper);
                     }
 
-                    if (isDark) square.addEventListener('click', () => clicarCasa(r, c));
+                    if (isDark && !modoEspectador) square.addEventListener('click', () => clicarCasa(r, c));
                     grid.appendChild(square);
                 }
             }
 
             renderizarReguas();
 
-            document.getElementById('turno-status').textContent = jogoEncerrado ? '🏁 Fim' : (turnoAtual === minhaCor ? 'Sua vez!' : 'Vez do oponente...');
+            const turnoEl = document.getElementById('turno-status');
+            if (turnoEl) {
+                if (jogoEncerrado) turnoEl.textContent = '🏁 Fim';
+                else if (modoEspectador) turnoEl.textContent = turnoAtual === 'white' ? '⚪ Brancas jogam' : '🔴 Vermelhas jogam';
+                else turnoEl.textContent = (turnoAtual === minhaCor ? 'Sua vez!' : 'Vez do oponente...');
+            }
 
-            // Mostra/esconde barra pós-jogo
             if (jogoEncerrado) {
                 document.getElementById('div-pos-jogo')?.classList.remove('hidden');
             } else {
@@ -823,7 +1165,11 @@
             }
         }
 
+        // ============================================================
+        // ================ INTERAÇÃO =================================
+        // ============================================================
         function clicarCasa(r, c) {
+            if (modoEspectador) return;
             if (jogoEncerrado || turnoAtual !== minhaCor) return;
             const peca = tabuleiro[r][c];
 
@@ -921,7 +1267,6 @@
             movimentosValidos = [];
             renderizarTabuleiro();
 
-            // Verifica fim de jogo por peças/movimentos
             const vencedorPorTabuleiro = verificarFimDeJogo();
 
             const payload = {
@@ -936,7 +1281,6 @@
             await update(ref(db, `salas_damas/${idSalaAtual}`), payload);
         }
 
-        // Retorna 'white' | 'red' | null se o jogo terminou por falta de peças/movimentos
         function verificarFimDeJogo() {
             let temWhite = false, temRed = false;
             for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
@@ -966,9 +1310,11 @@
 
             if (euVenci) {
                 SoundFX.win();
+                registrarVitoria();
                 toast('🏆 Você venceu a partida!', 'success');
             } else {
                 SoundFX.lose();
+                registrarDerrota();
                 toast('😢 Você perdeu a partida.', 'error');
             }
 
@@ -1014,11 +1360,11 @@
             }
         }
 
-        function mostrarPedidoRevanche(nomeOponente) {
+        function mostrarPedidoRevanche(nome) {
             const div = document.getElementById('div-revanche-pendente');
             if (!div) return;
             div.classList.remove('hidden');
-            document.getElementById('revanche-msg').textContent = `🔄 ${nomeOponente} quer jogar novamente!`;
+            document.getElementById('revanche-msg').textContent = `🔄 ${nome} quer jogar novamente!`;
             document.getElementById('revanche-actions').style.display = 'flex';
         }
 
@@ -1076,7 +1422,6 @@
             tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
             turnoAtual = dados.turno || 'white';
 
-            // Atualiza minha cor (pode ter sido trocada)
             const jogadores = dados.jogadores || {};
             if (jogadores[jogadorSessao.chave]?.cor) {
                 minhaCor = jogadores[jogadorSessao.chave].cor;
@@ -1091,6 +1436,7 @@
         }
 
         function confirmarDesistencia() {
+            if (modoEspectador) return;
             SoundFX.click();
             abrirModal({
                 icon: '🏳️',
@@ -1119,7 +1465,7 @@
         }
 
         // ============================================================
-        // ============== ESCUTA FIREBASE (com revanche) ==============
+        // ============== ESCUTA FIREBASE (jogo) ======================
         // ============================================================
         function escutarFirebase() {
             if (unsubscribeFirebase) unsubscribeFirebase();
@@ -1134,21 +1480,33 @@
                 jogoEncerrado = dados.status === 'encerrado';
                 vencedorDeclarado = dados.vencedor || null;
 
+                // Nomes dos jogadores
+                const jogadores = dados.jogadores || {};
+                const uids = Object.keys(jogadores);
+                const meuUid = jogadorSessao.chave;
+                const uidOponente = uids.find(u => u !== meuUid);
+                if (uidOponente && jogadores[uidOponente]) {
+                    nomeOponente = jogadores[uidOponente].nome || 'Oponente';
+                    document.getElementById('placar-nome-op').textContent = nomeOponente;
+                    document.getElementById('oponente-status').className = `status-dot ${jogadores[uidOponente].online ? 'online' : 'offline'}`;
+                }
+                document.getElementById('placar-nome-eu').textContent = modoEspectador ? '⚪ Brancas' : 'Você';
+
                 // Detecta desistência
-                if (jogoEncerrado && dados.motivoFim === 'desistencia' && !desistenciaProcessada) {
+                if (jogoEncerrado && dados.motivoFim === 'desistencia' && !desistenciaProcessada && !modoEspectador) {
                     desistenciaProcessada = true;
                     tratarFimDeJogo(vencedorDeclarado, 'desistencia');
                 }
 
                 // Detecta fim por tabuleiro
-                if (jogoEncerrado && dados.motivoFim === 'sem-movimentos' && !desistenciaProcessada) {
+                if (jogoEncerrado && dados.motivoFim === 'sem-movimentos' && !desistenciaProcessada && !modoEspectador) {
                     desistenciaProcessada = true;
                     tratarFimDeJogo(vencedorDeclarado, 'sem-movimentos');
                 }
 
                 // Detecta pedido de revanche
                 const pedido = dados.pedidoRevanche || null;
-                if (pedido && pedido.de !== jogadorSessao.chave) {
+                if (pedido && pedido.de !== jogadorSessao.chave && !modoEspectador) {
                     if (pedidoRevancheDe !== pedido.de) {
                         pedidoRevancheDe = pedido.de;
                         SoundFX.notify();
@@ -1165,17 +1523,16 @@
                 }
 
                 // Atualiza minha cor caso tenha sido trocada
-                const jogadores = dados.jogadores || {};
                 if (jogadores[jogadorSessao.chave]?.cor) {
                     const novaCor = jogadores[jogadorSessao.chave].cor;
-                    if (novaCor !== minhaCor) {
+                    if (novaCor !== minhaCor && !modoEspectador) {
                         minhaCor = novaCor;
                         document.getElementById('info-minha-cor').textContent = minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
                     }
                 }
 
                 // Som quando a vez passa para o jogador
-                if (turnoAnterior !== turnoAtual && turnoAtual === minhaCor && !jogoEncerrado) {
+                if (turnoAnterior !== turnoAtual && turnoAtual === minhaCor && !jogoEncerrado && !modoEspectador) {
                     setTimeout(() => SoundFX.notify(), 150);
                 }
 
@@ -1184,7 +1541,69 @@
         }
 
         // ============================================================
-        // ============== TELA CHEIA ==================================
+        // ================ CHAT RÁPIDO ===============================
+        // ============================================================
+        function escutarChat() {
+            if (unsubscribeChat) unsubscribeChat();
+            const chatRef = ref(db, `salas_damas/${idSalaAtual}/chat`);
+            unsubscribeChat = onValue(chatRef, (snapshot) => {
+                const dados = snapshot.val();
+                if (!dados) return;
+                // Pega as últimas mensagens não processadas
+                const entradas = Object.entries(dados)
+                    .map(([k, v]) => ({ id: k, ...v }))
+                    .filter(m => (m.ts || 0) > ultimoChatTs)
+                    .sort((a, b) => (a.ts || 0) - (b.ts || 0));
+
+                entradas.forEach(msg => {
+                    ultimoChatTs = Math.max(ultimoChatTs, msg.ts || 0);
+                    // Não mostra a própria mensagem (já foi mostrada ao clicar)
+                    if (msg.de !== jogadorSessao.chave) {
+                        mostrarBalao(msg.emoji, msg.nome || 'Oponente');
+                        SoundFX.chat();
+                    }
+                });
+            });
+        }
+
+        function enviarEmoji(emoji) {
+            if (!idSalaAtual) return;
+            SoundFX.click();
+            const nome = modoEspectador ? 'Espectador' : (jogadorSessao?.nome || 'Jogador');
+            const msgRef = push(ref(db, `salas_damas/${idSalaAtual}/chat`));
+            set(msgRef, {
+                emoji,
+                de: jogadorSessao.chave,
+                nome,
+                ts: Date.now()
+            }).catch(() => {});
+            // Mostra localmente
+            mostrarBalao(emoji, modoEspectador ? '👁️ Espectador' : 'Você');
+        }
+
+        function mostrarBalao(emoji, nome) {
+            const layer = document.getElementById('bubble-layer');
+            if (!layer) return;
+            const el = document.createElement('div');
+            el.className = 'bubble';
+            el.innerHTML = `<span class="bubble-nome">${nome}</span><span>${emoji}</span>`;
+            layer.appendChild(el);
+            // Limpa balões antigos se houver muitos
+            const bubbles = layer.querySelectorAll('.bubble');
+            if (bubbles.length > 3) bubbles[0].remove();
+            setTimeout(() => el.remove(), 2600);
+        }
+
+        // Listeners dos botões de emoji
+        document.querySelectorAll('.emoji-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (modoEspectador) return;
+                enviarEmoji(btn.dataset.emoji || '👍');
+            });
+        });
+
+        // ============================================================
+        // ================ TELA CHEIA ================================
         // ============================================================
         function isFullscreen() {
             return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
@@ -1230,7 +1649,7 @@
         document.getElementById('fs-exit').addEventListener('click', () => { SoundFX.click(); sairTelaCheia(); });
 
         // ============================================================
-        // ============== SOM E TEMA ==================================
+        // ================ SOM E MÚSICA ==============================
         // ============================================================
         const btnSom = document.getElementById('btn-som');
         const somPreferido = localStorage.getItem('brain_damas_som');
@@ -1244,6 +1663,25 @@
             localStorage.setItem('brain_damas_som', ativo ? 'on' : 'off');
         });
 
+        const btnMusica = document.getElementById('btn-musica');
+        const musicaPreferida = localStorage.getItem('brain_damas_musica');
+        if (musicaPreferida === 'on') {
+            MusicaFundo.toggle();
+            btnMusica.textContent = '🎵';
+            btnMusica.style.color = 'var(--c-green)';
+        }
+        btnMusica.addEventListener('click', () => {
+            SoundFX.click();
+            const tocando = MusicaFundo.toggle();
+            btnMusica.textContent = tocando ? '🎵' : '🔇';
+            btnMusica.style.color = tocando ? 'var(--c-green)' : '';
+            localStorage.setItem('brain_damas_musica', tocando ? 'on' : 'off');
+            toast(tocando ? '🎵 Música ligada' : '🔇 Música desligada', 'info');
+        });
+
+        // ============================================================
+        // ================ TEMA ======================================
+        // ============================================================
         const themeToggle = document.getElementById('theme-toggle');
         themeToggle.addEventListener('click', () => {
             SoundFX.click();
@@ -1262,21 +1700,21 @@
         }
 
         // ============================================================
-        // ============== SAIR / DESISTIR / REVANCHE ==================
+        // ================ SAIR / DESISTIR / REVANCHE ================
         // ============================================================
         document.getElementById('btn-sair').addEventListener('click', () => {
             SoundFX.click();
             abrirModal({
                 icon: '🚪',
                 title: 'Sair da partida?',
-                message: 'Você pode perder o progresso da partida atual.',
+                message: modoEspectador ? 'Você vai parar de assistir.' : 'Você pode perder o progresso da partida atual.',
                 actions: [
                     { label: 'Cancelar', onClick: () => {} },
                     {
                         label: 'Sair',
                         onClick: async () => {
                             try {
-                                if (idSalaAtual && jogadorSessao?.chave) {
+                                if (idSalaAtual && jogadorSessao?.chave && !modoEspectador) {
                                     await update(ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), { online: false });
                                 }
                             } catch (_) {}
@@ -1290,7 +1728,6 @@
         });
 
         document.getElementById('btn-desistir').addEventListener('click', confirmarDesistencia);
-
         document.getElementById('btn-jogar-novamente').addEventListener('click', enviarPedidoRevanche);
 
         document.getElementById('btn-sair-pos-jogo').addEventListener('click', () => {
@@ -1303,9 +1740,36 @@
         document.getElementById('btn-aceitar-revanche').addEventListener('click', aceitarRevanche);
         document.getElementById('btn-recusar-revanche').addEventListener('click', recusarRevanche);
 
+        // Convite via WhatsApp (jogador)
+        document.getElementById('btn-whatsapp').addEventListener('click', () => {
+            SoundFX.click();
+            const link = `${window.location.origin}${window.location.pathname}?sala=${encodeURIComponent(idSalaAtual)}`;
+            const msg = encodeURIComponent(`♟️ *Convite para Damas*\n\nDesafiado(a) por *${jogadorSessao?.nome || 'Alguém'}*!\n\n👉 Clique para entrar direto:\n${link}`);
+            window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
+        });
+
+        // Convite de espectador
+        document.getElementById('btn-whatsapp-assistir').addEventListener('click', () => {
+            SoundFX.click();
+            const link = `${window.location.origin}${window.location.pathname}?sala=${encodeURIComponent(idSalaAtual)}&modo=assistir`;
+            const msg = encodeURIComponent(`👁️ *Assista à partida de Damas!*\n\nSala: *${idSalaAtual}*\n\n👉 Clique para assistir:\n${link}`);
+            window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
+        });
+
         // Desbloqueia áudio no primeiro toque
         ['pointerdown', 'touchstart', 'keydown'].forEach(evt => {
             window.addEventListener(evt, () => SoundFX.click(), { once: true });
+        });
+
+        // ============================================================
+        // ================ LIMPEZA AO SAIR ===========================
+        // ============================================================
+        window.addEventListener('beforeunload', () => {
+            try {
+                if (idSalaAtual && jogadorSessao?.chave && !modoEspectador) {
+                    update(ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), { online: false });
+                }
+            } catch (_) {}
         });
     </script>
 </body>
