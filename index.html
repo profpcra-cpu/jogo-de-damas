@@ -7,160 +7,85 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1020">
-    <title>Brain Damas - Duelo Multiplayer</title>
+    <title>Brain Damas - Duelo Multiplayer (v1.1 - Grupo 1)</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* ============================================================
-           TEMAS VISUAIS (UI) — dark / light / neon / madeira / minimal
-           ============================================================ */
         :root {
-            --bg-color: #0b1020;
-            --bg-gradient-1: #1e1b4b;
-            --bg-gradient-2: #0b1020;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --card-border: rgba(148, 163, 184, 0.15);
+            --bg-color: #0b1020; --bg-gradient-1: #1e1b4b; --bg-gradient-2: #0b1020;
+            --card-bg: rgba(30, 41, 59, 0.7); --card-border: rgba(148, 163, 184, 0.15);
             --card-glow: rgba(99, 102, 241, 0.25);
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-            --text-subtle: #64748b;
-            --border-color: rgba(148, 163, 184, 0.18);
-            --border-strong: rgba(148, 163, 184, 0.35);
+            --text-color: #f8fafc; --text-muted: #94a3b8; --text-subtle: #64748b;
+            --border-color: rgba(148, 163, 184, 0.18); --border-strong: rgba(148, 163, 184, 0.35);
             --input-bg: rgba(15, 23, 42, 0.7);
-            --btn-primary: #6366f1;
-            --btn-primary-hover: #818cf8;
-            --btn-accent: #8b5cf6;
+            --btn-primary: #6366f1; --btn-primary-hover: #818cf8; --btn-accent: #8b5cf6;
             --btn-whatsapp: #22c55e;
-            --c-green: #4ade80;
-            --c-blue: #38bdf8;
-            --c-amber: #f59e0b;
-            --c-red: #ef4444;
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 20px;
+            --c-green: #4ade80; --c-blue: #38bdf8; --c-amber: #f59e0b; --c-red: #ef4444;
+            --radius-sm: 8px; --radius-md: 12px; --radius-lg: 20px;
             --shadow-card: 0 20px 60px -20px rgba(0, 0, 0, 0.65);
             --shadow-btn: 0 6px 20px -6px rgba(99, 102, 241, 0.55);
-            --t-fast: 0.15s ease;
-            --t-base: 0.25s ease;
-            --t-slow: 0.4s ease;
-            /* Tabuleiro */
-            --board-frame-1: #4a2f1e;
-            --board-frame-2: #2a1810;
-            --board-light: #e8d4a8;
-            --board-light-2: #dcc398;
-            --board-dark: #8b5a2b;
-            --board-dark-2: #7a4a20;
-            --board-coord: rgba(232, 212, 168, 0.9);
-            --board-coord-edge: #fbbf24;
+            --t-fast: 0.15s ease; --t-base: 0.25s ease; --t-slow: 0.4s ease;
+            --board-frame-1: #4a2f1e; --board-frame-2: #2a1810;
+            --board-light: #e8d4a8; --board-light-2: #dcc398;
+            --board-dark: #8b5a2b; --board-dark-2: #7a4a20;
+            --board-coord: rgba(232, 212, 168, 0.9); --board-coord-edge: #fbbf24;
         }
-
         [data-theme="light"] {
-            --bg-color: #eef2ff;
-            --bg-gradient-1: #e0e7ff;
-            --bg-gradient-2: #f8fafc;
-            --card-bg: rgba(255, 255, 255, 0.88);
-            --card-border: rgba(15, 23, 42, 0.08);
+            --bg-color: #eef2ff; --bg-gradient-1: #e0e7ff; --bg-gradient-2: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.88); --card-border: rgba(15, 23, 42, 0.08);
             --card-glow: rgba(99, 102, 241, 0.15);
-            --text-color: #0f172a;
-            --text-muted: #475569;
-            --text-subtle: #64748b;
-            --border-color: rgba(15, 23, 42, 0.1);
-            --border-strong: rgba(15, 23, 42, 0.25);
+            --text-color: #0f172a; --text-muted: #475569; --text-subtle: #64748b;
+            --border-color: rgba(15, 23, 42, 0.1); --border-strong: rgba(15, 23, 42, 0.25);
             --input-bg: rgba(255, 255, 255, 0.95);
             --shadow-card: 0 20px 60px -20px rgba(30, 41, 59, 0.28);
         }
-
         [data-theme="neon"] {
-            --bg-color: #05010f;
-            --bg-gradient-1: #1a0033;
-            --bg-gradient-2: #05010f;
-            --card-bg: rgba(15, 5, 30, 0.85);
-            --card-border: rgba(236, 72, 153, 0.35);
-            --text-color: #f0fdff;
-            --text-muted: #a5b4fc;
-            --text-subtle: #818cf8;
-            --border-color: rgba(236, 72, 153, 0.25);
-            --border-strong: rgba(236, 72, 153, 0.55);
+            --bg-color: #05010f; --bg-gradient-1: #1a0033; --bg-gradient-2: #05010f;
+            --card-bg: rgba(15, 5, 30, 0.85); --card-border: rgba(236, 72, 153, 0.35);
+            --text-color: #f0fdff; --text-muted: #a5b4fc; --text-subtle: #818cf8;
+            --border-color: rgba(236, 72, 153, 0.25); --border-strong: rgba(236, 72, 153, 0.55);
             --input-bg: rgba(15, 5, 30, 0.9);
-            --btn-primary: #ec4899;
-            --btn-accent: #06b6d4;
-            --c-green: #22d3ee;
-            --c-blue: #38bdf8;
-            --c-amber: #fbbf24;
-            --c-red: #f43f5e;
+            --btn-primary: #ec4899; --btn-accent: #06b6d4;
+            --c-green: #22d3ee; --c-blue: #38bdf8; --c-amber: #fbbf24; --c-red: #f43f5e;
             --shadow-card: 0 20px 60px -20px rgba(236, 72, 153, 0.6);
             --shadow-btn: 0 6px 24px -6px rgba(236, 72, 153, 0.75);
-            --board-frame-1: #2a0033;
-            --board-frame-2: #0f0020;
-            --board-light: #1e1b4b;
-            --board-light-2: #18173a;
-            --board-dark: #4c1d95;
-            --board-dark-2: #3b1578;
-            --board-coord: #67e8f9;
-            --board-coord-edge: #f0abfc;
+            --board-frame-1: #2a0033; --board-frame-2: #0f0020;
+            --board-light: #1e1b4b; --board-light-2: #18173a;
+            --board-dark: #4c1d95; --board-dark-2: #3b1578;
+            --board-coord: #67e8f9; --board-coord-edge: #f0abfc;
         }
-
         [data-theme="madeira"] {
-            --bg-color: #2d1a0f;
-            --bg-gradient-1: #4a2c17;
-            --bg-gradient-2: #2d1a0f;
-            --card-bg: rgba(62, 39, 22, 0.85);
-            --card-border: rgba(180, 130, 70, 0.35);
-            --text-color: #fef3c7;
-            --text-muted: #d6b896;
-            --text-subtle: #a88660;
-            --border-color: rgba(180, 130, 70, 0.28);
-            --border-strong: rgba(180, 130, 70, 0.55);
+            --bg-color: #2d1a0f; --bg-gradient-1: #4a2c17; --bg-gradient-2: #2d1a0f;
+            --card-bg: rgba(62, 39, 22, 0.85); --card-border: rgba(180, 130, 70, 0.35);
+            --text-color: #fef3c7; --text-muted: #d6b896; --text-subtle: #a88660;
+            --border-color: rgba(180, 130, 70, 0.28); --border-strong: rgba(180, 130, 70, 0.55);
             --input-bg: rgba(45, 26, 15, 0.85);
-            --btn-primary: #b45309;
-            --btn-accent: #92400e;
-            --c-green: #a3e635;
-            --c-blue: #38bdf8;
-            --c-amber: #fbbf24;
-            --c-red: #ef4444;
+            --btn-primary: #b45309; --btn-accent: #92400e;
+            --c-green: #a3e635; --c-blue: #38bdf8; --c-amber: #fbbf24; --c-red: #ef4444;
             --shadow-card: 0 20px 60px -20px rgba(0, 0, 0, 0.8);
             --shadow-btn: 0 6px 20px -6px rgba(180, 83, 9, 0.7);
-            --board-frame-1: #6b3410;
-            --board-frame-2: #3d1a08;
-            --board-light: #f5deb3;
-            --board-light-2: #e8c98a;
-            --board-dark: #a0522d;
-            --board-dark-2: #8b4513;
-            --board-coord: #fef3c7;
-            --board-coord-edge: #fbbf24;
+            --board-frame-1: #6b3410; --board-frame-2: #3d1a08;
+            --board-light: #f5deb3; --board-light-2: #e8c98a;
+            --board-dark: #a0522d; --board-dark-2: #8b4513;
+            --board-coord: #fef3c7; --board-coord-edge: #fbbf24;
         }
-
         [data-theme="minimal"] {
-            --bg-color: #fafafa;
-            --bg-gradient-1: #ffffff;
-            --bg-gradient-2: #f5f5f5;
-            --card-bg: rgba(255, 255, 255, 0.98);
-            --card-border: rgba(0, 0, 0, 0.06);
-            --text-color: #171717;
-            --text-muted: #525252;
-            --text-subtle: #737373;
-            --border-color: rgba(0, 0, 0, 0.08);
-            --border-strong: rgba(0, 0, 0, 0.2);
+            --bg-color: #fafafa; --bg-gradient-1: #ffffff; --bg-gradient-2: #f5f5f5;
+            --card-bg: rgba(255, 255, 255, 0.98); --card-border: rgba(0, 0, 0, 0.06);
+            --text-color: #171717; --text-muted: #525252; --text-subtle: #737373;
+            --border-color: rgba(0, 0, 0, 0.08); --border-strong: rgba(0, 0, 0, 0.2);
             --input-bg: #f5f5f5;
-            --btn-primary: #171717;
-            --btn-accent: #404040;
-            --c-green: #16a34a;
-            --c-blue: #0284c7;
-            --c-amber: #d97706;
-            --c-red: #dc2626;
+            --btn-primary: #171717; --btn-accent: #404040;
+            --c-green: #16a34a; --c-blue: #0284c7; --c-amber: #d97706; --c-red: #dc2626;
             --shadow-card: 0 8px 30px -10px rgba(0, 0, 0, 0.12);
             --shadow-btn: 0 4px 12px -4px rgba(0, 0, 0, 0.3);
-            --board-frame-1: #d4d4d4;
-            --board-frame-2: #a3a3a3;
-            --board-light: #ffffff;
-            --board-light-2: #fafafa;
-            --board-dark: #525252;
-            --board-dark-2: #404040;
-            --board-coord: #171717;
-            --board-coord-edge: #dc2626;
+            --board-frame-1: #d4d4d4; --board-frame-2: #a3a3a3;
+            --board-light: #ffffff; --board-light-2: #fafafa;
+            --board-dark: #525252; --board-dark-2: #404040;
+            --board-coord: #171717; --board-coord-edge: #dc2626;
         }
 
         *, *::before, *::after { box-sizing: border-box; }
@@ -171,26 +96,17 @@
             background: radial-gradient(circle at 20% 0%, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 55%);
             background-attachment: fixed;
             color: var(--text-color);
-            margin: 0;
-            padding: 16px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            min-height: 100dvh;
+            margin: 0; padding: 16px;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; min-height: 100dvh;
             transition: background-color var(--t-slow), color var(--t-base);
             -webkit-font-smoothing: antialiased;
             -webkit-tap-highlight-color: transparent;
         }
 
         body::before, body::after {
-            content: "";
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(130px);
-            opacity: 0.3;
-            z-index: -1;
-            pointer-events: none;
+            content: ""; position: fixed; border-radius: 50%; filter: blur(130px);
+            opacity: 0.3; z-index: -1; pointer-events: none;
         }
         body::before { width: 420px; height: 420px; background: var(--btn-primary); top: -140px; left: -120px; }
         body::after { width: 460px; height: 460px; background: var(--btn-accent); bottom: -180px; right: -140px; }
@@ -198,29 +114,22 @@
         [data-theme="minimal"] body::after { display: none; }
 
         .container {
-            position: relative;
-            background: var(--card-bg);
+            position: relative; background: var(--card-bg);
             backdrop-filter: blur(18px) saturate(160%);
             -webkit-backdrop-filter: blur(18px) saturate(160%);
-            padding: 20px;
-            border-radius: var(--radius-lg);
+            padding: 20px; border-radius: var(--radius-lg);
             box-shadow: var(--shadow-card), 0 0 0 1px var(--card-border) inset;
-            width: 100%;
-            max-width: 520px;
-            text-align: center;
+            width: 100%; max-width: 520px; text-align: center;
             border: 1px solid var(--card-border);
             animation: cardIn 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-            overflow: hidden;
-            transition: max-width var(--t-base), padding var(--t-base);
+            overflow: hidden; transition: max-width var(--t-base), padding var(--t-base);
         }
-
         [data-theme="neon"] .container {
             box-shadow: var(--shadow-card), 0 0 0 1px var(--card-border) inset, 0 0 40px rgba(236, 72, 153, 0.25);
         }
-
         @keyframes cardIn {
             from { opacity: 0; transform: translateY(16px) scale(0.98); }
-            to   { opacity: 1; transform: translateY(0) scale(1); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         body.is-fullscreen { padding: 0; }
@@ -286,6 +195,41 @@
         }
         #turno-status { color: var(--c-amber); }
 
+        /* ============================================================
+           GRUPO 1: Banner de handshake
+           ============================================================ */
+        .handshake-bar {
+            display: flex; align-items: center; justify-content: center;
+            padding: 10px 14px; border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(59, 130, 246, 0.12));
+            border: 1px solid rgba(56, 189, 248, 0.5);
+            margin-bottom: 10px; font-size: 13px; font-weight: 700;
+            color: var(--text-color);
+            animation: handshakePulse 1.6s infinite;
+        }
+        @keyframes handshakePulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.65; }
+        }
+
+        /* ============================================================
+           GRUPO 1: Indicador de conexão
+           ============================================================ */
+        .connection-status {
+            position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            color: #fff; font-size: 12px; font-weight: 700;
+            padding: 6px 14px; border-radius: 999px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            z-index: 5500; display: none; align-items: center; gap: 6px;
+            animation: connectionPulse 1s infinite;
+        }
+        .connection-status.active { display: flex; }
+        @keyframes connectionPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+        }
+
         .placar-bar {
             display: flex; justify-content: space-around; align-items: center;
             background: var(--input-bg); border: 1px solid var(--border-color);
@@ -306,7 +250,6 @@
             border-radius: 12px; box-shadow: 0 14px 40px -12px rgba(0, 0, 0, 0.75);
             margin: 0 auto 12px; user-select: none;
         }
-
         [data-theme="neon"] .board-wrapper {
             box-shadow: 0 14px 40px -12px rgba(236, 72, 153, 0.6), 0 0 30px rgba(236, 72, 153, 0.35);
         }
@@ -393,7 +336,6 @@
         .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1100; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
         .toast { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid var(--c-blue); padding: 10px 16px; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; color: var(--text-color); }
 
-        /* Chat */
         .chat-bar {
             display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
             margin: 8px 0; padding: 8px; background: var(--input-bg);
@@ -431,7 +373,6 @@
             padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px;
         }
 
-        /* Tabs / selectors */
         .tabs { display: flex; gap: 4px; margin-bottom: 10px; background: var(--input-bg); padding: 4px; border-radius: var(--radius-md); border: 1px solid var(--border-color); }
         .tab-btn {
             flex: 1; padding: 8px 10px; font-size: 12px; font-weight: 700;
@@ -440,7 +381,6 @@
         }
         .tab-btn.active { background: linear-gradient(135deg, var(--btn-primary), var(--btn-accent)); color: #fff; }
 
-        /* Ranking */
         .rank-row {
             display: flex; align-items: center; gap: 8px; padding: 8px 10px;
             border-radius: var(--radius-sm); background: var(--input-bg);
@@ -451,7 +391,6 @@
         .rank-name { flex: 1; text-align: left; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .rank-wins { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--c-green); }
 
-        /* Conquistas */
         .ach-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px; }
         .ach-item {
             aspect-ratio: 1; display: flex; flex-direction: column;
@@ -464,7 +403,6 @@
         .ach-item .ach-label { font-size: 8.5px; font-weight: 700; color: var(--text-muted); text-align: center; line-height: 1.1; padding: 0 2px; }
         .ach-item.unlocked .ach-label { color: var(--text-color); }
 
-        /* Selector de tema */
         .theme-selector { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
         .theme-opt {
             width: auto; padding: 6px 10px; font-size: 11px; font-weight: 700;
@@ -491,6 +429,7 @@
             .ach-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
             .ach-item { font-size: 16px; }
             .ach-item .ach-label { font-size: 7.5px; }
+            .connection-status { font-size: 11px; padding: 5px 12px; }
         }
 
         @media (max-width: 380px) {
@@ -509,6 +448,14 @@
     </style>
 </head>
 <body>
+
+    <!-- ============================================================
+         GRUPO 1: Indicador de conexão
+         ============================================================ -->
+    <div id="connection-status" class="connection-status">
+        <span>📡</span>
+        <span id="connection-msg">Reconectando…</span>
+    </div>
 
     <button class="fs-exit-btn" id="fs-exit" type="button">✕</button>
 
@@ -532,7 +479,6 @@
                 </div>
             </div>
 
-            <!-- Tabs do lobby -->
             <div class="tabs" id="lobby-tabs">
                 <button class="tab-btn active" data-tab="jogo" type="button">🎮 Jogo</button>
                 <button class="tab-btn" data-tab="ranking" type="button">🌐 Ranking</button>
@@ -636,6 +582,13 @@
                     <button id="btn-desistir" class="btn-small" type="button" style="padding: 4px 10px; font-size: 11px;">🏳️ Desistir</button>
                     <button id="btn-fullscreen-game" class="btn-small" type="button" style="padding: 4px 10px; font-size: 11px;">⛶</button>
                 </div>
+            </div>
+
+            <!-- ============================================================
+                 GRUPO 1: Banner de handshake
+                 ============================================================ -->
+            <div id="div-handshake" class="handshake-bar hidden">
+                <span id="handshake-msg">⏳ A aguardar adversário…</span>
             </div>
 
             <div class="placar-bar">
@@ -744,11 +697,20 @@
         let nomeOponente = 'Oponente';
         let ultimoChatTs = 0;
 
+        // === GRUPO 1: Handshake informativo ===
+        let euPronto = false;
+        let adversarioPronto = false;
+        let ambosProntos = false;
+
+        // === GRUPO 1: Indicador de conexão ===
+        let ultimaRespostaFirebase = 0;
+        let connectionCheckInterval = null;
+
         // Histórico de resultados (para conquistas)
-        let historicoResultados = []; // ex: ['win', 'loss', 'win']
+        let historicoResultados = [];
 
         // SFX pack atual
-        let sfxPack = 'classic'; // 'classic' | 'arcade' | 'suave'
+        let sfxPack = 'classic';
 
         // ============================================================
         // ==================== CONQUISTAS ============================
@@ -851,7 +813,6 @@
                 osc.start(now); osc.stop(now + duration + 0.02);
             }
 
-            // --- Aplica o pack escolhido ---
             function P() {
                 if (sfxPack === 'arcade') return {
                     click: { freq: 800, type: 'square', duration: 0.04, gain: 0.08 },
@@ -908,7 +869,6 @@
                                   { freq: 784, type: 'sine', duration: 0.14, gain: 0.08, delay: 0.28 },
                                   { freq: 1046, type: 'sine', duration: 0.26, gain: 0.10, delay: 0.42 }]
                 };
-                // classic (padrão)
                 return {
                     click: { freq: 600, type: 'triangle', duration: 0.05, gain: 0.06 },
                     select: { freq: 880, type: 'sine', duration: 0.08, gain: 0.08 },
@@ -1099,6 +1059,109 @@
             url.searchParams.delete('sala');
             url.searchParams.delete('modo');
             window.history.replaceState({}, '', url.pathname);
+            // GRUPO 1: Para o monitor de conexão
+            pararMonitorConexao();
+        }
+
+        // ============================================================
+        // ============== GRUPO 1: INDICADOR DE CONEXÃO ===============
+        // ============================================================
+        function marcarFirebaseVivo() {
+            ultimaRespostaFirebase = Date.now();
+            const statusEl = document.getElementById('connection-status');
+            if (statusEl && statusEl.classList.contains('active')) {
+                statusEl.classList.remove('active');
+                if (idSalaAtual) toast('✅ Reconectado!', 'success');
+            }
+        }
+
+        function iniciarMonitorConexao() {
+            if (connectionCheckInterval) clearInterval(connectionCheckInterval);
+            ultimaRespostaFirebase = Date.now();
+            connectionCheckInterval = setInterval(() => {
+                if (!idSalaAtual) return;
+                const agora = Date.now();
+                const diff = agora - ultimaRespostaFirebase;
+                const statusEl = document.getElementById('connection-status');
+                if (!statusEl) return;
+                if (diff > 5000 && ultimaRespostaFirebase > 0) {
+                    statusEl.classList.add('active');
+                    const msgEl = document.getElementById('connection-msg');
+                    if (msgEl) {
+                        const segundos = Math.floor(diff / 1000);
+                        msgEl.textContent = `Reconectando… (${segundos}s)`;
+                    }
+                }
+            }, 1000);
+        }
+
+        function pararMonitorConexao() {
+            if (connectionCheckInterval) {
+                clearInterval(connectionCheckInterval);
+                connectionCheckInterval = null;
+            }
+            document.getElementById('connection-status')?.classList.remove('active');
+        }
+
+        // ============================================================
+        // ============== GRUPO 1: HANDSHAKE INFORMATIVO ==============
+        // ============================================================
+        function marcarPronto() {
+            if (euPronto) return;
+            euPronto = true;
+            if (!idSalaAtual || !jogadorSessao?.chave || modoEspectador) {
+                adversarioPronto = true;
+                ambosProntos = true;
+                return;
+            }
+            update(ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), {
+                pronto: true
+            }).catch(err => {
+                console.warn('[Handshake] Não consegui marcar pronto:', err);
+            });
+        }
+
+        function atualizarHandshake(dados, uids) {
+            if (modoEspectador) {
+                adversarioPronto = true;
+                euPronto = true;
+                ambosProntos = true;
+                document.getElementById('div-handshake')?.classList.add('hidden');
+                return;
+            }
+            const jogadores = dados.jogadores || {};
+            const meuUid = jogadorSessao?.chave;
+            const uidOponente = uids.find(u => u !== meuUid);
+
+            if (meuUid && jogadores[meuUid]?.pronto) euPronto = true;
+            adversarioPronto = !!(uidOponente && jogadores[uidOponente]?.pronto);
+            ambosProntos = euPronto && adversarioPronto;
+
+            const bannerWrap = document.getElementById('div-handshake');
+            const bannerMsg = document.getElementById('handshake-msg');
+            if (bannerWrap && bannerMsg) {
+                if (!ambosProntos) {
+                    bannerWrap.classList.remove('hidden');
+                    if (!euPronto) bannerMsg.textContent = '⏳ A preparar o teu tabuleiro…';
+                    else if (!adversarioPronto) bannerMsg.textContent = '⏳ A aguardar que o adversário carregue…';
+                } else {
+                    bannerWrap.classList.add('hidden');
+                }
+            }
+        }
+
+        // ============================================================
+        // ============== GRUPO 1: WRAPPER SEGURO FIREBASE ============
+        // ============================================================
+        async function updateSeguro(path, dados) {
+            try {
+                await update(ref(db, path), dados);
+                return { ok: true };
+            } catch (err) {
+                console.error('[Firebase] Erro ao gravar:', path, err);
+                toast('⚠️ Falha de comunicação. Verifica a ligação.', 'error');
+                return { ok: false, err };
+            }
         }
 
         // ============================================================
@@ -1322,12 +1385,10 @@
             carregarConquistas();
             atualizarGridConquistas();
 
-            // Tema salvo
             const temaSalvo = localStorage.getItem('brain_damas_tema') || 'dark';
             document.documentElement.setAttribute('data-theme', temaSalvo);
             atualizarSeletorTema();
 
-            // SFX salvo
             const sfxSalvo = localStorage.getItem('brain_damas_sfx') || 'classic';
             sfxPack = sfxSalvo;
             SoundFX.setPack(sfxSalvo);
@@ -1378,6 +1439,9 @@
                 turnoAtual = 'white';
                 jogoEncerrado = false;
                 vencedorDeclarado = null;
+                euPronto = false;
+                adversarioPronto = false;
+                ambosProntos = false;
 
                 await set(ref(db, 'salas_damas/' + idSalaAtual), {
                     status: 'jogando',
@@ -1445,6 +1509,14 @@
             }
 
             renderizarTabuleiro();
+
+            // GRUPO 1: Marca como pronto (handshake informativo)
+            if (!modoEspectador && idSalaAtual) {
+                setTimeout(() => marcarPronto(), 400);
+            }
+
+            // GRUPO 1: Arranca monitor de conexão
+            iniciarMonitorConexao();
         }
 
         // ============================================================
@@ -1631,7 +1703,8 @@
                 payload.vencedor = vencedorPorTabuleiro;
                 payload.motivoFim = 'sem-movimentos';
             }
-            await update(ref(db, `salas_damas/${idSalaAtual}`), payload);
+            // GRUPO 1: update com feedback de erro
+            await updateSeguro(`salas_damas/${idSalaAtual}`, payload);
         }
 
         function verificarFimDeJogo() {
@@ -1673,23 +1746,18 @@
                 toast('😢 Você perdeu a partida.', 'error');
             }
 
-            // Atualiza estatísticas de conquistas
             const cData = carregarConquistas();
             if (euVenci) {
                 cData.stats.vitorias++;
                 cData.stats.streakAtual = (cData.stats.streakAtual || 0) + 1;
                 cData.stats.maiorStreak = Math.max(cData.stats.maiorStreak || 0, cData.stats.streakAtual);
                 if (motivo === 'desistencia') cData.stats.desistenciasAdv++;
-                // Verifica virada: se no meio do jogo já estive em desvantagem (simplificado: se o oponente tinha 2+ peças a mais em algum momento)
-                // Aqui usamos um proxy simples: se venceu por sem-movimentos e o tabuleiro teve capturas
-                // (A implementação real pode ser melhorada com tracking completo)
             } else {
                 cData.stats.derrotas++;
                 cData.stats.streakAtual = 0;
             }
             salvarConquistas(cData);
 
-            // Detecta conquistas
             desbloquearConquistas();
 
             const motivoTxt = motivo === 'desistencia'
@@ -1790,6 +1858,10 @@
             movimentosValidos = [];
             jogoEncerrado = false;
             vencedorDeclarado = null;
+            // GRUPO 1: Reset do handshake
+            euPronto = false;
+            adversarioPronto = false;
+            ambosProntos = false;
             tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
             turnoAtual = dados.turno || 'white';
 
@@ -1804,6 +1876,8 @@
             renderizarTabuleiro();
             SoundFX.notify();
             toast('🎮 Nova partida iniciada!', 'success');
+            // GRUPO 1: remarca pronto na nova partida
+            setTimeout(() => marcarPronto(), 400);
         }
 
         function confirmarDesistencia() {
@@ -1854,6 +1928,12 @@
                     document.getElementById('oponente-status').className = `status-dot ${jogadores[uidOponente].online ? 'online' : 'offline'}`;
                 }
                 document.getElementById('placar-nome-eu').textContent = modoEspectador ? '⚪ Brancas' : 'Você';
+
+                // GRUPO 1: Marca que o Firebase respondeu
+                marcarFirebaseVivo();
+
+                // GRUPO 1: Atualiza o handshake informativo
+                atualizarHandshake(dados, uids);
 
                 if (jogoEncerrado && dados.motivoFim === 'desistencia' && !desistenciaProcessada && !modoEspectador) {
                     desistenciaProcessada = true;
@@ -2045,7 +2125,6 @@
                 SoundFX.setPack(sfxPack);
                 localStorage.setItem('brain_damas_sfx', sfxPack);
                 atualizarSeletorSfx();
-                // Testa o som
                 setTimeout(() => SoundFX.select(), 50);
                 toast(`🔊 Pacote: ${btn.textContent.trim()}`, 'info');
             });
