@@ -730,13 +730,13 @@
         let ultimoChatTs = 0;
 
         // Torneio
-        let modoTorneio = 0;
+        let modoTorneio = 0; // 0 = off, 3 = MD3, 5 = MD5
         let torneioPlacar = { eu: 0, op: 0 };
-        let torneioRodadaAtual = 0;
+        let torneioRodadaAtual = 0; // índice da partida atual (1-based)
 
-        // Histórico
-        let historicoMovimentos = [];
-        let historicoPartidas = [];
+        // Histórico (replay + resultados)
+        let historicoMovimentos = []; // [{tabuleiro, turno, de, para, captura, cor}]
+        let historicoPartidas = [];   // [{id, data, resultado, movimentos, sala, oponente}]
 
         // SFX
         let sfxPack = 'classic';
@@ -1041,6 +1041,7 @@
             catch (_) { historicoPartidas = []; }
         }
         function salvarHistorico() {
+            // Limita a 20 partidas para não estourar localStorage
             if (historicoPartidas.length > 20) historicoPartidas = historicoPartidas.slice(0, 20);
             try { localStorage.setItem('brain_damas_historico', JSON.stringify(historicoPartidas)); }
             catch (_) { historicoPartidas = historicoPartidas.slice(0, 10); localStorage.setItem('brain_damas_historico', JSON.stringify(historicoPartidas)); }
@@ -1049,10 +1050,10 @@
             const partida = {
                 id: 'P-' + Date.now().toString(36).toUpperCase(),
                 data: new Date().toISOString(),
-                resultado,
+                resultado, // 'vitoria' | 'derrota'
                 oponente: oponente || 'Oponente',
                 sala: idSalaAtual,
-                movimentos: historicoMovimentos.slice()
+                movimentos: historicoMovimentos.slice() // snapshot completo
             };
             historicoPartidas.unshift(partida);
             salvarHistorico();
@@ -1242,6 +1243,7 @@
                         if (s.status === 'encerrado') return false;
                         const jogadores = s.jogadores || {};
                         if (Object.keys(jogadores).length >= 2) return false;
+                        // Expira salas com mais de 1 hora
                         const criadaEm = s.criadaEm || 0;
                         if (typeof criadaEm === 'number' && (agora - criadaEm) > 3600000) return false;
                         return true;
@@ -1597,6 +1599,7 @@
         // ==================== ANIMAÇÃO DE CAPTURA ===================
         // ============================================================
         function animarCaptura(r, c, cor) {
+            // Descobre a posição na tela do quadrado
             const grid = document.getElementById('checkers-board');
             if (!grid) return;
             const squares = grid.querySelectorAll('.square');
@@ -1608,6 +1611,7 @@
             if (!squareEl) return;
             const rect = squareEl.getBoundingClientRect();
 
+            // Elemento voando
             const fly = document.createElement('div');
             fly.className = 'piece piece-captured-flying ' + (cor === 'white' ? 'white' : 'red');
             fly.style.left = rect.left + 'px';
@@ -1617,6 +1621,7 @@
             fly.style.borderRadius = '50%';
             document.body.appendChild(fly);
 
+            // Explosão colorida
             const explosion = document.createElement('div');
             explosion.className = 'piece-captured-explosion';
             explosion.style.left = (rect.left + rect.width / 2 - 30) + 'px';
@@ -1698,6 +1703,7 @@
             const pecaMovida = tabuleiro[deR][deC];
             const corPeca = pecaMovida.startsWith('white') ? 'white' : 'red';
 
+            // Animação de captura antes de remover
             if (mov.captura) {
                 const pecaCapturada = tabuleiro[mov.captura.r][mov.captura.c];
                 const corCapturada = pecaCapturada && pecaCapturada.startsWith('white') ? 'white' : 'red';
@@ -1707,6 +1713,7 @@
                 SoundFX.move();
             }
 
+            // Aplica movimento no tabuleiro
             tabuleiro[paraR][paraC] = pecaMovida;
             tabuleiro[deR][deC] = null;
             if (mov.captura) tabuleiro[mov.captura.r][mov.captura.c] = null;
@@ -1719,6 +1726,7 @@
             turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
             celulaSelecionada = null; movimentosValidos = [];
 
+            // Registra no histórico de movimentos
             historicoMovimentos.push({
                 tabuleiro: tabuleiroParaFirebase(tabuleiro),
                 turno: turnoAtual,
@@ -1770,6 +1778,7 @@
             const euVenci = (vencedor === minhaCor);
             const oponente = nomeOponente || 'Oponente';
 
+            // Atualiza placar da sessão
             if (euVenci) {
                 SoundFX.win(); registrarVitoria(); enviarVitoriaRanking();
                 toast('🏆 Você venceu!', 'success');
@@ -1778,8 +1787,10 @@
                 toast('😢 Você perdeu.', 'error');
             }
 
+            // Registra no histórico local
             adicionarAoHistorico(euVenci ? 'vitoria' : 'derrota', oponente);
 
+            // Conquistas
             const cData = carregarConquistas();
             if (euVenci) {
                 cData.stats.vitorias++;
@@ -1793,6 +1804,7 @@
             salvarConquistas(cData);
             desbloquearConquistas();
 
+            // === TORNEIO ===
             if (modoTorneio > 0) {
                 if (euVenci) torneioPlacar.eu++;
                 else torneioPlacar.op++;
@@ -1801,6 +1813,7 @@
 
                 const necessario = Math.ceil(modoTorneio / 2);
                 if (torneioPlacar.eu >= necessario || torneioPlacar.op >= necessario) {
+                    // Torneio terminou
                     const euGanheiTorneio = torneioPlacar.eu >= necessario;
                     if (euGanheiTorneio) {
                         const cc = carregarConquistas();
@@ -1822,6 +1835,7 @@
                     document.getElementById('div-pos-jogo')?.classList.remove('hidden');
                     return;
                 }
+                // Não terminou ainda — apenas mostra a próxima rodada
                 const motivoTxt = motivo === 'desistencia' ? 'Adversário desistiu.' : 'Sem movimentos.';
                 setTimeout(() => {
                     abrirModal({
@@ -1838,6 +1852,7 @@
                 return;
             }
 
+            // === MODO NORMAL ===
             const motivoTxt = motivo === 'desistencia'
                 ? (euVenci ? 'O adversário desistiu.' : 'Você desistiu.')
                 : (euVenci ? 'O adversário ficou sem movimentos.' : 'Você ficou sem movimentos.');
@@ -2210,6 +2225,7 @@
             window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
         });
 
+        // Limpar histórico
         document.getElementById('btn-limpar-historico').addEventListener('click', () => {
             SoundFX.click();
             abrirModal({
@@ -2227,6 +2243,7 @@
             });
         });
 
+        // Replay controls
         document.getElementById('replay-first').addEventListener('click', () => { replayState.idx = 0; renderizarReplay(); });
         document.getElementById('replay-prev').addEventListener('click', () => { if (replayState.idx > 0) replayState.idx--; renderizarReplay(); });
         document.getElementById('replay-next').addEventListener('click', () => { if (replayState.idx < replayState.movimentos.length) replayState.idx++; renderizarReplay(); });
