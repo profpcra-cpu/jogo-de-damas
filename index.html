@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt" data-theme="dark" data-board-theme="default">
+<html lang="pt" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0">
@@ -199,6 +199,17 @@
         }
         .board-wrapper.flash-5s { animation: flashRed 0.8s infinite; }
 
+        .handshake-bar {
+            display: flex; align-items: center; justify-content: center;
+            padding: 10px 14px; border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(59, 130, 246, 0.12));
+            border: 1px solid rgba(56, 189, 248, 0.5);
+            margin-bottom: 10px; font-size: 13px; font-weight: 700;
+            color: var(--text-color);
+            animation: handshakePulse 1.6s infinite;
+        }
+        @keyframes handshakePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.65; } }
+
         .placar-bar {
             display: flex; justify-content: space-around; align-items: center;
             background: var(--input-bg); border: 1px solid var(--border-color);
@@ -325,9 +336,7 @@
         .toast.warn-flash {
             border-left-color: var(--c-red); background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(153, 27, 27, 0.15));
             font-size: 15px; font-weight: 800; color: #fff; box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
-            animation: toastFlash 1s infinite;
         }
-        @keyframes toastFlash { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.05); } }
 
         .chat-bar {
             display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
@@ -478,10 +487,8 @@
             color: #fff; padding: 12px 20px; border-radius: var(--radius-md);
             font-size: 13px; font-weight: 700; z-index: 1150; max-width: 90vw;
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
-            animation: tutorialIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex; align-items: center; gap: 8px;
         }
-        @keyframes tutorialIn { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
         .agenda-item {
             display: flex; align-items: center; justify-content: space-between; gap: 8px;
@@ -565,7 +572,6 @@
         <div class="top-bar">
             <button id="btn-sair" class="btn-small" type="button">🚪 Sair</button>
             <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
-                <button id="btn-google" class="btn-small" type="button">🌐 Google</button>
                 <button id="btn-musica" class="btn-small" type="button" title="Música">🎵</button>
                 <button id="btn-som" class="btn-small" type="button" title="Som">🔊</button>
                 <button id="btn-fullscreen" class="btn-small" type="button">⛶</button>
@@ -792,7 +798,6 @@
                 </div>
             </div>
 
-            <!-- Pedido de pausa pendente -->
             <div id="div-pausa-pendente" class="pausa-pedido hidden">
                 <span>⏸️ <strong id="pausa-msg">Adversário</strong> pediu pausa!</span>
                 <div style="display:flex; gap:6px;">
@@ -801,7 +806,10 @@
                 </div>
             </div>
 
-            <!-- Barra de progresso do timer -->
+            <div id="div-handshake" class="handshake-bar hidden">
+                <span id="handshake-msg">⏳ A aguardar adversário…</span>
+            </div>
+
             <div id="timer-bar-wrap" class="timer-bar-wrap hidden">
                 <div id="timer-bar-fill" class="timer-bar-fill"></div>
             </div>
@@ -867,7 +875,6 @@
         </div>
     </div>
 
-    <!-- MODAL -->
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal-card">
             <div style="font-size: 40px; margin-bottom: 10px;" id="modal-icon">ℹ️</div>
@@ -877,7 +884,6 @@
         </div>
     </div>
 
-    <!-- MODAL DE REPLAY -->
     <div class="modal-overlay" id="replay-overlay">
         <div class="modal-card" style="max-width: 460px;">
             <div style="font-size: 32px; margin-bottom: 8px;">📜</div>
@@ -902,14 +908,14 @@
     <script type="module">
         import { db, auth } from "./firebase-config.js";
         import {
-            ref, get, set, update, onValue, runTransaction, serverTimestamp, push, remove, onDisconnect
+            ref, get, set, update, onValue, runTransaction, serverTimestamp, push, onDisconnect
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import {
-            signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup
+            signInAnonymously
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         // ============================================================
-        // ==================== ESTADO ================================
+        // ==================== ESTADO GLOBAL =========================
         // ============================================================
         let jogadorSessao = null;
         let idSalaAtual = null;
@@ -967,11 +973,15 @@
         let emPausa = false;
         let pausaPendenteDe = null;
         let pausaSolicitadaPorMim = false;
-        let tempoRestanteNaPausa = 0;
 
-        // === TEMPO MÉDIO POR JOGADA ===
+        // === TEMPO MÉDIO ===
         let tempoInicioJogada = 0;
         let temposJogadas = [];
+
+        // === HANDSHAKE ===
+        let euPronto = false;
+        let adversarioPronto = false;
+        let ambosProntos = false;
 
         // ============================================================
         // ==================== CONQUISTAS ============================
@@ -1198,7 +1208,7 @@
         })();
 
         // ============================================================
-        // ==================== TIMER (CORRIGIDO) =====================
+        // ==================== TIMER =================================
         // ============================================================
         function pararTimer() {
             if (timerIntervalId) { clearInterval(timerIntervalId); timerIntervalId = null; }
@@ -1213,6 +1223,7 @@
             if (tempoLimiteSegundos <= 0) return;
             if (jogoEncerrado || modoEspectador || modoTutorial) return;
             if (emPausa) return;
+            if (!ambosProntos && !modoIA && !modoTutorial) return;
             if (modoIA && turnoAtual !== minhaCor) return;
             if (turnoAtual !== minhaCor) return;
 
@@ -1232,8 +1243,7 @@
 
             timerIntervalId = setInterval(() => {
                 if (jogoEncerrado) { pararTimer(); return; }
-                if (emPausa) { return; }
-                // Se a vez mudou (por qualquer razão), para o timer
+                if (emPausa) return;
                 if (turnoAtual !== minhaCor) { pararTimer(); return; }
                 timerSegundosRestantes--;
                 if (timerSegundosRestantes <= 10 && timerSegundosRestantes > 5) SoundFX.tick();
@@ -1270,7 +1280,6 @@
 
         function perderPorTempo() {
             if (jogoEncerrado || desistenciaProcessada) return;
-            // Se a vez já não é minha, o timer não devia ter disparado. Ignora.
             if (turnoAtual !== minhaCor && !modoIA && !modoTutorial) return;
             toast('⏱️ Tempo esgotado! Você perdeu.', 'error');
             registrarTempoJogada();
@@ -1284,31 +1293,22 @@
         }
 
         // ============================================================
-        // ==================== PAUSA (CORRIGIDO) =====================
+        // ==================== PAUSA =================================
         // ============================================================
         function pedirPausa() {
-            if (modoEspectador || jogoEncerrado) return;
-            if (emPausa) return;
-            if (modoIA || modoTutorial) {
-                ativarPausaLocal('você');
-                return;
-            }
+            if (modoEspectador || jogoEncerrado || emPausa) return;
+            if (!ambosProntos && !modoIA && !modoTutorial) return;
+            if (modoIA || modoTutorial) { ativarPausaLocal('você'); return; }
             SoundFX.click();
             pausaSolicitadaPorMim = true;
             update(ref(db, `salas_damas/${idSalaAtual}`), {
-                pausaPedido: {
-                    de: jogadorSessao.chave,
-                    nome: jogadorSessao.nome,
-                    em: Date.now()
-                }
+                pausaPedido: { de: jogadorSessao.chave, nome: jogadorSessao.nome, em: Date.now() }
             }).catch(() => {});
             toast('⏸️ Pedido de pausa enviado...', 'info');
         }
-
         function ativarPausaLocal(porQuem) {
             if (emPausa) return;
             emPausa = true;
-            tempoRestanteNaPausa = timerSegundosRestantes;
             if (timerIntervalId) { clearInterval(timerIntervalId); timerIntervalId = null; }
             timerAtivo = false;
             document.getElementById('board-wrapper-el')?.classList.add('paused');
@@ -1322,7 +1322,6 @@
             SoundFX.pause();
             toast(`⏸️ Partida em pausa${porQuem ? ' por ' + porQuem : ''}.`, 'info');
         }
-
         function retomarPausaLocal() {
             if (!emPausa) return;
             emPausa = false;
@@ -1338,27 +1337,21 @@
             const barFill = document.getElementById('timer-bar-fill');
             if (barFill) barFill.classList.remove('paused');
             SoundFX.unpause();
-            // Reinicia o timer para o jogador da vez
-            if (!jogoEncerrado && turnoAtual === minhaCor && !modoIA && !modoTutorial) {
+            if (!jogoEncerrado && turnoAtual === minhaCor && !modoIA && !modoTutorial && ambosProntos) {
                 setTimeout(() => iniciarTimer(), 200);
             }
             toast('▶️ Partida retomada!', 'success');
         }
-
         function mostrarPedidoPausa(nome) {
             const div = document.getElementById('div-pausa-pendente');
             if (!div) return;
             div.classList.remove('hidden');
             document.getElementById('pausa-msg').textContent = nome || 'Adversário';
         }
-
         async function aceitarPausa() {
             SoundFX.click();
             try {
-                await update(ref(db, `salas_damas/${idSalaAtual}`), {
-                    pausaAtiva: true,
-                    pausaPedido: null
-                });
+                await update(ref(db, `salas_damas/${idSalaAtual}`), { pausaAtiva: true, pausaPedido: null });
                 const cData = carregarConquistas();
                 cData.stats.pausasSobrevividas = (cData.stats.pausasSobrevividas || 0) + 1;
                 salvarConquistas(cData); desbloquearConquistas();
@@ -1366,33 +1359,20 @@
             ativarPausaLocal('acordo mútuo');
             document.getElementById('div-pausa-pendente')?.classList.add('hidden');
         }
-
         async function recusarPausa() {
             SoundFX.click();
-            try {
-                await update(ref(db, `salas_damas/${idSalaAtual}`), { pausaPedido: null });
-                toast('Pausa recusada.', 'info');
-            } catch (e) {}
+            try { await update(ref(db, `salas_damas/${idSalaAtual}`), { pausaPedido: null }); toast('Pausa recusada.', 'info'); } catch (e) {}
             document.getElementById('div-pausa-pendente')?.classList.add('hidden');
         }
-
-        // Botão único que serve para pedir ou retomar
         function togglePausa() {
             if (emPausa) {
-                // Retomar (local ou remoto)
-                if (modoIA || modoTutorial) {
-                    retomarPausaLocal();
-                } else {
+                if (modoIA || modoTutorial) { retomarPausaLocal(); }
+                else {
                     SoundFX.click();
-                    update(ref(db, `salas_damas/${idSalaAtual}`), {
-                        pausaAtiva: null,
-                        pausaPedido: null
-                    }).catch(() => {});
+                    update(ref(db, `salas_damas/${idSalaAtual}`), { pausaAtiva: null, pausaPedido: null }).catch(() => {});
                     retomarPausaLocal();
                 }
-            } else {
-                pedirPausa();
-            }
+            } else { pedirPausa(); }
         }
 
         // ============================================================
@@ -1500,7 +1480,7 @@
         function jogadorTemCapturaObrigatoria(cor) { return capturasObrigatorias(cor).length > 0; }
 
         // ============================================================
-        // ==================== PLACAR LOCAL ==========================
+        // ==================== PLACAR ================================
         // ============================================================
         function carregarPlacarLocal() {
             try {
@@ -1546,11 +1526,9 @@
         function registrarTempoJogada() {
             if (tempoInicioJogada > 0) {
                 const dur = Math.round((Date.now() - tempoInicioJogada) / 1000);
-                // Sanidade: aceita apenas entre 0 e o tempo limite (+ 5s de margem)
                 const maxAceitavel = (tempoLimiteSegundos > 0 ? tempoLimiteSegundos + 5 : 300);
                 if (dur >= 0 && dur <= maxAceitavel) {
                     temposJogadas.push(dur);
-                    // Limita a 500 registos para não estourar
                     if (temposJogadas.length > 500) temposJogadas = temposJogadas.slice(-500);
                 }
                 tempoInicioJogada = 0;
@@ -1567,8 +1545,6 @@
             document.getElementById('stat-streak').textContent = s.maiorStreak || 0;
             document.getElementById('stat-torneios').textContent = s.torneiosVencidos || 0;
             document.getElementById('stat-total').textContent = total;
-
-            // Tempo médio por jogada
             let mediaTempo = '--';
             if (temposJogadas.length > 0) {
                 const soma = temposJogadas.reduce((a, b) => a + b, 0);
@@ -1576,7 +1552,6 @@
             }
             document.getElementById('stat-tempo-medio').textContent = mediaTempo;
             document.getElementById('stat-jogadas').textContent = temposJogadas.length;
-
             const cont = document.getElementById('stats-aberturas');
             const aberturas = Object.entries(statsJogador.aberturas || {})
                 .sort((a, b) => b[1].total - a[1].total).slice(0, 5);
@@ -1888,7 +1863,7 @@
             modoEspectador = querEspectador;
             toast(querEspectador ? '👁️ Espectador...' : '⏳ A entrar...', 'info');
             const uid = await garantirAutenticacao();
-            const nomeUser = auth.currentUser?.displayName || ('Jogador ' + Math.floor(Math.random() * 9000 + 1000));
+            const nomeUser = ('Jogador ' + Math.floor(Math.random() * 9000 + 1000));
             jogadorSessao = { chave: uid, nome: nomeUser, avatar: querEspectador ? '👁️' : '😀', isAnonimo: true };
 
             let dados = null;
@@ -1929,6 +1904,8 @@
 
         async function continuarEntradaSala(uid, nomeUser, codigoSala, dados, querEspectador) {
             const jogadores = dados.jogadores || {};
+
+            // === RECONEXÃO ===
             if (jogadores[uid] && !querEspectador) {
                 idSalaAtual = codigoSala; minhaCor = jogadores[uid].cor;
                 tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
@@ -1940,6 +1917,7 @@
                 toast('✅ Reconectado!', 'success');
                 return;
             }
+            // === ESPECTADOR ===
             if (querEspectador) {
                 idSalaAtual = codigoSala; minhaCor = null; modoEspectador = true;
                 tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
@@ -1950,6 +1928,7 @@
                 entrarInterfaceJogo(); escutarFirebase(); escutarChat();
                 return;
             }
+            // === SALA CHEIA ===
             if (Object.keys(jogadores).length >= 2) {
                 abrirModal({ icon: '👥', title: 'Sala Cheia', message: 'Deseja assistir?',
                     actions: [
@@ -1962,17 +1941,20 @@
                     ] });
                 return;
             }
+            // === NOVO JOGADOR ===
             const coresExistentes = Object.values(jogadores).map(j => j.cor);
             const corEscolhida = coresExistentes.includes('white') ? 'red' : 'white';
+            idSalaAtual = codigoSala;
+            minhaCor = corEscolhida;
             try {
                 await set(ref(db, `salas_damas/${codigoSala}/jogadores/${uid}`), {
-                    nome: nomeUser, cor: corEscolhida, online: true
+                    nome: nomeUser, cor: corEscolhida, online: true, pronto: false
                 });
                 try { onDisconnect(ref(db, `salas_damas/${codigoSala}/jogadores/${uid}/online`)).set(false); } catch (_) {}
-                idSalaAtual = codigoSala; minhaCor = corEscolhida;
                 tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
                 turnoAtual = dados.turno || 'white';
-                jogoEncerrado = false; salaConfirmada = true;
+                jogoEncerrado = false;
+                salaConfirmada = true;
                 salvarSessao();
                 entrarInterfaceJogo(); escutarFirebase(); escutarChat();
                 toast(`🎉 Entrou como ${minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas'}!`, 'success');
@@ -2003,8 +1985,7 @@
             if (entrouPeloLink) return;
 
             const uid = await garantirAutenticacao();
-            const prefs = JSON.parse(localStorage.getItem('brain_damas_prefs') || '{"nome":"Jogador ' + Math.floor(Math.random()*9000+1000) + '","avatar":"😀"}');
-            jogadorSessao = { chave: uid, nome: prefs.nome, avatar: prefs.avatar, isAnonimo: true };
+            jogadorSessao = { chave: uid, nome: 'Jogador ' + Math.floor(Math.random()*9000+1000), avatar: '😀', isAnonimo: true };
             document.getElementById('lobby-nome').textContent = jogadorSessao.nome;
             document.getElementById('lobby-avatar').textContent = jogadorSessao.avatar;
             document.getElementById('display-nome').textContent = jogadorSessao.nome;
@@ -2056,6 +2037,56 @@
         });
 
         // ============================================================
+        // ==================== HANDSHAKE =============================
+        // ============================================================
+        async function marcarPronto() {
+            if (euPronto) return;
+            euPronto = true;
+            if (!idSalaAtual || !jogadorSessao?.chave || modoIA || modoTutorial || modoEspectador) {
+                adversarioPronto = true; ambosProntos = true;
+                return;
+            }
+            try {
+                await update(ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), { pronto: true });
+            } catch (e) {}
+        }
+
+        function atualizarHandshake(dados, uids) {
+            if (modoEspectador || modoIA || modoTutorial) {
+                adversarioPronto = true; ambosProntos = true;
+                document.getElementById('div-handshake')?.classList.add('hidden');
+                return;
+            }
+            const jogadores = dados.jogadores || {};
+            const meuUid = jogadorSessao?.chave;
+            const uidOponente = uids.find(u => u !== meuUid);
+            if (meuUid && jogadores[meuUid]?.pronto) euPronto = true;
+            adversarioPronto = !!(uidOponente && jogadores[uidOponente]?.pronto);
+            const antes = ambosProntos;
+            ambosProntos = euPronto && adversarioPronto;
+            const bannerWrap = document.getElementById('div-handshake');
+            const bannerMsg = document.getElementById('handshake-msg');
+            if (bannerWrap && bannerMsg) {
+                if (!ambosProntos) {
+                    bannerWrap.classList.remove('hidden');
+                    bannerMsg.textContent = !euPronto
+                        ? '⏳ A preparar o teu tabuleiro…'
+                        : '⏳ A aguardar que o adversário carregue…';
+                } else {
+                    bannerWrap.classList.add('hidden');
+                }
+            }
+            if (!antes && ambosProntos) onAmbosProntos();
+        }
+
+        function onAmbosProntos() {
+            const turnoEl = document.getElementById('turno-status');
+            if (turnoEl) turnoEl.textContent = turnoAtual === minhaCor ? 'Sua vez!' : 'Vez do oponente...';
+            if (!jogoEncerrado && turnoAtual === minhaCor && !emPausa) setTimeout(() => iniciarTimer(), 200);
+            toast('✅ Ambos prontos! Bom jogo!', 'success');
+        }
+
+        // ============================================================
         // ==================== CRIAR SALA ============================
         // ============================================================
         async function criarSala({ publica = false, melhorDe = 0, comSenha = false } = {}) {
@@ -2067,17 +2098,13 @@
                 modoTorneio = melhorDe;
                 torneioPlacar = { eu: 0, op: 0 }; torneioRodadaAtual = 1;
                 jogadasPrimeiras = [];
-                historicoMovimentos = [{
-                    tabuleiro: tabuleiroParaFirebase(tabuleiro),
-                    turno: 'white', cor: 'white', de: '—', para: '—'
-                }];
+                historicoMovimentos = [{ tabuleiro: tabuleiroParaFirebase(tabuleiro), turno: 'white', cor: 'white', de: '—', para: '—' }];
                 modoIA = null; modoTutorial = false;
                 capturaMultiplaAtiva = false; capturaMultiplaPos = null;
-                desistenciaProcessada = false;
-                emPausa = false;
-                pausaPendenteDe = null;
-                pausaSolicitadaPorMim = false;
+                desistenciaProcessada = false; emPausa = false;
+                pausaPendenteDe = null; pausaSolicitadaPorMim = false;
                 temposJogadas = [];
+                euPronto = false; adversarioPronto = false; ambosProntos = false;
                 const dados = {
                     status: 'jogando', turno: 'white',
                     tabuleiro: tabuleiroParaFirebase(tabuleiro),
@@ -2086,12 +2113,12 @@
                     publica: !!publica,
                     tempoLimite: tempoLimiteSegundos,
                     jogadores: {
-                        [jogadorSessao.chave]: { nome: jogadorSessao.nome, cor: 'white', online: true, vitorias: 0 }
+                        [jogadorSessao.chave]: { nome: jogadorSessao.nome, cor: 'white', online: true, pronto: false }
                     }
                 };
                 if (comSenha) { senhaSalaAtual = gerarSenha(); dados.senha = senhaSalaAtual; }
                 else senhaSalaAtual = null;
-                if (melhorDe > 0) { dados.melhorDe = melhorDe; dados.torneioPlacar = { [jogadorSessao.chave]: 0 }; }
+                if (melhorDe > 0) { dados.melhorDe = melhorDe; }
                 await set(ref(db, 'salas_damas/' + idSalaAtual), dados);
                 try { onDisconnect(ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}/online`)).set(false); } catch (_) {}
                 salaConfirmada = true; salvarSessao();
@@ -2120,12 +2147,11 @@
                 tabuleiro = criarTabuleiroInicial();
                 turnoAtual = 'white'; jogoEncerrado = false; vencedorDeclarado = null;
                 capturaMultiplaAtiva = false; capturaMultiplaPos = null;
-                desistenciaProcessada = false;
-                emPausa = false;
-                pausaSolicitadaPorMim = false;
-                pausaPendenteDe = null;
+                desistenciaProcessada = false; emPausa = false;
+                pausaSolicitadaPorMim = false; pausaPendenteDe = null;
                 historicoMovimentos = [{ tabuleiro: tabuleiroParaFirebase(tabuleiro), turno: 'white', cor: 'white', de: '—', para: '—' }];
                 temposJogadas = [];
+                euPronto = true; adversarioPronto = true; ambosProntos = true;
                 salaConfirmada = true;
                 entrarInterfaceJogo();
                 document.getElementById('display-sala-tag').textContent = `🤖 IA · ${nivel}`;
@@ -2135,9 +2161,9 @@
                 document.getElementById('btn-desistir').classList.remove('hidden');
                 document.getElementById('btn-rec').classList.remove('hidden');
                 document.getElementById('btn-pausa').classList.remove('hidden');
+                document.getElementById('div-handshake').classList.add('hidden');
                 renderizarTabuleiro();
                 toast(`🤖 Partida contra IA (${nivel})`, 'success');
-                // O timer já é iniciado automaticamente por entrarInterfaceJogo()
             } catch (e) { toast('Erro ao iniciar IA.', 'error'); }
         }
         document.getElementById('btn-ia-facil').addEventListener('click', () => iniciarPartidaIA('facil'));
@@ -2206,9 +2232,6 @@
                 const corCap = pecaCap && pecaCap.startsWith('white') ? 'white' : 'red';
                 animarCaptura(mov.captura.r, mov.captura.c, corCap);
                 SoundFX.capture();
-                const cData = carregarConquistas();
-                cData.stats.capturasTotais = (cData.stats.capturasTotais || 0) + 1;
-                salvarConquistas(cData);
             } else SoundFX.move();
             tabuleiro[paraR][paraC] = pecaMovida;
             tabuleiro[deR][deC] = null;
@@ -2217,7 +2240,6 @@
             if (pecaMovida === 'white' && paraR === 0) { tabuleiro[paraR][paraC] = 'white-king'; promoveu = true; }
             if (pecaMovida === 'red' && paraR === 7) { tabuleiro[paraR][paraC] = 'red-king'; promoveu = true; }
             if (promoveu) setTimeout(() => SoundFX.king(), 120);
-
             if (mov.captura && pecaMovida && !pecaMovida.includes('king')) {
                 const maisCapturas = capturasEmCadeia(paraR, paraC, corPeca);
                 if (maisCapturas.length > 0) {
@@ -2269,11 +2291,10 @@
                 modoTutorial = true; tutorialPasso = 0;
                 tabuleiro = criarTabuleiroInicial();
                 turnoAtual = 'white'; jogoEncerrado = false; vencedorDeclarado = null;
-                jogadasPrimeiras = []; historicoMovimentos = [];
-                temposJogadas = [];
+                jogadasPrimeiras = []; historicoMovimentos = []; temposJogadas = [];
                 capturaMultiplaAtiva = false; capturaMultiplaPos = null;
-                desistenciaProcessada = false;
-                emPausa = false;
+                desistenciaProcessada = false; emPausa = false;
+                euPronto = true; adversarioPronto = true; ambosProntos = true;
                 salaConfirmada = true;
                 entrarInterfaceJogo();
                 document.getElementById('display-sala-tag').textContent = `🎓 Tutorial`;
@@ -2284,6 +2305,7 @@
                 document.getElementById('btn-pausa').classList.add('hidden');
                 document.getElementById('chat-bar').style.opacity = '0.4';
                 document.getElementById('chat-bar').style.pointerEvents = 'none';
+                document.getElementById('div-handshake').classList.add('hidden');
                 renderizarTabuleiro();
                 mostrarPassoTutorial();
             } catch (e) { toast('Erro ao iniciar tutorial.', 'error'); }
@@ -2328,14 +2350,12 @@
             const pausaBtn = document.getElementById('btn-pausa');
             const chatBar = document.getElementById('chat-bar');
             const torneioBar = document.getElementById('torneio-bar');
-
             if (modoTorneio > 0 && !modoEspectador) {
                 torneioBar.classList.remove('hidden');
                 document.getElementById('torneio-melhor-de').textContent = modoTorneio;
                 document.getElementById('torneio-eu').textContent = torneioPlacar.eu;
                 document.getElementById('torneio-op').textContent = torneioPlacar.op;
             } else torneioBar.classList.add('hidden');
-
             if (modoEspectador) {
                 badge.classList.remove('hidden');
                 desistirBtn.classList.add('hidden'); recBtn.classList.add('hidden'); pausaBtn.classList.add('hidden');
@@ -2350,15 +2370,15 @@
                 document.getElementById('info-minha-cor-wrap').style.display = '';
                 document.getElementById('info-minha-cor').textContent = minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
                 if (!modoIA && !modoTutorial) recBtn.classList.remove('hidden');
-                // Pausa apenas em multiplayer
                 if (!modoIA && !modoTutorial) pausaBtn.classList.remove('hidden');
                 else pausaBtn.classList.add('hidden');
             }
             renderizarTabuleiro();
-            if (!modoEspectador && !modoTutorial) {
-                setTimeout(() => {
-                    if (turnoAtual === minhaCor && !jogoEncerrado && !emPausa) iniciarTimer();
-                }, 500);
+            if (!modoEspectador && !modoTutorial && !modoIA && idSalaAtual) {
+                setTimeout(() => marcarPronto(), 400);
+            }
+            if (!modoEspectador && !modoTutorial && modoIA) {
+                setTimeout(() => { if (turnoAtual === minhaCor && !jogoEncerrado && !emPausa) iniciarTimer(); }, 500);
             }
         }
 
@@ -2438,6 +2458,7 @@
             if (turnoEl) {
                 if (jogoEncerrado) turnoEl.textContent = '🏁 Fim';
                 else if (emPausa) turnoEl.textContent = '⏸️ Em pausa';
+                else if (!ambosProntos && !modoIA && !modoTutorial && !modoEspectador) turnoEl.textContent = '⏳ Aguardando...';
                 else if (modoEspectador) turnoEl.textContent = turnoAtual === 'white' ? '⚪ Brancas jogam' : '🔴 Vermelhas jogam';
                 else if (modoIA && turnoAtual === iaCor) turnoEl.textContent = '🤖 IA pensando...';
                 else turnoEl.textContent = (turnoAtual === minhaCor ? 'Sua vez!' : 'Vez do oponente...');
@@ -2482,16 +2503,15 @@
         // ============================================================
         function clicarCasa(r, c) {
             if (modoEspectador || emPausa) return;
+            if (!ambosProntos && !modoIA && !modoTutorial) return;
             if (jogoEncerrado || turnoAtual !== minhaCor) return;
             if (modoIA && turnoAtual === iaCor) return;
-
             if (capturaMultiplaAtiva) {
                 if (movimentosValidos.some(m => m.r === r && m.c === c)) {
                     executarMovimento(capturaMultiplaPos.r, capturaMultiplaPos.c, r, c);
                 }
                 return;
             }
-
             const peca = tabuleiro[r][c];
             if (peca && peca.startsWith(minhaCor)) {
                 const temObrigatoria = jogadorTemCapturaObrigatoria(minhaCor);
@@ -2591,11 +2611,9 @@
                 cData.stats.capturasTotais = (cData.stats.capturasTotais || 0) + 1;
                 salvarConquistas(cData);
             } else SoundFX.move();
-
             tabuleiro[paraR][paraC] = pecaMovida;
             tabuleiro[deR][deC] = null;
             if (mov.captura) tabuleiro[mov.captura.r][mov.captura.c] = null;
-
             let promoveu = false;
             if (pecaMovida === 'white' && paraR === 0) { tabuleiro[paraR][paraC] = 'white-king'; promoveu = true; }
             if (pecaMovida === 'red' && paraR === 7) { tabuleiro[paraR][paraC] = 'red-king'; promoveu = true; }
@@ -2629,7 +2647,6 @@
                     return;
                 }
             }
-
             turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
             celulaSelecionada = null; movimentosValidos = [];
             capturaMultiplaAtiva = false; capturaMultiplaPos = null;
@@ -2640,22 +2657,18 @@
                 captura: mov.captura ? `(${mov.captura.r},${mov.captura.c})` : null
             });
             if (historicoMovimentos.length <= 4) jogadasPrimeiras.push(`(${deR},${deC})->(${paraR},${paraC})`);
-
             if (modoTutorial && TUTORIAL_PASSOS[tutorialPasso]?.pos) {
                 const p = TUTORIAL_PASSOS[tutorialPasso].pos;
                 if (p.r === paraR && p.c === paraC) { tutorialPasso++; setTimeout(mostrarPassoTutorial, 500); }
             }
             renderizarTabuleiro();
-
             const vencedorPorTabuleiro = verificarFimDeJogo();
-
             if (modoIA || modoTutorial) {
                 if (vencedorPorTabuleiro) tratarFimDeJogo(vencedorPorTabuleiro, 'sem-movimentos');
                 else if (modoIA && turnoAtual === iaCor) { pararTimer(); jogadaIA(); }
                 else if (turnoAtual === minhaCor) iniciarTimer();
                 return;
             }
-
             const payload = {
                 tabuleiro: tabuleiroParaFirebase(tabuleiro),
                 turno: turnoAtual,
@@ -2697,10 +2710,8 @@
             desistenciaProcessada = true;
             pararTimer();
             registrarTempoJogada();
-
             const euVenci = (vencedor === minhaCor);
             const oponente = modoIA ? `IA (${modoIA})` : (nomeOponente || 'Oponente');
-
             if (euVenci) {
                 SoundFX.win(); registrarVitoria();
                 if (!modoIA && !modoTutorial) enviarVitoriaRanking();
@@ -2710,14 +2721,12 @@
                 if (!modoIA && !modoTutorial) enviarDerrotaRanking();
                 toast('😢 Você perdeu.', 'error');
             }
-
             if (!modoTutorial) adicionarAoHistorico(euVenci ? 'vitoria' : 'derrota', oponente);
             if (!modoTutorial && jogadasPrimeiras.length >= 2) {
                 const movsStr = jogadasPrimeiras.slice(0, 3);
                 registrarAbertura(movsStr);
                 if (euVenci) registrarAberturaVitoria(movsStr);
             }
-
             const cData = carregarConquistas();
             if (euVenci) {
                 cData.stats.vitorias++;
@@ -2817,10 +2826,7 @@
         // ============================================================
         async function enviarPedidoRevanche() {
             SoundFX.click();
-            if (modoIA || modoTutorial) {
-                if (modoIA) iniciarPartidaIA(modoIA); else iniciarTutorial();
-                return;
-            }
+            if (modoIA || modoTutorial) { if (modoIA) iniciarPartidaIA(modoIA); else iniciarTutorial(); return; }
             try {
                 await update(ref(db, `salas_damas/${idSalaAtual}`), {
                     pedidoRevanche: { de: jogadorSessao.chave, nome: jogadorSessao.nome, em: Date.now() }
@@ -2849,7 +2855,7 @@
                 const jogadores = jogadoresSnap.val() || {};
                 const novasCores = {};
                 Object.entries(jogadores).forEach(([uid, j]) => {
-                    novasCores[uid] = { ...j, cor: j.cor === 'white' ? 'red' : 'white' };
+                    novasCores[uid] = { ...j, cor: j.cor === 'white' ? 'red' : 'white', pronto: false };
                 });
                 const updates = {
                     status: 'jogando', turno: 'white',
@@ -2874,14 +2880,12 @@
             jogoEncerrado = false; vencedorDeclarado = null;
             capturaMultiplaAtiva = false; capturaMultiplaPos = null;
             emPausa = false; pausaPendenteDe = null; pausaSolicitadaPorMim = false;
+            euPronto = false; adversarioPronto = false; ambosProntos = false;
             tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
             turnoAtual = dados.turno || 'white';
             jogadasPrimeiras = [];
             temposJogadas = [];
-            historicoMovimentos = [{
-                tabuleiro: tabuleiroParaFirebase(tabuleiro),
-                turno: 'white', cor: 'white', de: '—', para: '—'
-            }];
+            historicoMovimentos = [{ tabuleiro: tabuleiroParaFirebase(tabuleiro), turno: 'white', cor: 'white', de: '—', para: '—' }];
             const jogadores = dados.jogadores || {};
             if (jogadores[jogadorSessao.chave]?.cor) {
                 minhaCor = jogadores[jogadorSessao.chave].cor;
@@ -2899,7 +2903,7 @@
             renderizarTabuleiro();
             SoundFX.notify();
             toast('🎮 Nova partida!', 'success');
-            setTimeout(() => { if (turnoAtual === minhaCor && !jogoEncerrado && !emPausa) iniciarTimer(); }, 400);
+            setTimeout(() => marcarPronto(), 400);
         }
         function confirmarDesistencia() {
             if (modoEspectador) return;
@@ -2925,7 +2929,7 @@
         }
 
         // ============================================================
-        // ==================== ESCUTA FIREBASE (CORRIGIDO) ===========
+        // ==================== ESCUTA FIREBASE =======================
         // ============================================================
         function escutarFirebase() {
             if (unsubscribeFirebase) unsubscribeFirebase();
@@ -2942,15 +2946,10 @@
                 vencedorDeclarado = dados.vencedor || null;
                 if (dados.tempoLimite !== undefined) tempoLimiteSegundos = dados.tempoLimite;
 
-                // === PAUSA ===
                 const pausaAtivaRemota = !!dados.pausaAtiva;
-                if (pausaAtivaRemota && !emPausa) {
-                    ativarPausaLocal('acordo mútuo');
-                } else if (!pausaAtivaRemota && emPausa) {
-                    // Retomada remota: qualquer lado pode desfazer
-                    retomarPausaLocal();
-                }
-                // Pedido de pausa
+                if (pausaAtivaRemota && !emPausa) ativarPausaLocal('acordo mútuo');
+                else if (!pausaAtivaRemota && emPausa) retomarPausaLocal();
+
                 const pedidoPausa = dados.pausaPedido;
                 if (pedidoPausa && pedidoPausa.de !== jogadorSessao.chave && !modoEspectador) {
                     if (pausaPendenteDe !== pedidoPausa.de) {
@@ -2990,6 +2989,8 @@
                 }
                 document.getElementById('placar-nome-eu').textContent = modoEspectador ? '⚪ Brancas' : 'Você';
 
+                atualizarHandshake(dados, uids);
+
                 if (jogoEncerrado && dados.motivoFim === 'desistencia' && !desistenciaProcessada && !modoEspectador) {
                     desistenciaProcessada = true; pararTimer();
                     tratarFimDeJogo(vencedorDeclarado, 'desistencia');
@@ -3018,39 +3019,28 @@
                         document.getElementById('info-minha-cor').textContent = minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
                     }
                 }
-
-                // === SINCRONIZAÇÃO DA VEZ / TIMER (CORRIGIDO) ===
                 if (turnoAnterior !== turnoAtual) {
-                    // A vez mudou — limpa seleções antigas
                     celulaSelecionada = null;
                     movimentosValidos = [];
                     capturaMultiplaAtiva = false;
                     capturaMultiplaPos = null;
-
-                    if (!jogoEncerrado && !modoEspectador) {
+                    if (!jogoEncerrado && !modoEspectador && ambosProntos) {
                         if (turnoAtual === minhaCor && !emPausa) {
                             setTimeout(() => SoundFX.notify(), 150);
                             iniciarTimer();
-                        } else {
-                            pararTimer();
-                        }
+                        } else pararTimer();
                     }
                 }
-
-                // === Captura múltipla remota: apenas informativo ===
                 const cmRemota = dados.capturaMultipla;
                 if (cmRemota && cmRemota.cor && cmRemota.cor !== minhaCor && !modoEspectador) {
-                    // O adversário está em captura múltipla — apenas mostra highlight
                     celulaSelecionada = { r: cmRemota.r, c: cmRemota.c };
                     movimentosValidos = [];
                     capturaMultiplaAtiva = false;
                 } else if (!cmRemota && capturaMultiplaAtiva && turnoAtual === minhaCor && !modoEspectador) {
-                    // A captura múltipla terminou remotamente
                     capturaMultiplaAtiva = false;
                     capturaMultiplaPos = null;
                     celulaSelecionada = null;
                 }
-
                 renderizarTabuleiro();
             });
         }
@@ -3080,7 +3070,7 @@
             });
         }
         function enviarEmoji(emoji) {
-            if (!idSalaAtual || modoIA || modoTutorial) return;
+            if (!idSalaAtual || modoIA || modoTutorial || !ambosProntos) return;
             SoundFX.click();
             const nome = modoEspectador ? 'Espectador' : (jogadorSessao?.nome || 'Jogador');
             const msgRef = push(ref(db, `salas_damas/${idSalaAtual}/chat`));
@@ -3088,7 +3078,7 @@
             mostrarBalao(emoji, modoEspectador ? '👁️ Espectador' : 'Você', false);
         }
         function enviarTexto(texto) {
-            if (!idSalaAtual || !texto || modoIA || modoTutorial) return;
+            if (!idSalaAtual || !texto || modoIA || modoTutorial || !ambosProntos) return;
             const t = texto.trim().slice(0, 120);
             if (!t) return;
             SoundFX.click();
@@ -3119,103 +3109,6 @@
         document.getElementById('chat-input').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') { e.preventDefault(); enviarTexto(e.target.value); e.target.value = ''; }
         });
-
-        // ============================================================
-        // ==================== GRAVAÇÃO POR CANVAS ===================
-        // ============================================================
-        function desenharTabuleiroNoCanvas(ctx, canvas, tab) {
-            const size = canvas.width;
-            const cell = size / 8;
-            ctx.fillStyle = '#4a2f1e';
-            ctx.fillRect(0, 0, size, size);
-            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-                const isDark = (r + c) % 2 === 1;
-                ctx.fillStyle = isDark ? '#8b5a2b' : '#e8d4a8';
-                ctx.fillRect(c * cell, r * cell, cell, cell);
-            }
-            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-                const p = tab[r][c];
-                if (!p) continue;
-                const cx = c * cell + cell / 2;
-                const cy = r * cell + cell / 2;
-                const radius = cell * 0.4;
-                const grad = ctx.createRadialGradient(cx - radius*0.3, cy - radius*0.3, radius*0.1, cx, cy, radius);
-                if (p.startsWith('white')) {
-                    grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.75, '#cdb896'); grad.addColorStop(1, '#a08768');
-                    ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.fill();
-                    ctx.strokeStyle = '#7a6350'; ctx.lineWidth = 2; ctx.stroke();
-                } else {
-                    grad.addColorStop(0, '#dc2626'); grad.addColorStop(0.8, '#6b0f0f'); grad.addColorStop(1, '#450808');
-                    ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.fill();
-                    ctx.strokeStyle = '#2d0606'; ctx.lineWidth = 2; ctx.stroke();
-                }
-                if (p.includes('king')) {
-                    ctx.fillStyle = '#fbbf24'; ctx.font = `bold ${cell*0.5}px sans-serif`;
-                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-                    ctx.fillText('♛', cx, cy + 2);
-                }
-            }
-            ctx.fillStyle = 'rgba(232,212,168,0.9)';
-            ctx.font = `bold ${cell*0.28}px monospace`;
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            const colunas = ['a','b','c','d','e','f','g','h'];
-            for (let i = 0; i < 8; i++) {
-                ctx.fillText(colunas[i], i * cell + cell/2, 8);
-                ctx.fillText(colunas[i], i * cell + cell/2, size - 6);
-                ctx.fillText(8 - i, 6, i * cell + cell/2);
-                ctx.fillText(8 - i, size - 8, i * cell + cell/2);
-            }
-        }
-        async function toggleGravacaoCanvas() {
-            const btn = document.getElementById('btn-rec');
-            const badge = document.getElementById('badge-rec');
-            if (gravandoCanvas) {
-                try { if (canvasRecorder && canvasRecorder.state !== 'inactive') canvasRecorder.stop(); } catch (_) {}
-                if (gravandoIntervalId) { clearInterval(gravandoIntervalId); gravandoIntervalId = null; }
-                if (canvasStream) { canvasStream.getTracks().forEach(t => t.stop()); canvasStream = null; }
-                gravandoCanvas = false;
-                btn.textContent = '🎥 Gravar';
-                badge.classList.add('hidden');
-                return;
-            }
-            try {
-                const canvas = document.createElement('canvas');
-                canvas.width = 640; canvas.height = 640;
-                const ctx = canvas.getContext('2d');
-                canvasStream = canvas.captureStream(30);
-                const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-                    ? 'video/webm;codecs=vp9'
-                    : (MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : '');
-                canvasRecorder = new MediaRecorder(canvasStream, mimeType ? { mimeType } : undefined);
-                recordedChunks = [];
-                canvasRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
-                canvasRecorder.onstop = () => {
-                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `brain-damas-${idSalaAtual || 'partida'}-${Date.now()}.webm`;
-                    document.body.appendChild(a); a.click();
-                    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
-                    toast('🎥 Vídeo guardado!', 'success');
-                };
-                canvasRecorder.start(1000);
-                gravandoCanvas = true;
-                btn.textContent = '⏹️ Parar';
-                badge.classList.remove('hidden');
-                toast('🔴 A gravar apenas o tabuleiro.', 'info');
-                function drawLoop() {
-                    if (!gravandoCanvas) return;
-                    desenharTabuleiroNoCanvas(ctx, canvas, tabuleiro);
-                    gravandoIntervalId = requestAnimationFrame(drawLoop);
-                }
-                drawLoop();
-            } catch (e) {
-                toast('Erro ao iniciar gravação.', 'error');
-                gravandoCanvas = false;
-            }
-        }
-        document.getElementById('btn-rec').addEventListener('click', toggleGravacaoCanvas);
 
         // ============================================================
         // ==================== TELA CHEIA ============================
