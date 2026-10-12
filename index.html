@@ -143,20 +143,17 @@
         }
 
         body.is-fullscreen { padding: 0; }
-        body.is-fullscreen .container {
-            max-width: 100vw;
-            border-radius: 0;
-            padding: 12px;
-            animation: none;
-        }
+        body.is-fullscreen .container { max-width: 100vw; border-radius: 0; padding: 12px; animation: none; }
         body.is-fullscreen #btn-fullscreen { display: none; }
 
         .fs-exit-btn {
             position: fixed;
-            top: 12px; right: 12px;
+            top: 12px;
+            right: 12px;
             z-index: 5000;
             display: none;
-            width: 40px; height: 40px;
+            width: 40px;
+            height: 40px;
             padding: 0;
             border-radius: 50%;
             background: rgba(15, 23, 42, 0.9) !important;
@@ -170,10 +167,7 @@
             transition: transform var(--t-fast), background var(--t-fast);
         }
         body.is-fullscreen .fs-exit-btn { display: flex; }
-        .fs-exit-btn:hover {
-            transform: scale(1.08);
-            background: rgba(99, 102, 241, 0.95) !important;
-        }
+        .fs-exit-btn:hover { transform: scale(1.08); background: rgba(99, 102, 241, 0.95) !important; }
 
         .top-bar {
             display: flex;
@@ -249,7 +243,8 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 32px; height: 32px;
+            width: 32px;
+            height: 32px;
             font-size: 16px;
             border-radius: 50%;
             background: linear-gradient(135deg, rgba(99,102,241,0.25), rgba(139,92,246,0.2));
@@ -259,7 +254,8 @@
 
         .status-dot {
             display: inline-block;
-            width: 8px; height: 8px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             margin-left: 6px;
             background: var(--text-subtle);
@@ -311,49 +307,29 @@
             user-select: none;
             z-index: 2;
         }
-        .board-ruler-top {
-            top: 0; left: 22px; right: 22px; height: 22px;
-            display: grid; grid-template-columns: repeat(8, 1fr); align-items: center;
-        }
-        .board-ruler-bottom {
-            bottom: 0; left: 22px; right: 22px; height: 22px;
-            display: grid; grid-template-columns: repeat(8, 1fr); align-items: center;
-        }
-        .board-ruler-left {
-            top: 22px; bottom: 22px; left: 0; width: 22px;
-            display: grid; grid-template-rows: repeat(8, 1fr); align-items: center;
-        }
-        .board-ruler-right {
-            top: 22px; bottom: 22px; right: 0; width: 22px;
-            display: grid; grid-template-rows: repeat(8, 1fr); align-items: center;
-        }
+        .board-ruler-top { top: 0; left: 22px; right: 22px; height: 22px; display: grid; grid-template-columns: repeat(8, 1fr); align-items: center; }
+        .board-ruler-bottom { bottom: 0; left: 22px; right: 22px; height: 22px; display: grid; grid-template-columns: repeat(8, 1fr); align-items: center; }
+        .board-ruler-left { top: 22px; bottom: 22px; left: 0; width: 22px; display: grid; grid-template-rows: repeat(8, 1fr); align-items: center; }
+        .board-ruler-right { top: 22px; bottom: 22px; right: 0; width: 22px; display: grid; grid-template-rows: repeat(8, 1fr); align-items: center; }
 
         .board-ruler .coord {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 100%; height: 100%;
+            width: 100%;
+            height: 100%;
             text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9), 0 0 3px rgba(0, 0, 0, 0.6);
         }
-        .board-ruler .coord.edge {
-            font-weight: 800;
-            color: var(--board-coord-edge);
-        }
+        .board-ruler .coord.edge { font-weight: 800; color: var(--board-coord-edge); }
 
-        .board-ruler-top::after,
-        .board-ruler-bottom::after {
-            content: '';
-            position: absolute;
-            left: 0; right: 0; height: 1px;
+        .board-ruler-top::after, .board-ruler-bottom::after {
+            content: ''; position: absolute; left: 0; right: 0; height: 1px;
             background: linear-gradient(to right, transparent, rgba(0,0,0,0.4), transparent);
         }
         .board-ruler-top::after { bottom: 0; }
         .board-ruler-bottom::after { top: 0; }
-        .board-ruler-left::after,
-        .board-ruler-right::after {
-            content: '';
-            position: absolute;
-            top: 0; bottom: 0; width: 1px;
+        .board-ruler-left::after, .board-ruler-right::after {
+            content: ''; position: absolute; top: 0; bottom: 0; width: 1px;
             background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4), transparent);
         }
         .board-ruler-left::after  { right: 0; }
@@ -364,12 +340,11 @@
             grid-template-columns: repeat(8, 1fr);
             grid-template-rows: repeat(8, 1fr);
             gap: 0;
-            width: 100%; height: 100%;
+            width: 100%;
+            height: 100%;
             border-radius: 4px;
             overflow: hidden;
-            box-shadow:
-                inset 0 0 0 2px rgba(0, 0, 0, 0.45),
-                0 4px 14px rgba(0, 0, 0, 0.55);
+            box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.55);
         }
 
         .square {
@@ -403,13 +378,10 @@
             filter: brightness(0.9);
             box-shadow: inset 0 0 0 3px rgba(239, 68, 68, 0.95), inset 0 0 14px rgba(239, 68, 68, 0.5) !important;
         }
-        .square:focus-visible {
-            outline: 3px solid var(--c-blue);
-            outline-offset: -3px;
-        }
 
         .piece {
-            width: 80%; height: 80%;
+            width: 80%;
+            height: 80%;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -422,24 +394,12 @@
         .piece.white {
             background: radial-gradient(circle at 32% 28%, #ffffff 0%, #f5ede0 35%, #cdb896 75%, #a08768 100%);
             border: 1px solid #7a6350;
-            box-shadow:
-                inset 0 0 0 3px rgba(255, 255, 255, 0.65),
-                inset 0 0 0 5px rgba(160, 135, 104, 0.35),
-                inset 0 2px 3px rgba(255, 255, 255, 0.7),
-                inset 0 -2px 4px rgba(0, 0, 0, 0.25),
-                0 3px 0 #7a6350,
-                0 5px 10px rgba(0, 0, 0, 0.55);
+            box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.65), inset 0 0 0 5px rgba(160, 135, 104, 0.35), inset 0 2px 3px rgba(255, 255, 255, 0.7), inset 0 -2px 4px rgba(0, 0, 0, 0.25), 0 3px 0 #7a6350, 0 5px 10px rgba(0, 0, 0, 0.55);
         }
         .piece.red {
             background: radial-gradient(circle at 32% 28%, #dc2626 0%, #991b1b 40%, #6b0f0f 80%, #450808 100%);
             border: 1px solid #2d0606;
-            box-shadow:
-                inset 0 0 0 3px rgba(255, 200, 200, 0.22),
-                inset 0 0 0 5px rgba(0, 0, 0, 0.35),
-                inset 0 2px 3px rgba(255, 255, 255, 0.25),
-                inset 0 -2px 4px rgba(0, 0, 0, 0.5),
-                0 3px 0 #2d0606,
-                0 5px 10px rgba(0, 0, 0, 0.6);
+            box-shadow: inset 0 0 0 3px rgba(255, 200, 200, 0.22), inset 0 0 0 5px rgba(0, 0, 0, 0.35), inset 0 2px 3px rgba(255, 255, 255, 0.25), inset 0 -2px 4px rgba(0, 0, 0, 0.5), 0 3px 0 #2d0606, 0 5px 10px rgba(0, 0, 0, 0.6);
         }
         .piece.king::after {
             content: "♛";
@@ -448,10 +408,7 @@
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             color: #fbbf24;
-            text-shadow:
-                0 0 8px rgba(251, 191, 36, 0.95),
-                0 0 14px rgba(251, 191, 36, 0.55),
-                0 1px 2px rgba(0, 0, 0, 0.85);
+            text-shadow: 0 0 8px rgba(251, 191, 36, 0.95), 0 0 14px rgba(251, 191, 36, 0.55), 0 1px 2px rgba(0, 0, 0, 0.85);
             font-weight: 900;
             line-height: 1;
         }
@@ -464,7 +421,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 100%; height: 100%;
+            width: 100%;
+            height: 100%;
         }
         .piece-wrapper.movel { animation: pulse-movel 1.5s infinite; }
         @keyframes pulse-movel {
@@ -472,10 +430,7 @@
             50%  { transform: scale(1.055); }
             100% { transform: scale(1); }
         }
-        .piece.movel {
-            cursor: pointer;
-            filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.9));
-        }
+        .piece.movel { cursor: pointer; filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.9)); }
         .piece.movel:hover { transform: scale(1.08); }
 
         .instructions {
@@ -517,17 +472,12 @@
         .hidden { display: none !important; }
 
         .modal-overlay {
-            position: fixed;
-            inset: 0;
+            position: fixed; inset: 0;
             background: rgba(0, 0, 0, 0.55);
             backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 20px;
-            opacity: 0;
-            pointer-events: none;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; padding: 20px;
+            opacity: 0; pointer-events: none;
             transition: opacity var(--t-base);
         }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
@@ -536,13 +486,9 @@
             backdrop-filter: blur(18px) saturate(160%);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-lg);
-            padding: 24px;
-            max-width: 380px;
-            width: 100%;
-            text-align: center;
+            padding: 24px; max-width: 380px; width: 100%; text-align: center;
             box-shadow: var(--shadow-card);
-            transform: scale(0.9);
-            transition: transform var(--t-base);
+            transform: scale(0.9); transition: transform var(--t-base);
         }
         .modal-overlay.active .modal-card { transform: scale(1); }
         .modal-card h2 { margin: 0 0 8px; font-size: 20px; }
@@ -558,183 +504,67 @@
         }
 
         .toast-container {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1100;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            pointer-events: none;
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 1100; display: flex; flex-direction: column; gap: 8px; pointer-events: none;
         }
         .toast {
-            background: var(--card-bg);
-            backdrop-filter: blur(18px);
-            border: 1px solid var(--card-border);
-            border-left: 4px solid var(--c-blue);
-            padding: 10px 16px;
-            border-radius: var(--radius-md);
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-color);
-            box-shadow: var(--shadow-card);
-            animation: toastIn 0.3s ease;
-            max-width: 340px;
+            background: var(--card-bg); backdrop-filter: blur(18px);
+            border: 1px solid var(--card-border); border-left: 4px solid var(--c-blue);
+            padding: 10px 16px; border-radius: var(--radius-md);
+            font-size: 13px; font-weight: 600; color: var(--text-color);
+            box-shadow: var(--shadow-card); animation: toastIn 0.3s ease; max-width: 340px;
         }
         .toast.success { border-left-color: var(--c-green); }
         .toast.error   { border-left-color: var(--c-red); }
         .toast.warn    { border-left-color: var(--c-amber); }
-
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         #__erro_painel {
-            position: fixed;
-            bottom: 12px; left: 12px; right: 12px;
-            background: rgba(127, 29, 29, 0.95);
-            color: #fee2e2;
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            line-height: 1.5;
-            white-space: pre-wrap;
-            z-index: 99999;
-            max-height: 40vh;
-            overflow-y: auto;
-            border: 1px solid #ef4444;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            display: none;
+            position: fixed; bottom: 12px; left: 12px; right: 12px;
+            background: rgba(127, 29, 29, 0.95); color: #fee2e2;
+            padding: 12px 16px; border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace; font-size: 12px;
+            line-height: 1.5; white-space: pre-wrap; z-index: 99999;
+            max-height: 40vh; overflow-y: auto; border: 1px solid #ef4444;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); display: none;
         }
         #__erro_painel.visivel { display: block; }
         #__erro_painel .fechar {
-            position: absolute;
-            top: 6px; right: 8px;
-            background: transparent;
-            border: none;
-            color: #fee2e2;
-            cursor: pointer;
-            font-size: 14px;
-            width: auto;
-            padding: 2px 6px;
-            box-shadow: none;
+            position: absolute; top: 6px; right: 8px; background: transparent;
+            border: none; color: #fee2e2; cursor: pointer; font-size: 14px;
+            width: auto; padding: 2px 6px; box-shadow: none;
         }
 
         .readme-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(6px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1200;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity var(--t-base);
-            padding: 16px;
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center;
+            z-index: 1200; opacity: 0; pointer-events: none; transition: opacity var(--t-base); padding: 16px;
         }
         .readme-overlay.active { opacity: 1; pointer-events: auto; }
         .readme-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(18px) saturate(160%);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-lg);
-            width: 100%;
-            max-width: 720px;
-            max-height: 88vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: var(--shadow-card);
-            transform: translateY(12px) scale(0.98);
+            background: var(--card-bg); backdrop-filter: blur(18px) saturate(160%);
+            border: 1px solid var(--card-border); border-radius: var(--radius-lg);
+            width: 100%; max-width: 720px; max-height: 88vh; display: flex; flex-direction: column;
+            overflow: hidden; box-shadow: var(--shadow-card); transform: translateY(12px) scale(0.98);
             transition: transform var(--t-base);
         }
         .readme-overlay.active .readme-card { transform: translateY(0) scale(1); }
         .readme-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
-            gap: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 20px; border-bottom: 1px solid var(--border-color); gap: 12px;
         }
         .readme-header h2 { margin: 0; font-size: 16px; font-weight: 700; color: var(--text-color); }
         .readme-close {
-            width: 32px !important; height: 32px;
-            flex: 0 0 auto;
-            padding: 0 !important;
-            border-radius: 8px !important;
-            background: var(--input-bg) !important;
-            border: 1px solid var(--border-color) !important;
-            color: var(--text-muted) !important;
-            font-size: 16px !important;
-            box-shadow: none !important;
+            width: 32px !important; height: 32px; flex: 0 0 auto; padding: 0 !important;
+            border-radius: 8px !important; background: var(--input-bg) !important;
+            border: 1px solid var(--border-color) !important; color: var(--text-muted) !important;
+            font-size: 16px !important; box-shadow: none !important;
             display: flex; align-items: center; justify-content: center;
         }
         .readme-close:hover { color: var(--text-color) !important; background: var(--card-bg) !important; transform: none; }
         .readme-content {
-            flex: 1; overflow-y: auto;
-            padding: 20px 24px;
-            font-size: 14px; line-height: 1.65;
-            color: var(--text-color); text-align: left;
-        }
-        .readme-content h1, .readme-content h2, .readme-content h3, .readme-content h4 {
-            color: var(--text-color); margin: 20px 0 8px; line-height: 1.3;
-        }
-        .readme-content h1 { font-size: 22px; margin-top: 0; }
-        .readme-content h2 { font-size: 17px; padding-bottom: 6px; border-bottom: 1px solid var(--border-color); }
-        .readme-content h3 { font-size: 15px; }
-        .readme-content p { margin: 8px 0; color: var(--text-muted); }
-        .readme-content ul, .readme-content ol { margin: 8px 0 8px 22px; color: var(--text-muted); }
-        .readme-content li { margin: 4px 0; }
-        .readme-content code {
-            background: var(--input-bg);
-            padding: 2px 6px; border-radius: 5px;
-            font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
-            font-size: 12.5px; color: var(--c-amber);
-        }
-        .readme-content pre {
-            background: rgba(15, 23, 42, 0.9); color: #e2e8f0;
-            padding: 14px 16px; border-radius: 10px;
-            overflow-x: auto; font-size: 12.5px; line-height: 1.55; margin: 12px 0;
-        }
-        .readme-content pre code { background: transparent; color: inherit; padding: 0; font-size: inherit; }
-        .readme-content a { color: var(--btn-primary-hover); text-decoration: none; font-weight: 600; }
-        .readme-content a:hover { text-decoration: underline; }
-        .readme-content blockquote {
-            border-left: 3px solid var(--btn-primary);
-            background: var(--input-bg);
-            padding: 8px 14px; margin: 10px 0;
-            color: var(--text-muted);
-            border-radius: 0 8px 8px 0;
-        }
-        .readme-content img { max-width: 100%; border-radius: 10px; margin: 8px 0; }
-        .readme-content table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
-        .readme-content th, .readme-content td {
-            padding: 8px 10px;
-            border-bottom: 1px solid var(--border-color);
-            text-align: left; color: var(--text-muted);
-        }
-        .readme-content th { background: var(--input-bg); font-weight: 700; color: var(--text-color); }
-        .readme-content hr { border: none; border-top: 1px solid var(--border-color); margin: 18px 0; }
-
-        @media (max-width: 480px) {
-            .container { padding: 14px; }
-            .board-wrapper { padding: 20px; }
-            .board-ruler-top, .board-ruler-bottom { left: 20px; right: 20px; height: 20px; }
-            .board-ruler-left, .board-ruler-right { top: 20px; bottom: 20px; width: 20px; }
-            .board-ruler { font-size: 10px; }
-            .readme-card { max-height: 94vh; border-radius: 14px; }
-            .readme-content { padding: 16px; font-size: 13.5px; }
-            .readme-header { padding: 12px 16px; }
-            .top-bar { gap: 6px; }
-            .btn-small { padding: 7px 12px; font-size: 12px; }
-            .match-info-bar { font-size: 11px; padding: 6px 10px; gap: 6px; }
-            .match-info-bar > span { white-space: nowrap; }
+            flex: 1; overflow-y: auto; padding: 20px 24px;
+            font-size: 14px; line-height: 1.65; color: var(--text-color); text-align: left;
         }
     </style>
 </head>
@@ -746,7 +576,7 @@
         <div class="top-bar">
             <button id="btn-sair" class="btn-small" type="button" title="Sair da sala atual">🚪 Sair</button>
             <div style="display:flex; gap:6px; flex-wrap: wrap;">
-                <button id="btn-perfil" class="btn-small" type="button" title="Mudar nome e avatar">👤 <span id="btn-perfil-nome">Jogador</span></button>
+                <button id="btn-google" class="btn-small" type="button" title="Entrar com Google">🌐 Google</button>
                 <button id="btn-fullscreen" class="btn-small" type="button" title="Modo tela cheia">⛶</button>
                 <button id="btn-about" class="btn-small" type="button" title="Sobre o jogo">📖</button>
                 <button id="theme-toggle" class="btn-small" type="button">🌙</button>
@@ -757,22 +587,22 @@
         <div id="lobby-screen">
             <div class="user-header" style="justify-content: center;">
                 <div class="user-info-left">
-                    <span id="lobby-avatar" class="user-avatar-display">😀</span>
-                    <strong id="lobby-nome">Jogador</strong>
+                    <span id="lobby-avatar" class="user-avatar-display">⏳</span>
+                    <strong id="lobby-nome">Conectando…</strong>
                 </div>
             </div>
 
             <div class="lobby-box">
                 <h3>♟️ Jogo de Damas Multiplayer</h3>
                 <p>Jogue uma partida clássica de Damas 8x8 em turnos com um colega em tempo real. Crie sua sala e envie o convite pelo WhatsApp!</p>
-                <button id="btn-criar-sala" type="button">🚀 Criar Sala de Damas</button>
+                <button id="btn-criar-sala" type="button" disabled>🚀 Criar Sala de Damas</button>
             </div>
 
             <div class="lobby-box" style="margin-bottom: 0;">
                 <h3>🔗 Entrar com Código</h3>
                 <div style="display: flex; gap: 6px;">
                     <input type="text" id="input-codigo-sala" placeholder="Ex: DAMAS-7812" style="font-family: monospace;">
-                    <button id="btn-entrar-sala" type="button" style="width: 120px;">Entrar</button>
+                    <button id="btn-entrar-sala" type="button" style="width: 120px;" disabled>Entrar</button>
                 </div>
             </div>
         </div>
@@ -791,13 +621,7 @@
             <div class="match-info-bar">
                 <span>Sua Peça: <strong id="info-minha-cor" style="color: var(--c-blue);">--</strong></span>
                 <span id="turno-status">Aguardando...</span>
-                <button id="btn-fullscreen-game"
-                        class="btn-small"
-                        type="button"
-                        title="Modo tela cheia"
-                        style="padding: 4px 10px; font-size: 11px; width: auto;">
-                    ⛶
-                </button>
+                <button id="btn-fullscreen-game" class="btn-small" type="button" title="Modo tela cheia" style="padding: 4px 10px; font-size: 11px; width: auto;">⛶</button>
             </div>
 
             <p class="instructions" id="info-instrucao">Toque em sua peça e depois na casa de destino válida.</p>
@@ -827,23 +651,6 @@
         </div>
     </div>
 
-    <!-- MODAL PERFIL -->
-    <div class="modal-overlay" id="perfil-modal">
-        <div class="modal-card">
-            <div class="modal-icon">👤</div>
-            <h2>Seu perfil</h2>
-            <p>Escolha um nome e um avatar. Ficam guardados no seu dispositivo.</p>
-            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                <input type="text" id="perfil-nome-input" maxlength="20" placeholder="Nome" style="flex: 1;">
-                <button id="perfil-avatar-btn" type="button" style="width: 60px; font-size: 22px; padding: 8px 0;">😀</button>
-            </div>
-            <div class="modal-actions">
-                <button id="perfil-cancelar" type="button" class="btn-secondary">Cancelar</button>
-                <button id="perfil-salvar" type="button">Salvar</button>
-            </div>
-        </div>
-    </div>
-
     <!-- MODAL SOBRE -->
     <div class="readme-overlay" id="readme-modal" role="dialog" aria-modal="true" aria-labelledby="readme-title">
         <div class="readme-card">
@@ -866,9 +673,7 @@
     <!-- TOASTS -->
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- ═══════════════════════════════════════════════════════
-         SCRIPT 1 — PAINEL DE ERRO GLOBAL
-         ═══════════════════════════════════════════════════════ -->
+    <!-- SCRIPT 1 — ERROS GLOBAIS -->
     <script>
         (function () {
             'use strict';
@@ -894,9 +699,7 @@
         })();
     </script>
 
-    <!-- ═══════════════════════════════════════════════════════
-         SCRIPT 2 — MODAL "SOBRE"
-         ═══════════════════════════════════════════════════════ -->
+    <!-- SCRIPT 2 — MODAL SOBRE -->
     <script>
         (function () {
             'use strict';
@@ -918,7 +721,6 @@
                     markedFn = mod.marked || mod.default;
                     return markedFn;
                 } catch (e) {
-                    console.warn('[Sobre] marked indisponível.', e);
                     return null;
                 }
             }
@@ -930,11 +732,9 @@
                     const mod = await import('./sobre.js');
                     md = mod.CONTEUDO_SOBRE || mod.default || '';
                 } catch (e) {
-                    console.error('[Sobre] Falha ao importar sobre.js:', e);
-                    conteudo.innerHTML = '<p style="color:#ef4444;text-align:center;padding:20px;">⚠️ sobre.js não encontrado.</p>';
+                    conteudo.innerHTML = '<p style="color:#ef4444;text-align:center;padding:20px;">⚠️ Não foi possível carregar o conteúdo do "Sobre".</p>';
                     return;
                 }
-                if (!md.trim()) return;
                 const marked = await carregarMarked();
                 if (marked && typeof marked.parse === 'function') {
                     conteudo.innerHTML = marked.parse(md);
@@ -944,7 +744,7 @@
                     });
                 } else {
                     const pre = document.createElement('pre');
-                    pre.style.cssText = 'white-space:pre-wrap;font-family:JetBrains Mono,monospace;font-size:12.5px;color:var(--text-muted);';
+                    pre.style.cssText = 'white-space:pre-wrap; font-family:JetBrains Mono,monospace; font-size:12.5px; color:var(--text-muted);';
                     pre.textContent = md;
                     conteudo.innerHTML = '';
                     conteudo.appendChild(pre);
@@ -957,8 +757,8 @@
                 modal.classList.add('active');
                 document.body.style.overflow = 'hidden';
                 renderizarSobre();
-                setTimeout(() => btnClose && btnClose.focus(), 50);
             }
+
             function fecharModalSobre() {
                 modal.classList.remove('active');
                 document.body.style.overflow = '';
@@ -968,21 +768,16 @@
             btnAbout.addEventListener('click', abrirModalSobre);
             if (btnClose) btnClose.addEventListener('click', fecharModalSobre);
             modal.addEventListener('click', (e) => { if (e.target === modal) fecharModalSobre(); });
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && modal.classList.contains('active')) fecharModalSobre();
-            });
         })();
     </script>
 
-    <!-- ═══════════════════════════════════════════════════════
-         SCRIPT 3 — FULLSCREEN
-         ═══════════════════════════════════════════════════════ -->
+    <!-- SCRIPT 3 — FULLSCREEN -->
     <script>
         (function () {
             'use strict';
-            const btnFullscreen     = document.getElementById('btn-fullscreen');
+            const btnFullscreen = document.getElementById('btn-fullscreen');
             const btnFullscreenGame = document.getElementById('btn-fullscreen-game');
-            const btnExitFs         = document.getElementById('fs-exit');
+            const btnExitFs = document.getElementById('fs-exit');
             let fsAtivo = false;
 
             function entrarFullscreen() {
@@ -992,6 +787,7 @@
                 document.body.classList.add('is-fullscreen');
                 fsAtivo = true;
             }
+
             function sairFullscreen() {
                 if (document.fullscreenElement || document.webkitFullscreenElement) {
                     const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
@@ -1000,35 +796,44 @@
                 document.body.classList.remove('is-fullscreen');
                 fsAtivo = false;
             }
-            function toggleFullscreen() { if (fsAtivo) sairFullscreen(); else entrarFullscreen(); }
-            function syncFullscreenState() {
-                const ehNativo = !!(document.fullscreenElement || document.webkitFullscreenElement);
-                if (!ehNativo && fsAtivo) { fsAtivo = false; document.body.classList.remove('is-fullscreen'); }
+
+            function toggleFullscreen() {
+                if (fsAtivo) sairFullscreen();
+                else entrarFullscreen();
             }
+
+            function syncFullscreenState() {
+                const ehFullscreenNativo = !!(document.fullscreenElement || document.webkitFullscreenElement);
+                if (!ehFullscreenNativo && fsAtivo) {
+                    fsAtivo = false;
+                    document.body.classList.remove('is-fullscreen');
+                }
+            }
+
             document.addEventListener('fullscreenchange', syncFullscreenState);
             document.addEventListener('webkitfullscreenchange', syncFullscreenState);
             btnFullscreen && btnFullscreen.addEventListener('click', toggleFullscreen);
             btnFullscreenGame && btnFullscreenGame.addEventListener('click', toggleFullscreen);
             btnExitFs && btnExitFs.addEventListener('click', sairFullscreen);
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && fsAtivo) sairFullscreen();
-            });
         })();
     </script>
 
-    <!-- ═══════════════════════════════════════════════════════
-         SCRIPT 4 — LÓGICA DO JOGO (SEM AUTH)
-         ═══════════════════════════════════════════════════════ -->
+    <!-- SCRIPT 4 — LÓGICA DO JOGO -->
     <script type="module">
-        import { db } from "./firebase-config.js";
+        import { db, auth } from "./firebase-config.js";
         import {
-            ref, get, set, update, onValue, runTransaction, onDisconnect, serverTimestamp, remove
+            ref, get, set, update, onValue, runTransaction, onDisconnect, serverTimestamp
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import {
+            signInAnonymously,
+            onAuthStateChanged,
+            GoogleAuthProvider,
+            signInWithPopup,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const VALORES_PECA_VALIDOS = new Set([null, 'white', 'red', 'white-king', 'red-king']);
-        const TTL_SALA_HORAS = 6; // salas mais antigas que isto podem ser limpas
 
-        /* ═══════════════ UI HELPERS ═══════════════ */
         const modalOverlay = document.getElementById('modal-overlay');
         const modalIcon    = document.getElementById('modal-icon');
         const modalTitle   = document.getElementById('modal-title');
@@ -1061,7 +866,6 @@
             modalOverlay.classList.add('active');
         }
         function fecharModal() { modalOverlay.classList.remove('active'); }
-        modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) fecharModal(); });
 
         function toast(mensagem, tipo = 'info', duracao = 3200) {
             const container = document.getElementById('toast-container');
@@ -1077,7 +881,6 @@
             }, duracao);
         }
 
-        /* ═══════════════ SERIALIZAÇÃO ═══════════════ */
         function tabuleiroParaFirebase(t) { return t.map(row => row.slice()); }
 
         function firebaseParaTabuleiro(raw) {
@@ -1107,94 +910,107 @@
             return { white: w, red: r };
         }
 
-        /* ═══════════════ IDENTIDADE LOCAL (sem Auth) ═══════════════
-           Cada browser recebe um ID aleatório único, guardado em
-           localStorage. Este ID é a "chave" do jogador no Firebase.
-           Não há login, não há race condition, não há permissões.
-           ═══════════════════════════════════════════════════════════ */
-        function gerarIdLocal() {
-            return 'p_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
-        }
+        let jogadorSessao = null;
 
-        function carregarIdentidadeLocal() {
-            try {
-                const salvo = JSON.parse(localStorage.getItem('brain_damas_identidade'));
-                if (salvo && salvo.id && salvo.nome && salvo.avatar) return salvo;
-            } catch (_) {}
-            const nova = {
-                id: gerarIdLocal(),
-                nome: 'Jogador ' + Math.floor(Math.random() * 9000 + 1000),
-                avatar: escolherAvatarAleatorio()
-            };
-            try { localStorage.setItem('brain_damas_identidade', JSON.stringify(nova)); } catch (_) {}
-            return nova;
-        }
-
-        function escolherAvatarAleatorio() {
+        function gerarNomeAleatorio() { return 'Jogador ' + Math.floor(Math.random() * 9000 + 1000); }
+        function gerarAvatarAleatorio() {
             const av = ['😀', '😎', '🤠', '🦊', '🐼', '🐸', '🦁', '🐯', '🐻', '🐨', '🦄', '🐙'];
             return av[Math.floor(Math.random() * av.length)];
         }
-
-        function salvarIdentidadeLocal() {
-            try { localStorage.setItem('brain_damas_identidade', JSON.stringify(identidade)); } catch (_) {}
-        }
-
-        // Identidade local do jogador
-        const identidade = carregarIdentidadeLocal();
-        console.log('🎭 Identidade local:', identidade.id, '—', identidade.nome);
-
-        // Atualiza UI do lobby e do botão de perfil
-        document.getElementById('lobby-nome').textContent = identidade.nome;
-        document.getElementById('lobby-avatar').textContent = identidade.avatar;
-        document.getElementById('display-nome').textContent = identidade.nome;
-        document.getElementById('display-avatar').textContent = identidade.avatar;
-        document.getElementById('btn-perfil-nome').textContent = identidade.nome;
-
-        /* ═══════════════ MODAL PERFIL ═══════════════ */
-        const perfilModal = document.getElementById('perfil-modal');
-        const perfilNomeInput = document.getElementById('perfil-nome-input');
-        const perfilAvatarBtn = document.getElementById('perfil-avatar-btn');
-
-        function abrirModalPerfil() {
-            perfilNomeInput.value = identidade.nome;
-            perfilAvatarBtn.textContent = identidade.avatar;
-            perfilModal.classList.add('active');
-        }
-        function fecharModalPerfil() { perfilModal.classList.remove('active'); }
-
-        document.getElementById('btn-perfil').addEventListener('click', abrirModalPerfil);
-        document.getElementById('perfil-cancelar').addEventListener('click', fecharModalPerfil);
-        perfilModal.addEventListener('click', (e) => { if (e.target === perfilModal) fecharModalPerfil(); });
-
-        perfilAvatarBtn.addEventListener('click', () => {
-            perfilAvatarBtn.textContent = escolherAvatarAleatorio();
-        });
-
-        document.getElementById('perfil-salvar').addEventListener('click', () => {
-            const novoNome = perfilNomeInput.value.trim().slice(0, 20) || identidade.nome;
-            const novoAvatar = perfilAvatarBtn.textContent.trim() || identidade.avatar;
-            identidade.nome = novoNome;
-            identidade.avatar = novoAvatar;
-            salvarIdentidadeLocal();
-
-            document.getElementById('lobby-nome').textContent = identidade.nome;
-            document.getElementById('lobby-avatar').textContent = identidade.avatar;
-            document.getElementById('display-nome').textContent = identidade.nome;
-            document.getElementById('display-avatar').textContent = identidade.avatar;
-            document.getElementById('btn-perfil-nome').textContent = identidade.nome;
-
-            // Se estiver numa sala, atualiza o próprio registo
-            if (idSalaAtual && salaConfirmada) {
-                update(ref(db, `salas_damas/${idSalaAtual}/jogadores/${identidade.id}`), {
-                    nome: identidade.nome
-                }).catch(() => {});
+        function obterPreferenciasLocais() {
+            try {
+                const p = JSON.parse(localStorage.getItem('brain_damas_prefs'));
+                return { nome: p?.nome || gerarNomeAleatorio(), avatar: p?.avatar || gerarAvatarAleatorio() };
+            } catch (_) {
+                return { nome: gerarNomeAleatorio(), avatar: gerarAvatarAleatorio() };
             }
+        }
 
-            fecharModalPerfil();
-            toast('Perfil atualizado!', 'success');
-        });
+        async function inicializarAuthUnica() {
+            return new Promise((resolve) => {
+                let resolvido = false;
+                let tentouAnonimo = false;
+                let uidFinal = null;
+                let debounceTimer = null;
 
-        /* ═══════════════ ESTADO ═══════════════ */
+                const timeoutSeguranca = setTimeout(() => {
+                    if (resolvido) return;
+                    const prefs = obterPreferenciasLocais();
+                    jogadorSessao = {
+                        chave: 'local_' + Math.random().toString(36).slice(2, 12),
+                        nome: prefs.nome, avatar: prefs.avatar, isAnonimo: true, email: null
+                    };
+                    resolvido = true;
+                    resolve(false);
+                }, 8000);
+
+                function finalizar() {
+                    if (resolvido || !uidFinal) return;
+                    const userAtual = auth.currentUser;
+                    if (!userAtual || userAtual.uid !== uidFinal) return;
+                    const prefs = obterPreferenciasLocais();
+                    jogadorSessao = {
+                        chave: userAtual.uid,
+                        nome: userAtual.displayName || prefs.nome,
+                        avatar: userAtual.photoURL ? '🌐' : prefs.avatar,
+                        isAnonimo: userAtual.isAnonymous,
+                        email: userAtual.email || null
+                    };
+                    clearTimeout(timeoutSeguranca);
+                    resolvido = true;
+                    resolve(true);
+                }
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (resolvido) return;
+                    if (user) {
+                        if (debounceTimer) clearTimeout(debounceTimer);
+                        uidFinal = user.uid;
+                        debounceTimer = setTimeout(finalizar, 800);
+                        return;
+                    }
+                    if (tentouAnonimo) return;
+                    tentouAnonimo = true;
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (e) {
+                        const prefs = obterPreferenciasLocais();
+                        jogadorSessao = {
+                            chave: 'local_' + Math.random().toString(36).slice(2, 12),
+                            nome: prefs.nome, avatar: prefs.avatar, isAnonimo: true, email: null
+                        };
+                        clearTimeout(timeoutSeguranca);
+                        resolvido = true;
+                        resolve(false);
+                    }
+                });
+            });
+        }
+
+        await inicializarAuthUnica();
+
+        if (jogadorSessao) {
+            document.getElementById('lobby-nome').textContent = jogadorSessao.nome;
+            document.getElementById('lobby-avatar').textContent = jogadorSessao.avatar;
+            document.getElementById('display-nome').textContent = jogadorSessao.nome;
+            document.getElementById('display-avatar').textContent = jogadorSessao.avatar;
+            document.getElementById('btn-criar-sala').disabled = false;
+            document.getElementById('btn-entrar-sala').disabled = false;
+        }
+
+        const btnGoogle = document.getElementById('btn-google');
+        function atualizarBotaoGoogle() {
+            if (!btnGoogle || !jogadorSessao) return;
+            if (!jogadorSessao.isAnonimo) {
+                btnGoogle.textContent = '🚪';
+                btnGoogle.title = 'Sair da conta Google';
+            } else {
+                btnGoogle.textContent = '🌐';
+                btnGoogle.title = 'Entrar com Google';
+            }
+        }
+        atualizarBotaoGoogle();
+
         let idSalaAtual = null;
         let minhaCor = null;
         let tabuleiro = [];
@@ -1207,7 +1023,6 @@
         let capturaMultiplaEmAndamento = false;
         let salaConfirmada = false;
 
-        /* ═══════════════ TEMA ═══════════════ */
         const themeToggleBtn = document.getElementById('theme-toggle');
         const savedTheme = localStorage.getItem('brain_flow_theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -1221,14 +1036,10 @@
             themeToggleBtn.textContent = nxt === 'dark' ? '☀️' : '🌙';
         });
 
-        /* ═══════════════ SAIR ═══════════════ */
         document.getElementById('btn-sair').addEventListener('click', () => {
             if (!salaConfirmada) { limparSessao(); return; }
-            if (!confirm('Deseja sair da sala atual?')) return;
-            if (unsubscribeFirebase) {
-                try { unsubscribeFirebase(); } catch (_) {}
-                unsubscribeFirebase = null;
-            }
+            if (!confirm('Deseja sair da sala atual? Sua sessão de sala será encerrada.')) return;
+            if (unsubscribeFirebase) { try { unsubscribeFirebase(); } catch (_) {} unsubscribeFirebase = null; }
             voltarAoLobby();
         });
 
@@ -1237,21 +1048,15 @@
             window.location.href = window.location.pathname;
         }
 
-        /* ═══════════════ TABULEIRO ═══════════════ */
         function criarTabuleiroInicial() {
             const t = Array.from({ length: 8 }, () => Array(8).fill(null));
-            for (let r = 0; r < 3; r++) for (let c = 0; c < 8; c++) {
-                if ((r + c) % 2 === 1) t[r][c] = 'red';
-            }
-            for (let r = 5; r < 8; r++) for (let c = 0; c < 8; c++) {
-                if ((r + c) % 2 === 1) t[r][c] = 'white';
-            }
+            for (let r = 0; r < 3; r++) for (let c = 0; c < 8; c++) if ((r + c) % 2 === 1) t[r][c] = 'red';
+            for (let r = 5; r < 8; r++) for (let c = 0; c < 8; c++) if ((r + c) % 2 === 1) t[r][c] = 'white';
             return t;
         }
 
-        /* ═══════════════ SESSÃO LOCAL / URL ═══════════════ */
         function salvarSessao() {
-            if (!idSalaAtual) return;
+            if (!idSalaAtual || !minhaCor) return;
             localStorage.setItem('brain_damas_sessao', JSON.stringify({ sala: idSalaAtual }));
         }
 
@@ -1262,27 +1067,120 @@
             window.history.replaceState({}, '', url.pathname);
         }
 
-        /* ═══════════════ PRESENÇA ═══════════════ */
         async function registrarPresenca(codigo) {
+            if (!jogadorSessao) return;
             try {
-                const presencaRef = ref(db, `salas_damas/${codigo}/jogadores/${identidade.id}/online`);
+                const presencaRef = ref(db, `salas_damas/${codigo}/jogadores/${jogadorSessao.chave}/online`);
                 await set(presencaRef, true);
                 onDisconnect(presencaRef).set(false);
-            } catch (e) {
-                console.warn('Falha ao registrar presença:', e);
-            }
+            } catch (e) {}
         }
 
-        /* ═══════════════ DETEÇÃO DE CONVITE ═══════════════ */
         function detectarConviteNaURL() {
             const params = new URLSearchParams(window.location.search);
             const sala = params.get('sala');
-            if (!sala) return { tipo: 'nenhum' };
-            return { tipo: 'convite', sala };
+            return sala ? { tipo: 'convite', sala } : { tipo: 'nenhum' };
         }
 
-        /* ═══════════════ CRIAR SALA ═══════════════ */
-        async function criarSala() {
+        async function entrarDiretoPorConvite(codigo) {
+            if (!codigo || !jogadorSessao) return false;
+            let dados = null;
+            for (let tentativa = 1; tentativa <= 5; tentativa++) {
+                try {
+                    const snap = await get(ref(db, 'salas_damas/' + codigo));
+                    if (snap.exists()) { dados = snap.val(); break; }
+                } catch (e) {}
+                await new Promise(r => setTimeout(r, 400 + tentativa * 200));
+            }
+
+            if (!dados) {
+                abrirModal({
+                    icon: '🚫', title: 'Sala não encontrada',
+                    message: 'O convite expirou ou a sala foi encerrada.',
+                    actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }]
+                });
+                return false;
+            }
+
+            if (dados.status === 'encerrado') {
+                abrirModal({ icon: '🏁', title: 'Partida encerrada', message: 'Esta partida já foi encerrada.', actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }] });
+                return false;
+            }
+
+            const jogadores = dados.jogadores || {};
+            if (jogadores[jogadorSessao.chave]) {
+                idSalaAtual = codigo;
+                minhaCor = jogadores[jogadorSessao.chave].cor;
+                tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
+                turnoAtual = dados.turno || 'white';
+                jogoEncerrado = dados.status === 'encerrado';
+                await registrarPresenca(codigo);
+                salaConfirmada = true;
+                salvarSessao();
+                entrarInterfaceJogo();
+                escutarFirebase();
+                toast('Reconectado à partida!', 'success');
+                return true;
+            }
+
+            if (Object.keys(jogadores).length >= 2) {
+                abrirModal({ icon: '👥', title: 'Sala cheia', message: 'Esta sala já tem dois jogadores.', actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }] });
+                return false;
+            }
+
+            let corEscolhida = null;
+            let motivoFalha = null;
+            const resultado = await runTransaction(ref(db, 'salas_damas/' + codigo), (atual) => {
+                if (!atual) { motivoFalha = 'REMOVIDA'; return; }
+                if (atual.status === 'encerrado') { motivoFalha = 'ENCERRADA'; return; }
+                atual.jogadores = atual.jogadores || {};
+                if (atual.jogadores[jogadorSessao.chave]) { motivoFalha = 'JA_ESTA'; return; }
+                if (Object.keys(atual.jogadores).length >= 2) { motivoFalha = 'CHEIA'; return; }
+                const cores = Object.values(atual.jogadores).map(j => j.cor);
+                corEscolhida = cores.includes('white') ? 'red' : 'white';
+                atual.jogadores[jogadorSessao.chave] = { nome: jogadorSessao.nome, cor: corEscolhida, online: true };
+                return atual;
+            });
+
+            if (!resultado.committed) {
+                abrirModal({ icon: '🚫', title: 'Erro ao entrar', message: 'Não foi possível entrar na sala.', actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }] });
+                return false;
+            }
+
+            const dadosAtualizados = resultado.snapshot.val();
+            idSalaAtual = codigo;
+            minhaCor = corEscolhida || 'red';
+            tabuleiro = firebaseParaTabuleiro(dadosAtualizados.tabuleiro);
+            turnoAtual = dadosAtualizados.turno || 'white';
+            jogoEncerrado = false;
+            await registrarPresenca(codigo);
+            salaConfirmada = true;
+            salvarSessao();
+            entrarInterfaceJogo();
+            escutarFirebase();
+            toast(`Entrou como ${minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas'}!`, 'success');
+            return true;
+        }
+
+        async function inicializarPerfil() {
+            if (!jogadorSessao) return;
+            const convite = detectarConviteNaURL();
+            if (convite.tipo === 'convite') {
+                localStorage.removeItem('brain_damas_sessao');
+                await entrarDiretoPorConvite(convite.sala);
+                return;
+            }
+            let sessaoSalva = null;
+            try { sessaoSalva = JSON.parse(localStorage.getItem('brain_damas_sessao')); } catch (_) {}
+            if (sessaoSalva && sessaoSalva.sala) {
+                await entrarDiretoPorConvite(sessaoSalva.sala);
+            }
+        }
+
+        if (jogadorSessao) inicializarPerfil();
+
+        document.getElementById('btn-criar-sala').addEventListener('click', async () => {
+            if (!jogadorSessao) return;
             try {
                 idSalaAtual = 'DAMAS-' + Date.now().toString(36).toUpperCase();
                 minhaCor = 'white';
@@ -1294,13 +1192,10 @@
                     status: 'jogando',
                     turno: 'white',
                     tabuleiro: tabuleiroParaFirebase(tabuleiro),
+                    criador: jogadorSessao.chave,
                     criadaEm: serverTimestamp(),
                     jogadores: {
-                        [identidade.id]: {
-                            nome: identidade.nome,
-                            cor: 'white',
-                            online: true
-                        }
+                        [jogadorSessao.chave]: { nome: jogadorSessao.nome, cor: 'white', online: true }
                     }
                 });
 
@@ -1310,272 +1205,54 @@
                 entrarInterfaceJogo();
                 document.getElementById('div-whatsapp').classList.remove('hidden');
                 escutarFirebase();
-                toast('Sala criada! Envie o convite pelo WhatsApp.', 'success', 3500);
+                toast('Sala criada com sucesso!', 'success');
             } catch (e) {
-                console.error('Erro ao criar sala:', e);
-                toast('Erro ao criar sala: ' + (e.message || 'desconhecido'), 'error');
+                toast('Erro ao criar sala.', 'error');
             }
-        }
-
-        /* ═══════════════ ENTRAR NA SALA (via transação atómica) ═══════════════ */
-        async function entrarNaSala(codigo) {
-            if (!codigo) { toast('Código de sala inválido.', 'error'); return false; }
-
-            console.log(`🎟️ [id=${identidade.id}] Tentando entrar na sala ${codigo}...`);
-
-            // Retry: a sala pode ainda não estar sincronizada
-            let existeSala = false;
-            const MAX_TENTATIVAS = 6;
-            for (let tentativa = 1; tentativa <= MAX_TENTATIVAS; tentativa++) {
-                try {
-                    const snap = await get(ref(db, 'salas_damas/' + codigo));
-                    if (snap.exists()) {
-                        existeSala = true;
-                        console.log(`✅ Sala encontrada (tentativa ${tentativa}).`);
-                        break;
-                    }
-                    console.log(`⏳ Tentativa ${tentativa}/${MAX_TENTATIVAS}: sala ainda não disponível.`);
-                } catch (e) {
-                    console.warn(`Erro na tentativa ${tentativa}:`, e.message);
-                }
-                if (tentativa < MAX_TENTATIVAS) {
-                    await new Promise(r => setTimeout(r, 400 + tentativa * 200));
-                }
-            }
-
-            if (!existeSala) {
-                abrirModal({
-                    icon: '🚫',
-                    title: 'Sala não encontrada',
-                    message: 'O convite expirou, a sala foi encerrada, ou ainda está a sincronizar.',
-                    actions: [
-                        { label: 'Tentar de novo', onClick: () => entrarNaSala(codigo) },
-                        { label: 'Voltar ao lobby', secondary: true, onClick: voltarAoLobby }
-                    ]
-                });
-                return false;
-            }
-
-            // Transação atómica: entra como segundo jogador se houver vaga
-            let corEscolhida = null;
-            let motivoFalha = null;
-
-            try {
-                console.log(`🔄 Executando transação (id=${identidade.id})...`);
-
-                const resultado = await runTransaction(ref(db, 'salas_damas/' + codigo), (atual) => {
-                    if (!atual) { motivoFalha = 'REMOVIDA'; return; }
-                    if (atual.status === 'encerrado') { motivoFalha = 'ENCERRADA'; return; }
-                    atual.jogadores = atual.jogadores || {};
-
-                    // Já estou na sala → não mexo
-                    if (atual.jogadores[identidade.id]) { motivoFalha = 'JA_ESTA'; return; }
-
-                    // Sala cheia (2 jogadores) → não entro
-                    if (Object.keys(atual.jogadores).length >= 2) { motivoFalha = 'CHEIA'; return; }
-
-                    // Escolhe a cor livre
-                    const cores = Object.values(atual.jogadores).map(j => j.cor);
-                    const corLivre = cores.includes('white') ? 'red' : 'white';
-
-                    atual.jogadores[identidade.id] = {
-                        nome: identidade.nome,
-                        cor: corLivre,
-                        online: true
-                    };
-                    corEscolhida = corLivre;
-                    return atual;
-                });
-
-                if (!resultado.committed) {
-                    console.warn('❌ Transação falhou:', motivoFalha);
-
-                    if (motivoFalha === 'JA_ESTA') {
-                        // Já estava — só reconectar
-                        return reconectarNaSala(codigo);
-                    }
-                    if (motivoFalha === 'CHEIA') {
-                        abrirModal({
-                            icon: '👥',
-                            title: 'Sala cheia',
-                            message: 'Esta sala já tem dois jogadores. Peça para criarem uma nova sala.',
-                            actions: [
-                                { label: 'Voltar ao lobby', onClick: voltarAoLobby },
-                                { label: 'Fechar', secondary: true, onClick: limparSessao }
-                            ]
-                        });
-                        return false;
-                    }
-                    if (motivoFalha === 'ENCERRADA') {
-                        abrirModal({
-                            icon: '🏁',
-                            title: 'Partida encerrada',
-                            message: 'Esta partida já foi encerrada.',
-                            actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }]
-                        });
-                        return false;
-                    }
-                    abrirModal({
-                        icon: '🚫',
-                        title: 'Sala indisponível',
-                        message: 'A sala foi removida ou está temporariamente indisponível.',
-                        actions: [
-                            { label: 'Tentar de novo', onClick: () => entrarNaSala(codigo) },
-                            { label: 'Voltar ao lobby', secondary: true, onClick: voltarAoLobby }
-                        ]
-                    });
-                    return false;
-                }
-
-                const dadosAtualizados = resultado.snapshot.val();
-                idSalaAtual = codigo;
-                minhaCor = corEscolhida || 'red';
-                tabuleiro = firebaseParaTabuleiro(dadosAtualizados.tabuleiro);
-                turnoAtual = dadosAtualizados.turno || 'white';
-                jogoEncerrado = false;
-
-                await registrarPresenca(codigo);
-                salaConfirmada = true;
-                salvarSessao();
-                entrarInterfaceJogo();
-                escutarFirebase();
-                toast(`🎉 Você entrou como ${minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas'}!`, 'success', 3500);
-                return true;
-
-            } catch (e) {
-                console.error('Erro na transação:', e);
-                toast('Erro ao entrar: ' + (e.message || 'desconhecido'), 'error');
-                return false;
-            }
-        }
-
-        /* ═══════════════ RECONECTAR A UMA SALA EXISTENTE ═══════════════ */
-        async function reconectarNaSala(codigo) {
-            try {
-                const snap = await get(ref(db, 'salas_damas/' + codigo));
-                if (!snap.exists()) { limparSessao(); return false; }
-
-                const dados = snap.val();
-                const jogadores = dados.jogadores || {};
-                if (!jogadores[identidade.id]) {
-                    // Não estou — tento entrar
-                    return entrarNaSala(codigo);
-                }
-
-                idSalaAtual = codigo;
-                minhaCor = jogadores[identidade.id].cor;
-                tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
-                turnoAtual = dados.turno || 'white';
-                jogoEncerrado = dados.status === 'encerrado';
-                salaConfirmada = true;
-
-                await registrarPresenca(codigo);
-                entrarInterfaceJogo();
-                escutarFirebase();
-                toast('✅ Reconectado à partida!', 'success');
-                return true;
-            } catch (e) {
-                console.error('Erro ao reconectar:', e);
-                return false;
-            }
-        }
-
-        /* ═══════════════ INICIALIZAÇÃO ═══════════════ */
-        async function inicializar() {
-            const convite = detectarConviteNaURL();
-            if (convite.tipo === 'convite') {
-                localStorage.removeItem('brain_damas_sessao');
-                await entrarNaSala(convite.sala);
-                return;
-            }
-
-            let sessaoSalva = null;
-            try { sessaoSalva = JSON.parse(localStorage.getItem('brain_damas_sessao')); } catch (_) {}
-
-            if (sessaoSalva && sessaoSalva.sala) {
-                try {
-                    const snap = await get(ref(db, 'salas_damas/' + sessaoSalva.sala));
-                    if (!snap.exists()) {
-                        limparSessao();
-                    } else {
-                        await reconectarNaSala(sessaoSalva.sala);
-                    }
-                } catch (e) {
-                    console.warn('Erro ao validar sessão antiga:', e);
-                }
-            }
-        }
-
-        inicializar();
-
-        /* ═══════════════ BOTÕES DO LOBBY ═══════════════ */
-        document.getElementById('btn-criar-sala').addEventListener('click', criarSala);
+        });
 
         document.getElementById('btn-entrar-sala').addEventListener('click', () => {
             const codigo = document.getElementById('input-codigo-sala').value.trim().toUpperCase();
             if (!codigo) { toast('Digite o código da sala.', 'warn'); return; }
-            entrarNaSala(codigo);
-        });
-
-        document.getElementById('input-codigo-sala').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const codigo = e.target.value.trim().toUpperCase();
-                if (codigo) entrarNaSala(codigo);
-            }
+            entrarDiretoPorConvite(codigo);
         });
 
         function entrarInterfaceJogo() {
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
             document.getElementById('display-sala-tag').textContent = `Sala: ${idSalaAtual}`;
-            document.getElementById('info-minha-cor').textContent =
-                minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
+            document.getElementById('info-minha-cor').textContent = minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
             renderizarTabuleiro();
         }
 
-        /* ═══════════════ WHATSAPP ═══════════════ */
         document.getElementById('btn-whatsapp').addEventListener('click', () => {
             const baseUrl = window.location.origin + window.location.pathname;
             const link = `${baseUrl}?sala=${encodeURIComponent(idSalaAtual)}`;
-
-            const msg = encodeURIComponent(
-                `♟️ *Convite para Damas — Brain Hub*\n\n` +
-                `Você foi desafiado(a) por *${identidade.nome}*!\n\n` +
-                `👉 Clique para entrar direto:\n${link}\n\n` +
-                `_Ou use o código:_ *${idSalaAtual}*`
-            );
+            const msg = encodeURIComponent(`♟️ *Convite para Damas — Brain Hub*\n\nDesafiado(a) por *${jogadorSessao.nome}*!\n\n👉 Entrar direto:\n${link}\n\nCódigo: *${idSalaAtual}*`);
             window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
         });
 
-        /* ═══════════════ COORDENADAS ═══════════════ */
         function gerarCoordenadas() {
             const colunas = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
             const linhas  = ['8', '7', '6', '5', '4', '3', '2', '1'];
             const cols = (minhaCor === 'red') ? [...colunas].reverse() : colunas;
             const rows = (minhaCor === 'red') ? [...linhas].reverse()  : linhas;
 
-            const top    = document.getElementById('labels-top');
+            const top = document.getElementById('labels-top');
             const bottom = document.getElementById('labels-bottom');
-            const left   = document.getElementById('labels-left');
-            const right  = document.getElementById('labels-right');
-            if (!top || !bottom || !left || !right) return;
+            const left = document.getElementById('labels-left');
+            const right = document.getElementById('labels-right');
+            if (!top) return;
 
-            const renderCols = (arr) => arr.map((c, i) => {
-                const edge = (i === 0 || i === arr.length - 1) ? ' edge' : '';
-                return `<span class="coord${edge}">${c}</span>`;
-            }).join('');
-            const renderRows = (arr) => arr.map((n, i) => {
-                const edge = (i === 0 || i === arr.length - 1) ? ' edge' : '';
-                return `<span class="coord${edge}">${n}</span>`;
-            }).join('');
+            const renderCols = arr => arr.map((c, i) => `<span class="coord${i === 0 || i === arr.length - 1 ? ' edge' : ''}">${c}</span>`).join('');
+            const renderRows = arr => arr.map((n, i) => `<span class="coord${i === 0 || i === arr.length - 1 ? ' edge' : ''}">${n}</span>`).join('');
 
-            top.innerHTML    = renderCols(cols);
+            top.innerHTML = renderCols(cols);
             bottom.innerHTML = renderCols(cols);
-            left.innerHTML   = renderRows(rows);
-            right.innerHTML  = renderRows(rows);
+            left.innerHTML = renderRows(rows);
+            right.innerHTML = renderRows(rows);
         }
 
-        /* ═══════════════ RENDERIZAÇÃO ═══════════════ */
         function renderizarTabuleiro() {
             const grid = document.getElementById('checkers-board');
             if (!grid) return;
@@ -1592,9 +1269,7 @@
                     square.dataset.row = r;
                     square.dataset.col = c;
 
-                    if (celulaSelecionada && celulaSelecionada.r === r && celulaSelecionada.c === c) {
-                        square.classList.add('selected');
-                    }
+                    if (celulaSelecionada && celulaSelecionada.r === r && celulaSelecionada.c === c) square.classList.add('selected');
                     const mov = movimentosValidos.find(m => m.r === r && m.c === c);
                     if (mov) square.classList.add(mov.captura ? 'capture-target' : 'highlight');
 
@@ -1608,8 +1283,7 @@
 
                         let classeExtra = '';
                         if (!jogoEncerrado && turnoAtual === minhaCor && peca.startsWith(minhaCor)) {
-                            const movsPeca = calcularMovimentos(r, c);
-                            if (movsPeca.length > 0) {
+                            if (calcularMovimentos(r, c).length > 0) {
                                 classeExtra = ' movel';
                                 wrapper.classList.add('movel');
                             }
@@ -1619,61 +1293,56 @@
                         square.appendChild(wrapper);
                     }
 
-                    if (isDark) {
-                        square.addEventListener('click', () => clicarCasa(r, c));
-                    }
+                    if (isDark) square.addEventListener('click', () => clicarCasa(r, c));
                     grid.appendChild(square);
                 }
             }
 
             const statusEl = document.getElementById('turno-status');
             if (jogoEncerrado) statusEl.textContent = '🏁 Jogo encerrado';
-            else if (turnoAtual === minhaCor) statusEl.textContent = capturaMultiplaEmAndamento ? 'Continue capturando!' : 'Sua vez de jogar!';
+            else if (turnoAtual === minhaCor) statusEl.textContent = capturaMultiplaEmAndamento ? 'Continue capturando!' : 'Sua vez!';
             else statusEl.textContent = 'Vez do oponente...';
 
             gerarCoordenadas();
         }
 
-        /* ═══════════════ CLIQUE ═══════════════ */
         function clicarCasa(r, c) {
-            if (jogoEncerrado || !salaConfirmada) return;
-            if (turnoAtual !== minhaCor) {
-                document.getElementById('info-instrucao').textContent = '⏳ Aguarde a sua vez!';
-                return;
-            }
+            if (jogoEncerrado || !salaConfirmada || turnoAtual !== minhaCor) return;
             const peca = tabuleiro[r][c];
+
             if (capturaMultiplaEmAndamento) {
-                const movs = movimentosValidos.find(m => m.r === r && m.c === c);
-                if (movs) executarMovimento(celulaSelecionada.r, celulaSelecionada.c, r, c);
+                if (movimentosValidos.some(m => m.r === r && m.c === c)) {
+                    executarMovimento(celulaSelecionada.r, celulaSelecionada.c, r, c);
+                }
                 return;
             }
+
             if (peca && peca.startsWith(minhaCor)) {
                 celulaSelecionada = { r, c };
                 movimentosValidos = calcularMovimentos(r, c);
                 renderizarTabuleiro();
                 return;
             }
+
             if (celulaSelecionada && movimentosValidos.some(m => m.r === r && m.c === c)) {
                 executarMovimento(celulaSelecionada.r, celulaSelecionada.c, r, c);
                 return;
             }
+
             celulaSelecionada = null;
             movimentosValidos = [];
             renderizarTabuleiro();
         }
 
-        /* ═══════════════ MOVIMENTOS ═══════════════ */
         function calcularMovimentos(r, c) {
             const peca = tabuleiro[r][c];
             if (!peca) return [];
             const isDama = peca.includes('king');
             const cor = peca.startsWith('white') ? 'white' : 'red';
             const movimentos = [];
-            const direcoesFrente = cor === 'white' ? [-1] : [+1];
-            const direcoesDama = [-1, +1];
 
             if (isDama) {
-                for (const dr of direcoesDama) for (const dc of [-1, +1]) {
+                for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
                     let nr = r + dr, nc = c + dc, capturada = null;
                     while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
                         const alvo = tabuleiro[nr][nc];
@@ -1689,6 +1358,7 @@
                     }
                 }
             } else {
+                const direcoesFrente = cor === 'white' ? [-1] : [+1];
                 for (const dr of direcoesFrente) for (const dc of [-1, +1]) {
                     const nr = r + dr, nc = c + dc;
                     if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tabuleiro[nr][nc]) {
@@ -1737,13 +1407,11 @@
                     movimentosValidos = maisCapturas;
                     renderizarTabuleiro();
                     document.getElementById('info-instrucao').textContent = '🔥 Captura múltipla! Continue capturando.';
-                    try {
-                        await update(ref(db, `salas_damas/${idSalaAtual}`), {
-                            tabuleiro: tabuleiroParaFirebase(tabuleiro),
-                            turno: turnoAtual,
-                            status: 'jogando'
-                        });
-                    } catch (e) { console.error(e); }
+                    await update(ref(db, `salas_damas/${idSalaAtual}`), {
+                        tabuleiro: tabuleiroParaFirebase(tabuleiro),
+                        turno: turnoAtual,
+                        status: 'jogando'
+                    });
                     return;
                 }
             }
@@ -1758,11 +1426,7 @@
             let encerradoAgora = false;
             let mensagemFinal = '';
 
-            if (!temPecas(oponente)) {
-                encerradoAgora = true;
-                const vencedor = oponente === 'white' ? 'red' : 'white';
-                mensagemFinal = `🏆 Vitória das ${vencedor === 'white' ? 'brancas' : 'vermelhas'}!`;
-            } else if (!temMovimentos(oponente)) {
+            if (!temPecas(oponente) || !temMovimentos(oponente)) {
                 encerradoAgora = true;
                 const vencedor = minhaCor;
                 mensagemFinal = `🏆 Vitória das ${vencedor === 'white' ? 'brancas' : 'vermelhas'}!`;
@@ -1772,55 +1436,36 @@
                 jogoEncerrado = true;
                 document.getElementById('info-instrucao').textContent = mensagemFinal;
                 setTimeout(() => abrirModal({
-                    icon: '🏆',
-                    title: 'Fim de jogo!',
-                    message: mensagemFinal,
-                    actions: [
-                        { label: 'Nova Partida', onClick: voltarAoLobby },
-                        { label: 'Fechar', secondary: true }
-                    ]
+                    icon: '🏆', title: 'Fim de jogo!', message: mensagemFinal,
+                    actions: [{ label: 'Nova Partida', onClick: voltarAoLobby }]
                 }), 250);
             }
 
-            try {
-                await update(ref(db, `salas_damas/${idSalaAtual}`), {
-                    tabuleiro: tabuleiroParaFirebase(tabuleiro),
-                    turno: turnoAtual,
-                    status: jogoEncerrado ? 'encerrado' : 'jogando'
-                });
-            } catch (e) {
-                console.error('Erro de sync:', e);
-                toast('Falha de sincronização.', 'error');
-            }
+            await update(ref(db, `salas_damas/${idSalaAtual}`), {
+                tabuleiro: tabuleiroParaFirebase(tabuleiro),
+                turno: turnoAtual,
+                status: jogoEncerrado ? 'encerrado' : 'jogando'
+            });
         }
 
         function temPecas(cor) {
-            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-                const p = tabuleiro[r][c];
-                if (p && p.startsWith(cor)) return true;
-            }
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if (tabuleiro[r][c]?.startsWith(cor)) return true;
             return false;
         }
+
         function temMovimentos(cor) {
             for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-                const p = tabuleiro[r][c];
-                if (p && p.startsWith(cor) && calcularMovimentos(r, c).length > 0) return true;
+                if (tabuleiro[r][c]?.startsWith(cor) && calcularMovimentos(r, c).length > 0) return true;
             }
             return false;
         }
 
-        /* ═══════════════ LISTENER FIREBASE ═══════════════ */
         function escutarFirebase() {
-            if (unsubscribeFirebase) {
-                try { unsubscribeFirebase(); } catch (_) {}
-                unsubscribeFirebase = null;
-            }
+            if (unsubscribeFirebase) { try { unsubscribeFirebase(); } catch (_) {} unsubscribeFirebase = null; }
             if (!salaConfirmada || !idSalaAtual) return;
 
-            const salaRef = ref(db, 'salas_damas/' + idSalaAtual);
-            unsubscribeFirebase = onValue(salaRef, (snapshot) => {
+            unsubscribeFirebase = onValue(ref(db, 'salas_damas/' + idSalaAtual), (snapshot) => {
                 if (!snapshot.exists()) return;
-
                 const dados = snapshot.val();
                 tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
                 turnoAtual = dados.turno || 'white';
@@ -1838,37 +1483,17 @@
                 const novoStatusOponente = !!(oponenteEntry && oponenteEntry.online);
                 const statusDot = document.getElementById('oponente-status');
 
-                if (novoStatusOponente && !oponenteConectado) toast('✅ Oponente conectado!', 'success');
-                else if (!novoStatusOponente && oponenteConectado) toast('⚠️ Oponente desconectou.', 'warn');
+                if (novoStatusOponente && !oponenteConectado) toast('Oponente conectado!', 'success');
                 oponenteConectado = novoStatusOponente;
 
                 if (statusDot) {
                     statusDot.classList.toggle('online', novoStatusOponente);
                     statusDot.classList.toggle('offline', !novoStatusOponente && totalJogadores === 2);
-                    statusDot.title = novoStatusOponente ? 'Oponente online' : (totalJogadores === 2 ? 'Oponente offline' : 'Aguardando oponente');
-                }
-
-                if (totalJogadores === 2) {
-                    document.getElementById('info-instrucao').textContent =
-                        '✅ Oponente conectado! ' + (turnoAtual === minhaCor ? 'Sua vez.' : 'Aguarde a jogada dele.');
-                } else if (minhaCor === 'white') {
-                    document.getElementById('info-instrucao').textContent = '⏳ Aguardando o oponente entrar na sala...';
                 }
 
                 renderizarTabuleiro();
-            }, (error) => {
-                console.error('Erro no listener:', error);
             });
         }
-
-        /* ═══════════════ CLEANUP ═══════════════ */
-        window.addEventListener('beforeunload', () => {
-            if (unsubscribeFirebase) {
-                try { unsubscribeFirebase(); } catch (_) {}
-            }
-        });
-
-        console.log('✅ Jogo de Damas inicializado — modo simplificado (sem Auth).');
     </script>
 </body>
 </html>
