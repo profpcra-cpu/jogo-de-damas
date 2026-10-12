@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1020">
-    <title>Brain Damas - Duelo Multiplayer (v2.0 - Regras Brasileiras + Torneios)</title>
+    <title>Brain Damas - Duelo Multiplayer + IA (v3.0 - Regras Brasileiras)</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -280,6 +280,13 @@
         }
         @keyframes recPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
 
+        .ia-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: #fff; font-size: 10.5px; font-weight: 800;
+            padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px;
+        }
+
         .replay-board {
             display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr);
             width: 100%; max-width: 320px; aspect-ratio: 1/1; margin: 0 auto 10px;
@@ -499,6 +506,7 @@
             width: auto;
         }
         .tipo-opt.active { border-color: var(--c-amber) !important; background: rgba(245, 158, 11, 0.15) !important; }
+        .ia-opt.active { border-color: #a855f7 !important; background: rgba(168, 85, 247, 0.18) !important; }
 
         @media (max-width: 600px) {
             body { padding: 6px; align-items: flex-start; }
@@ -577,9 +585,23 @@
 
             <!-- TAB: JOGO -->
             <div id="tab-jogo">
+                <!-- NOVO: Modo IA -->
                 <div class="lobby-box">
-                    <h3>♟️ Jogo de Damas Multiplayer</h3>
-                    <p><strong>Regras brasileiras</strong>: captura obrigatória pela maior quantidade; dama captura em cadeia.</p>
+                    <h3>🤖 Jogar contra o Computador</h3>
+                    <p>Escolha o nível de dificuldade. As regras brasileiras oficiais são aplicadas automaticamente.</p>
+                    <div class="tipo-selector" id="ia-selector">
+                        <button class="tipo-opt ia-opt" data-nivel="1" type="button">🐣 Iniciante</button>
+                        <button class="tipo-opt ia-opt" data-nivel="2" type="button">🐤 Fácil</button>
+                        <button class="tipo-opt ia-opt active" data-nivel="3" type="button">🦊 Médio</button>
+                        <button class="tipo-opt ia-opt" data-nivel="4" type="button">🐺 Difícil</button>
+                        <button class="tipo-opt ia-opt" data-nivel="5" type="button">🐉 Mestre</button>
+                    </div>
+                    <button id="btn-jogar-ia" type="button" style="margin-top:8px; background: linear-gradient(135deg, #7c3aed, #a855f7);" disabled>🤖 Iniciar Partida contra IA</button>
+                </div>
+
+                <div class="lobby-box">
+                    <h3>♟️ Multiplayer Online</h3>
+                    <p><strong>Regras brasileiras</strong>: captura obrigatória pela maior quantidade; dama captura em cadeia; empate após 40 lances.</p>
                     <button id="btn-criar-sala" type="button" disabled>🚀 Criar Sala</button>
                     <button id="btn-criar-sala-senha" type="button" class="btn-secundario" style="margin-top:6px;" disabled>🔒 Criar Sala com Senha</button>
                     <div style="display:flex; gap:6px; margin-top:6px;">
@@ -630,7 +652,7 @@
                     <h3>📜 Histórico de Partidas</h3>
                     <p>Suas últimas partidas com replay disponível.</p>
                     <div id="historico-list">
-                        <div class="sala-vazia" style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">Nenhuma partida registada ainda.</div>
+                        <div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">Nenhuma partida registada ainda.</div>
                     </div>
                     <button id="btn-limpar-historico" type="button" class="btn-secundario" style="margin-top:10px; font-size:12px;">🗑️ Limpar histórico</button>
                 </div>
@@ -657,7 +679,7 @@
                 </div>
                 <div class="lobby-box" style="margin-bottom:0;">
                     <h3>🗓️ Torneios Agendados</h3>
-                    <div id="agenda-list"><div class="sala-vazia" style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">Nenhum torneio agendado.</div></div>
+                    <div id="agenda-list"><div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">Nenhum torneio agendado.</div></div>
                 </div>
             </div>
 
@@ -711,6 +733,7 @@
                     <span id="display-avatar" class="user-avatar-display">😀</span>
                     <strong id="display-nome"></strong>
                     <span id="oponente-status" class="status-dot"></span>
+                    <span id="badge-ia" class="ia-badge hidden">🤖 IA</span>
                     <span id="badge-espectador" class="espectador-badge hidden">👁️ ASSISTINDO</span>
                     <span id="badge-rec" class="rec-badge hidden">🔴 REC</span>
                     <span id="badge-pausa" class="pausa-badge hidden">⏸️ EM PAUSA</span>
@@ -850,13 +873,27 @@
     <div class="toast-container" id="toast-container"></div>
 
     <script type="module">
-        import { db, auth } from "./firebase-config.js";
-        import {
-            ref, get, set, update, onValue, runTransaction, serverTimestamp, push
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import {
-            signInAnonymously, onAuthStateChanged, GoogleAuthProvider, signInWithPopup
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        // Firebase (opcional): se não existir o ficheiro, o jogo funciona offline (só IA/hot-seat)
+        let db = null, auth = null;
+        let fns = {};
+        try {
+            const fb = await import("./firebase-config.js");
+            db = fb.db; auth = fb.auth;
+            const rtdb = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js");
+            const fbauth = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
+            fns = {
+                ref: rtdb.ref, get: rtdb.get, set: rtdb.set, update: rtdb.update,
+                onValue: rtdb.onValue, runTransaction: rtdb.runTransaction, push: rtdb.push,
+                serverTimestamp: rtdb.serverTimestamp,
+                signInAnonymously: fbauth.signInAnonymously,
+                onAuthStateChanged: fbauth.onAuthStateChanged,
+                GoogleAuthProvider: fbauth.GoogleAuthProvider,
+                signInWithPopup: fbauth.signInWithPopup
+            };
+        } catch (e) {
+            console.warn('[Firebase] Não carregado — modo offline ativado.', e.message);
+        }
+        const firebaseDisponivel = !!db;
 
         // ============================================================
         // ==================== ESTADO ================================
@@ -890,35 +927,37 @@
         let historicoMovimentos = [];
         let historicoPartidas = [];
 
-        // === GRUPO 1 ===
+        // Handshake / conexão
         let euPronto = false;
         let adversarioPronto = false;
         let ambosProntos = false;
         let ultimaRespostaFirebase = 0;
         let connectionCheckInterval = null;
 
-        // === GRUPO 2+3 ===
+        // Timer
         let tempoLimiteSegundos = 40;
         let timerIntervalId = null;
         let timerSegundosRestantes = 40;
         let timerAtivo = false;
         let aviso5sDisparado = false;
 
-        // === GRUPO 5/BRASILEIRAS: captura múltipla ===
+        // Captura múltipla (estado transitório durante execução)
         let capturaMultiplaAtiva = false;
         let capturaMultiplaPos = null;
-        // Cadeia em progresso (para damas e peões com múltiplas capturas)
-        let capturaCadeiaCaminho = []; // lista de {r, c} de destino já visitados
 
-        // === GRUPO 6 ===
+        // Empate (regras brasileiras)
+        let lancesSemCaptura = 0;
+        let lancesDamas = 0;
+
+        // Pausa
         let emPausa = false;
         let pausaPendenteDe = null;
         let pausaSolicitadaPorMim = false;
 
-        // === GRUPO 8 ===
+        // Senha
         let senhaSalaAtual = null;
 
-        // === GRUPO 9 ===
+        // Gravação
         let canvasRecorder = null;
         let canvasStream = null;
         let recordedChunks = [];
@@ -927,6 +966,11 @@
 
         // SFX
         let sfxPack = 'classic';
+
+        // IA
+        let modoIA = false;
+        let nivelIA = 3;
+        let iaPensando = false;
 
         // ============================================================
         // ==================== CONQUISTAS ============================
@@ -938,7 +982,7 @@
             { id: 'streak3', emoji: '🔥', nome: '3 Seguidas', desc: '3 vitórias consecutivas', check: (s) => s.maiorStreak >= 3 },
             { id: 'streak5', emoji: '⚡', nome: 'Imparável', desc: '5 vitórias consecutivas', check: (s) => s.maiorStreak >= 5 },
             { id: 'torneio', emoji: '🏆', nome: 'Campeão', desc: 'Vença um torneio', check: (s) => s.torneiosVencidos >= 1 },
-            { id: 'virada', emoji: '💪', nome: 'Virada Épica', desc: 'Vença com 2 peças a menos', check: (s) => s.viradas >= 1 },
+            { id: 'ia_mestre', emoji: '🐉', nome: 'Caçador de Dragões', desc: 'Vença a IA Mestre', check: (s) => s.iaMestreVencida >= 1 },
             { id: 'maratonista', emoji: '🎮', nome: 'Maratonista', desc: 'Jogue 10 partidas', check: (s) => (s.vitorias + s.derrotas) >= 10 }
         ];
 
@@ -949,11 +993,11 @@
                     unlocked: raw.unlocked || {},
                     stats: raw.stats || {
                         vitorias: 0, derrotas: 0, maiorStreak: 0, streakAtual: 0,
-                        viradas: 0, torneiosVencidos: 0
+                        viradas: 0, torneiosVencidos: 0, iaMestreVencida: 0
                     }
                 };
             } catch (_) {
-                return { unlocked: {}, stats: { vitorias: 0, derrotas: 0, maiorStreak: 0, streakAtual: 0, viradas: 0, torneiosVencidos: 0 } };
+                return { unlocked: {}, stats: { vitorias: 0, derrotas: 0, maiorStreak: 0, streakAtual: 0, viradas: 0, torneiosVencidos: 0, iaMestreVencida: 0 } };
             }
         }
         function salvarConquistas(d) { localStorage.setItem('brain_damas_conquistas', JSON.stringify(d)); }
@@ -1237,7 +1281,7 @@
         function gerarSenha() { return Math.floor(1000 + Math.random() * 9000).toString(); }
 
         // ============================================================
-        // ============== GRUPO 1: INDICADOR DE CONEXÃO ===============
+        // ============== INDICADOR DE CONEXÃO ========================
         // ============================================================
         function marcarFirebaseVivo() {
             ultimaRespostaFirebase = Date.now();
@@ -1248,6 +1292,7 @@
             }
         }
         function iniciarMonitorConexao() {
+            if (!firebaseDisponivel) return;
             if (connectionCheckInterval) clearInterval(connectionCheckInterval);
             ultimaRespostaFirebase = Date.now();
             connectionCheckInterval = setInterval(() => {
@@ -1268,19 +1313,20 @@
         }
 
         // ============================================================
-        // ============== GRUPO 1: HANDSHAKE ==========================
+        // ============== HANDSHAKE ===================================
         // ============================================================
         function marcarPronto() {
             if (euPronto) return;
             euPronto = true;
-            if (!idSalaAtual || !jogadorSessao?.chave || modoEspectador) {
+            if (!firebaseDisponivel || !idSalaAtual || !jogadorSessao?.chave || modoEspectador || modoIA) {
                 adversarioPronto = true; ambosProntos = true;
+                document.getElementById('div-handshake')?.classList.add('hidden');
                 return;
             }
-            update(ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), { pronto: true }).catch(() => {});
+            fns.update(fns.ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), { pronto: true }).catch(() => {});
         }
         function atualizarHandshake(dados, uids) {
-            if (modoEspectador) {
+            if (modoEspectador || modoIA) {
                 adversarioPronto = true; euPronto = true; ambosProntos = true;
                 document.getElementById('div-handshake')?.classList.add('hidden');
                 return;
@@ -1301,7 +1347,8 @@
             }
         }
         async function updateSeguro(path, dados) {
-            try { await update(ref(db, path), dados); return { ok: true }; }
+            if (!firebaseDisponivel) return { ok: false };
+            try { await fns.update(fns.ref(db, path), dados); return { ok: true }; }
             catch (err) {
                 console.error('[Firebase] Erro:', path, err);
                 toast('⚠️ Falha de comunicação. Verifica a ligação.', 'error');
@@ -1310,7 +1357,7 @@
         }
 
         // ============================================================
-        // ============== GRUPO 2+3: TIMER ============================
+        // ============== TIMER =======================================
         // ============================================================
         function pararTimer() {
             if (timerIntervalId) { clearInterval(timerIntervalId); timerIntervalId = null; }
@@ -1370,22 +1417,28 @@
             if (turnoAtual !== minhaCor) return;
             toast('⏱️ Tempo esgotado! Você perdeu.', 'error');
             const corAdversaria = minhaCor === 'white' ? 'red' : 'white';
-            update(ref(db, `salas_damas/${idSalaAtual}`), {
+            if (modoIA) {
+                jogoEncerrado = true;
+                tratarFimDeJogo(corAdversaria, 'timeout');
+                return;
+            }
+            updateSeguro(`salas_damas/${idSalaAtual}`, {
                 status: 'encerrado', vencedor: corAdversaria,
                 motivoFim: 'timeout', perdedor: jogadorSessao.chave
-            }).catch(() => {});
+            });
         }
 
         // ============================================================
-        // ============== GRUPO 6: PAUSA ==============================
+        // ============== PAUSA =======================================
         // ============================================================
         function pedirPausa() {
             if (modoEspectador || jogoEncerrado || emPausa) return;
+            if (modoIA) { toast('🤖 Pausa indisponível contra IA.', 'info'); return; }
             SoundFX.click();
             pausaSolicitadaPorMim = true;
-            update(ref(db, `salas_damas/${idSalaAtual}`), {
+            updateSeguro(`salas_damas/${idSalaAtual}`, {
                 pausaPedido: { de: jogadorSessao.chave, nome: jogadorSessao.nome, em: Date.now() }
-            }).catch(() => {});
+            });
             toast('⏸️ Pedido de pausa enviado...', 'info');
         }
         function ativarPausaLocal(porQuem) {
@@ -1428,25 +1481,29 @@
         }
         async function aceitarPausa() {
             SoundFX.click();
-            try { await update(ref(db, `salas_damas/${idSalaAtual}`), { pausaAtiva: true, pausaPedido: null }); } catch (e) {}
+            if (!firebaseDisponivel) return;
+            try { await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { pausaAtiva: true, pausaPedido: null }); } catch (e) {}
             ativarPausaLocal('acordo mútuo');
             document.getElementById('div-pausa-pendente')?.classList.add('hidden');
         }
         async function recusarPausa() {
             SoundFX.click();
-            try { await update(ref(db, `salas_damas/${idSalaAtual}`), { pausaPedido: null }); toast('Pausa recusada.', 'info'); } catch (e) {}
+            if (firebaseDisponivel) {
+                try { await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { pausaPedido: null }); } catch (e) {}
+            }
+            toast('Pausa recusada.', 'info');
             document.getElementById('div-pausa-pendente')?.classList.add('hidden');
         }
         function togglePausa() {
             if (emPausa) {
                 SoundFX.click();
-                update(ref(db, `salas_damas/${idSalaAtual}`), { pausaAtiva: null, pausaPedido: null }).catch(() => {});
+                updateSeguro(`salas_damas/${idSalaAtual}`, { pausaAtiva: null, pausaPedido: null });
                 retomarPausaLocal();
             } else pedirPausa();
         }
 
         // ============================================================
-        // ============== GRUPO 9: GRAVAÇÃO ===========================
+        // ============== GRAVAÇÃO ====================================
         // ============================================================
         function desenharTabuleiroNoCanvas(ctx, canvas, tab) {
             const size = canvas.width;
@@ -1536,7 +1593,7 @@
         }
 
         // ============================================================
-        // ============== GRUPO 10: HISTÓRICO + REPLAY ================
+        // ============== HISTÓRICO + REPLAY ==========================
         // ============================================================
         function carregarHistorico() {
             try { historicoPartidas = JSON.parse(localStorage.getItem('brain_damas_historico') || '[]'); }
@@ -1659,10 +1716,10 @@
         // ==================== RANKING ===============================
         // ============================================================
         async function enviarVitoriaRanking() {
-            if (!jogadorSessao?.nome || !jogadorSessao?.chave) return;
+            if (!firebaseDisponivel || !jogadorSessao?.nome || !jogadorSessao?.chave) return;
             try {
-                const rankRef = ref(db, 'ranking_damas/' + jogadorSessao.chave);
-                await runTransaction(rankRef, (atual) => {
+                const rankRef = fns.ref(db, 'ranking_damas/' + jogadorSessao.chave);
+                await fns.runTransaction(rankRef, (atual) => {
                     const base = atual || { nome: jogadorSessao.nome, vitorias: 0, derrotas: 0 };
                     base.nome = jogadorSessao.nome; base.vitorias = (base.vitorias || 0) + 1;
                     base.atualizadoEm = Date.now(); return base;
@@ -1670,10 +1727,10 @@
             } catch (_) {}
         }
         async function enviarDerrotaRanking() {
-            if (!jogadorSessao?.nome || !jogadorSessao?.chave) return;
+            if (!firebaseDisponivel || !jogadorSessao?.nome || !jogadorSessao?.chave) return;
             try {
-                const rankRef = ref(db, 'ranking_damas/' + jogadorSessao.chave);
-                await runTransaction(rankRef, (atual) => {
+                const rankRef = fns.ref(db, 'ranking_damas/' + jogadorSessao.chave);
+                await fns.runTransaction(rankRef, (atual) => {
                     const base = atual || { nome: jogadorSessao.nome, vitorias: 0, derrotas: 0 };
                     base.nome = jogadorSessao.nome; base.derrotas = (base.derrotas || 0) + 1;
                     base.atualizadoEm = Date.now(); return base;
@@ -1683,9 +1740,13 @@
         async function carregarRanking() {
             const container = document.getElementById('ranking-list');
             if (!container) return;
+            if (!firebaseDisponivel) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">Ranking indisponível offline.</div>';
+                return;
+            }
             container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">A carregar ranking…</div>';
             try {
-                const snap = await get(ref(db, 'ranking_damas'));
+                const snap = await fns.get(fns.ref(db, 'ranking_damas'));
                 if (!snap.exists()) {
                     container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">Nenhum jogador no ranking.</div>';
                     return;
@@ -1779,15 +1840,17 @@
         // ==================== AUTENTICAÇÃO ==========================
         // ============================================================
         async function garantirAutenticacao() {
+            if (!firebaseDisponivel || !auth) return 'local_' + Math.random().toString(36).slice(2, 12);
             if (auth.currentUser) return auth.currentUser.uid;
-            try { const cred = await signInAnonymously(auth); return cred.user.uid; }
+            try { const cred = await fns.signInAnonymously(auth); return cred.user.uid; }
             catch (e) { return 'local_' + Math.random().toString(36).slice(2, 12); }
         }
         async function loginGoogle() {
             SoundFX.click();
+            if (!firebaseDisponivel) { toast('Firebase não disponível offline.', 'warn'); return; }
             try {
-                const provider = new GoogleAuthProvider();
-                const result = await signInWithPopup(auth, provider);
+                const provider = new fns.GoogleAuthProvider();
+                const result = await fns.signInWithPopup(auth, provider);
                 const user = result.user;
                 if (user) {
                     jogadorSessao = { chave: user.uid, nome: user.displayName || 'Jogador', avatar: '👤', isAnonimo: false };
@@ -1809,6 +1872,10 @@
             const codigoSala = params.get('sala');
             const modo = params.get('modo');
             if (!codigoSala) return false;
+            if (!firebaseDisponivel) {
+                abrirModal({ icon: '📡', title: 'Modo Online Indisponível', message: 'Firebase não configurado. Vais jogar contra a IA.', actions: [{ label: 'OK', onClick: () => {} }] });
+                return false;
+            }
             const querEspectador = (modo === 'assistir');
             modoEspectador = querEspectador;
             toast(querEspectador ? '👁️ Entrando como espectador...' : '⏳ A entrar automaticamente na sala...', 'info');
@@ -1818,7 +1885,7 @@
             let dados = null;
             for (let i = 1; i <= 15; i++) {
                 try {
-                    const snap = await get(ref(db, 'salas_damas/' + codigoSala));
+                    const snap = await fns.get(fns.ref(db, 'salas_damas/' + codigoSala));
                     if (snap.exists()) { dados = snap.val(); break; }
                 } catch (e) {}
                 await new Promise(r => setTimeout(r, 400));
@@ -1885,7 +1952,7 @@
             const coresExistentes = Object.values(jogadores).map(j => j.cor);
             const corEscolhida = coresExistentes.includes('white') ? 'red' : 'white';
             try {
-                await set(ref(db, `salas_damas/${codigoSala}/jogadores/${uid}`), { nome: nomeUser, cor: corEscolhida, online: true });
+                await fns.set(fns.ref(db, `salas_damas/${codigoSala}/jogadores/${uid}`), { nome: nomeUser, cor: corEscolhida, online: true });
                 idSalaAtual = codigoSala; minhaCor = corEscolhida;
                 tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
                 turnoAtual = dados.turno || 'white';
@@ -1922,9 +1989,15 @@
             document.getElementById('lobby-avatar').textContent = jogadorSessao.avatar;
             document.getElementById('display-nome').textContent = jogadorSessao.nome;
             document.getElementById('display-avatar').textContent = jogadorSessao.avatar;
-            ['btn-criar-sala', 'btn-criar-sala-senha', 'btn-criar-torneio3', 'btn-criar-torneio5', 'btn-entrar-sala'].forEach(id => {
+            ['btn-criar-sala', 'btn-criar-sala-senha', 'btn-criar-torneio3', 'btn-criar-torneio5', 'btn-entrar-sala', 'btn-jogar-ia'].forEach(id => {
                 const b = document.getElementById(id); if (b) b.disabled = false;
             });
+            if (!firebaseDisponivel) {
+                ['btn-criar-sala', 'btn-criar-sala-senha', 'btn-criar-torneio3', 'btn-criar-torneio5', 'btn-entrar-sala', 'btn-assistir-sala'].forEach(id => {
+                    const b = document.getElementById(id); if (b) { b.disabled = true; b.title = 'Indisponível offline'; }
+                });
+                toast('📡 Firebase não detetado — só modo IA disponível.', 'info');
+            }
         })();
 
         // ============================================================
@@ -1965,13 +2038,29 @@
         });
 
         // ============================================================
+        // ==================== SELECTOR DE IA ========================
+        // ============================================================
+        let nivelIASelecionado = 3;
+        document.querySelectorAll('#ia-selector .tipo-opt').forEach(btn => {
+            btn.addEventListener('click', () => {
+                SoundFX.click();
+                document.querySelectorAll('#ia-selector .tipo-opt').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                nivelIASelecionado = parseInt(btn.dataset.nivel);
+                toast(`🤖 Nível: ${IA.NIVEIS[nivelIASelecionado].nome}`, 'info');
+            });
+        });
+        document.getElementById('btn-jogar-ia').addEventListener('click', () => jogarContraIA(nivelIASelecionado));
+
+        // ============================================================
         // ==================== CRIAR SALA ============================
         // ============================================================
         async function criarSala({ comSenha = false, melhorDe = 0 } = {}) {
+            if (!firebaseDisponivel) { toast('Firebase indisponível.', 'error'); return; }
             SoundFX.click();
             try {
                 idSalaAtual = 'DAMAS-' + Date.now().toString(36).toUpperCase();
-                minhaCor = 'white'; modoEspectador = false;
+                minhaCor = 'white'; modoEspectador = false; modoIA = false;
                 tabuleiro = criarTabuleiroInicial();
                 turnoAtual = 'white'; jogoEncerrado = false; vencedorDeclarado = null;
                 modoTorneio = melhorDe;
@@ -1979,6 +2068,7 @@
                 euPronto = false; adversarioPronto = false; ambosProntos = false;
                 capturaMultiplaAtiva = false; capturaMultiplaPos = null;
                 emPausa = false; pausaPendenteDe = null; pausaSolicitadaPorMim = false;
+                lancesSemCaptura = 0; lancesDamas = 0;
                 historicoMovimentos = [{
                     tabuleiro: tabuleiroParaFirebase(tabuleiro),
                     turno: 'white', cor: 'white', de: '—', para: '—'
@@ -1987,17 +2077,18 @@
                     status: 'jogando', turno: 'white',
                     tabuleiro: tabuleiroParaFirebase(tabuleiro),
                     criador: jogadorSessao.chave,
-                    criadaEm: serverTimestamp(),
+                    criadaEm: fns.serverTimestamp ? fns.serverTimestamp() : Date.now(),
                     tempoLimite: tempoLimiteSegundos,
                     jogadores: { [jogadorSessao.chave]: { nome: jogadorSessao.nome, cor: 'white', online: true } }
                 };
                 if (comSenha) { senhaSalaAtual = gerarSenha(); dados.senha = senhaSalaAtual; }
                 else senhaSalaAtual = null;
                 if (melhorDe > 0) { dados.melhorDe = melhorDe; }
-                await set(ref(db, 'salas_damas/' + idSalaAtual), dados);
+                await fns.set(fns.ref(db, 'salas_damas/' + idSalaAtual), dados);
                 salaConfirmada = true; salvarSessao();
                 entrarInterfaceJogo();
                 document.getElementById('div-whatsapp').classList.remove('hidden');
+                document.getElementById('badge-ia').classList.add('hidden');
                 escutarFirebase(); escutarChat();
                 if (comSenha) toast(`🔒 Sala criada! Senha: ${senhaSalaAtual}`, 'success');
                 else if (melhorDe > 0) toast(`🏆 Torneio MD${melhorDe} criado!`, 'success');
@@ -2028,15 +2119,18 @@
         function entrarInterfaceJogo() {
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
-            document.getElementById('display-sala-tag').textContent = `Sala: ${idSalaAtual}`;
+            document.getElementById('display-sala-tag').textContent = modoIA
+                ? `🤖 ${IA.NIVEIS[nivelIA].nome}`
+                : `Sala: ${idSalaAtual}`;
             const badge = document.getElementById('badge-espectador');
+            const badgeIA = document.getElementById('badge-ia');
             const desistirBtn = document.getElementById('btn-desistir');
             const pausaBtn = document.getElementById('btn-pausa');
             const recBtn = document.getElementById('btn-rec');
             const chatBar = document.getElementById('chat-bar');
             const torneioBar = document.getElementById('torneio-bar');
 
-            if (modoTorneio > 0 && !modoEspectador) {
+            if (modoTorneio > 0 && !modoEspectador && !modoIA) {
                 torneioBar.classList.remove('hidden');
                 document.getElementById('torneio-melhor-de').textContent = modoTorneio;
                 document.getElementById('torneio-eu').textContent = torneioPlacar.eu;
@@ -2045,6 +2139,7 @@
 
             if (modoEspectador) {
                 badge.classList.remove('hidden');
+                badgeIA.classList.add('hidden');
                 desistirBtn.classList.add('hidden'); pausaBtn.classList.add('hidden'); recBtn.classList.add('hidden');
                 document.getElementById('info-minha-cor-wrap').style.display = 'none';
                 document.getElementById('display-avatar').textContent = '👁️';
@@ -2052,15 +2147,33 @@
                 document.getElementById('div-whatsapp').classList.remove('hidden');
                 document.getElementById('div-pos-jogo').classList.add('hidden');
                 chatBar.style.opacity = '0.5'; chatBar.style.pointerEvents = 'none';
+            } else if (modoIA) {
+                badge.classList.add('hidden');
+                badgeIA.classList.remove('hidden');
+                document.getElementById('info-minha-cor-wrap').style.display = '';
+                document.getElementById('info-minha-cor').textContent = '⚪ Brancas';
+                document.getElementById('display-avatar').textContent = '😀';
+                document.getElementById('display-nome').textContent = jogadorSessao?.nome || 'Você';
+                document.getElementById('oponente-status').className = 'status-dot online';
+                document.getElementById('placar-nome-op').textContent = IA.NIVEIS[nivelIA].nome;
+                pausaBtn.classList.add('hidden');
+                recBtn.classList.remove('hidden');
+                desistirBtn.textContent = '🏳️ Sair';
+                chatBar.style.opacity = '0.4'; chatBar.style.pointerEvents = 'none';
+                document.getElementById('div-whatsapp').classList.add('hidden');
             } else {
                 badge.classList.add('hidden');
+                badgeIA.classList.add('hidden');
                 document.getElementById('info-minha-cor-wrap').style.display = '';
                 document.getElementById('info-minha-cor').textContent = minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
+                desistirBtn.textContent = '🏳️ Desistir';
                 pausaBtn.classList.remove('hidden');
                 recBtn.classList.remove('hidden');
+                chatBar.style.opacity = ''; chatBar.style.pointerEvents = '';
             }
             renderizarTabuleiro();
-            if (!modoEspectador && idSalaAtual) setTimeout(() => marcarPronto(), 400);
+            if (!modoEspectador && idSalaAtual && !modoIA) setTimeout(() => marcarPronto(), 400);
+            if (modoIA) setTimeout(() => { if (turnoAtual === 'white') iniciarTimer(); }, 600);
             iniciarMonitorConexao();
         }
 
@@ -2092,8 +2205,7 @@
             const invertido = (minhaCor === 'red');
             const corDaVez = turnoAtual;
 
-            // Se há captura múltipla em andamento, destaca o caminho já percorrido
-            const capsObrig = (!jogoEncerrado && !modoEspectador && turnoAtual === minhaCor && !capturaMultiplaAtiva && !emPausa)
+            const capsObrig = (!jogoEncerrado && !modoEspectador && turnoAtual === minhaCor && !emPausa && !iaPensando)
                 ? capturasObrigatorias(corDaVez) : [];
             const pecasObrigadas = new Set(capsObrig.map(o => `${o.r},${o.c}`));
             const temObrigatoria = pecasObrigadas.size > 0;
@@ -2123,7 +2235,7 @@
                         wrapper.appendChild(pieceEl);
                         square.appendChild(wrapper);
                     }
-                    if (isDark && !modoEspectador && !emPausa) square.addEventListener('click', () => clicarCasa(r, c));
+                    if (isDark && !modoEspectador && !emPausa && !iaPensando) square.addEventListener('click', () => clicarCasa(r, c));
                     grid.appendChild(square);
                 }
             }
@@ -2142,6 +2254,7 @@
             if (turnoEl) {
                 if (jogoEncerrado) turnoEl.textContent = '🏁 Fim';
                 else if (emPausa) turnoEl.textContent = '⏸️ Em pausa';
+                else if (iaPensando) turnoEl.textContent = '🤖 IA pensando…';
                 else if (modoEspectador) turnoEl.textContent = turnoAtual === 'white' ? '⚪ Brancas jogam' : '🔴 Vermelhas jogam';
                 else turnoEl.textContent = (turnoAtual === minhaCor ? 'Sua vez!' : 'Vez do oponente...');
             }
@@ -2153,15 +2266,8 @@
         // ==================== INTERAÇÃO =============================
         // ============================================================
         function clicarCasa(r, c) {
-            if (modoEspectador || emPausa) return;
+            if (modoEspectador || emPausa || iaPensando) return;
             if (jogoEncerrado || turnoAtual !== minhaCor) return;
-
-            if (capturaMultiplaAtiva) {
-                if (movimentosValidos.some(m => m.r === r && m.c === c)) {
-                    executarMovimento(capturaMultiplaPos.r, capturaMultiplaPos.c, r, c);
-                }
-                return;
-            }
 
             const peca = tabuleiro[r][c];
             if (peca && peca.startsWith(minhaCor)) {
@@ -2196,184 +2302,85 @@
         }
 
         // ============================================================
-        // ========== REGRAS BRASILEIRAS: MOVIMENTOS ==================
+        // ========== REGRAS BRASILEIRAS OFICIAIS =====================
         // ============================================================
-        // Calcular movimentos de UMA peça numa posição específica
-        function calcularMovimentosPeca(r, c, cor, tab = null) {
-            const t = tab || tabuleiro;
-            const peca = t[r][c];
-            if (!peca) return [];
-            const isDama = peca.includes('king');
-            const movimentos = [];
+        // 1. Captura obrigatória pela MAIOR quantidade
+        // 2. Peão captura em qualquer direção diagonal
+        // 3. Dama captura em qualquer direção, quantas peças quiser
+        // 4. Promoção apenas ao PARAR na última fileira
+        // 5. Empate após 40 lances sem captura (ou só damas)
+        // ============================================================
 
-            if (isDama) {
-                // Dama: movimentos simples em qualquer diagonal até encontrar peça
-                for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
-                    let nr = r + dr, nc = c + dc;
-                    while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
-                        if (!t[nr][nc]) {
-                            movimentos.push({ r: nr, c: nc });
-                            nr += dr; nc += dc;
-                        } else break;
-                    }
-                }
-            } else {
-                const direcoesFrente = cor === 'white' ? [-1] : [+1];
-                for (const dr of direcoesFrente) for (const dc of [-1, +1]) {
-                    const nr = r + dr, nc = c + dc;
-                    if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !t[nr][nc]) movimentos.push({ r: nr, c: nc });
-                }
-            }
-            return movimentos;
-        }
-
-        // Lista TODAS as capturas possíveis para uma peça, em qualquer direção (peão)
-        // ou com movimentos longos (dama). Retorna array de capturas com o destino final.
-        function calcularCapturasDaPeca(r, c, cor, t = null) {
-            const tab = t || tabuleiro;
+        // Simula todas as capturas possíveis de uma peça (recursivamente)
+        function explorarCapturas(r, c, cor, tab, capturadasSet = new Set(), profundidade = 0) {
+            if (profundidade > 20) return [];
             const peca = tab[r][c];
             if (!peca) return [];
             const isDama = peca.includes('king');
-            const capturas = [];
+            const caminhos = [];
 
+            const caps = [];
             if (isDama) {
-                // Dama: para cada direção, procura a PRIMEIRA peça adversária no caminho.
-                // Se houver, e a casa imediatamente atrás estiver livre, é uma captura válida.
                 for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
                     let nr = r + dr, nc = c + dc;
-                    while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tab[nr][nc]) {
-                        nr += dr; nc += dc;
-                    }
+                    while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tab[nr][nc]) { nr += dr; nc += dc; }
                     if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) continue;
                     const alvo = tab[nr][nc];
                     if (!alvo || alvo.startsWith(cor)) continue;
-                    // casa depois do alvo
+                    if (capturadasSet.has(`${nr},${nc}`)) continue;
                     const tr = nr + dr, tc = nc + dc;
                     if (tr >= 0 && tr < 8 && tc >= 0 && tc < 8 && !tab[tr][tc]) {
-                        capturas.push({
-                            r: tr, c: tc,
-                            capturada: { r: nr, c: nc }
-                        });
+                        caps.push({ r: tr, c: tc, capturada: { r: nr, c: nc } });
                     }
                 }
             } else {
-                // Peão: 4 direções diagonais (não só frente) — captura "para trás" também permitido nas Damas Brasileiras
                 for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
                     const mr = r + dr, mc = c + dc;
                     const jr = r + 2 * dr, jc = c + 2 * dc;
-                    if (jr >= 0 && jr < 8 && jc >= 0 && jc < 8) {
-                        const meio = tab[mr][mc];
-                        if (meio && !meio.startsWith(cor) && !tab[jr][jc]) {
-                            capturas.push({
-                                r: jr, c: jc,
-                                capturada: { r: mr, c: mc }
-                            });
-                        }
+                    if (jr < 0 || jr >= 8 || jc < 0 || jc >= 8) continue;
+                    const meio = tab[mr][mc];
+                    if (meio && !meio.startsWith(cor) && !tab[jr][jc] && !capturadasSet.has(`${mr},${mc}`)) {
+                        caps.push({ r: jr, c: jc, capturada: { r: mr, c: mc } });
                     }
                 }
             }
-            return capturas;
-        }
 
-        // Calcular o TOTAL MÁXIMO de peças que uma peça pode capturar (DFS com memo)
-        // Retorna o número máximo de peças capturadas a partir desta posição.
-        function maxCapturasDaPeca(r, c, cor, t = null, visitadas = null) {
-            const tab = t || tabuleiro;
-            const peca = tab[r][c];
-            if (!peca) return 0;
-            const isDama = peca.includes('king');
+            if (caps.length === 0) return [];
 
-            // Trabalha sobre cópia para simular capturas
-            const sim = tab.map(row => row.slice());
-            let maxCapt = 0;
+            for (const cap of caps) {
+                const novaTab = tab.map(row => row.slice());
+                const pecaAtual = novaTab[r][c];
+                const capturadaOriginal = novaTab[cap.capturada.r][cap.capturada.c];
+                novaTab[cap.r][cap.c] = pecaAtual;
+                novaTab[r][c] = null;
+                novaTab[cap.capturada.r][cap.capturada.c] = null;
 
-            function dfs(posR, posC, capturadas, profundidade) {
-                if (profundidade > 20) return; // sanity
-                const caps = calcularCapturasDaPeca(posR, posC, cor, sim);
-                if (caps.length === 0) {
-                    if (capturadas > maxCapt) maxCapt = capturadas;
-                    return;
-                }
-                for (const cap of caps) {
-                    // Simula a captura
-                    const pecaAtual = sim[posR][posC];
-                    sim[cap.r][cap.c] = pecaAtual;
-                    sim[posR][posC] = null;
-                    const capturadaOriginal = sim[cap.capturada.r][cap.capturada.c];
-                    sim[cap.capturada.r][cap.capturada.c] = null;
+                if (pecaAtual === 'white' && cap.r === 0) novaTab[cap.r][cap.c] = 'white-king';
+                if (pecaAtual === 'red' && cap.r === 7) novaTab[cap.r][cap.c] = 'red-king';
 
-                    // Promoção durante a cadeia (peão que chega ao fim)
-                    const isPeao = !pecaAtual.includes('king');
-                    let coroaAgora = false;
-                    if (isPeao) {
-                        if (cor === 'white' && cap.r === 0) { sim[cap.r][cap.c] = 'white-king'; coroaAgora = true; }
-                        if (cor === 'red' && cap.r === 7) { sim[cap.r][cap.c] = 'red-king'; coroaAgora = true; }
-                    }
+                const novasCapturadas = new Set(capturadasSet);
+                novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
 
-                    dfs(cap.r, cap.c, capturadas + 1, profundidade + 1);
+                const continuacoes = explorarCapturas(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
 
-                    // Restaura
-                    sim[posR][posC] = pecaAtual;
-                    sim[cap.r][cap.c] = null;
-                    sim[cap.capturada.r][cap.capturada.c] = capturadaOriginal;
-                }
+                if (continuacoes.length === 0) caminhos.push([cap]);
+                else for (const cont of continuacoes) caminhos.push([cap, ...cont]);
             }
-
-            dfs(r, c, 0, 0);
-            return maxCapt;
+            return caminhos;
         }
 
-        // Calcula a MELHOR captura de uma peça específica (com caminho completo até o fim)
-        function melhoresCapturasDaPeca(r, c, cor, t = null) {
-            const tab = t || tabuleiro;
-            const peca = tab[r][c];
-            if (!peca) return { max: 0, caminhos: [] };
-            const isDama = peca.includes('king');
-
-            const sim = tab.map(row => row.slice());
-            let maxCapt = 0;
-            let melhoresCaminhos = [];
-
-            function dfs(posR, posC, capturadas, caminho) {
-                if (caminho.length > 20) return;
-                const caps = calcularCapturasDaPeca(posR, posC, cor, sim);
-                if (caps.length === 0) {
-                    if (capturadas > maxCapt) {
-                        maxCapt = capturadas;
-                        melhoresCaminhos = [caminho.slice()];
-                    } else if (capturadas === maxCapt && capturadas > 0) {
-                        melhoresCaminhos.push(caminho.slice());
-                    }
-                    return;
-                }
-                for (const cap of caps) {
-                    const pecaAtual = sim[posR][posC];
-                    const capturadaOriginal = sim[cap.capturada.r][cap.capturada.c];
-                    sim[cap.r][cap.c] = pecaAtual;
-                    sim[posR][posC] = null;
-                    sim[cap.capturada.r][cap.capturada.c] = null;
-
-                    const isPeao = !pecaAtual.includes('king');
-                    if (isPeao) {
-                        if (cor === 'white' && cap.r === 0) sim[cap.r][cap.c] = 'white-king';
-                        if (cor === 'red' && cap.r === 7) sim[cap.r][cap.c] = 'red-king';
-                    }
-
-                    caminho.push({ r: cap.r, c: cap.c, capturada: cap.capturada });
-                    dfs(cap.r, cap.c, capturadas + 1, caminho);
-                    caminho.pop();
-
-                    sim[posR][posC] = pecaAtual;
-                    sim[cap.r][cap.c] = null;
-                    sim[cap.capturada.r][cap.capturada.c] = capturadaOriginal;
-                }
-            }
-
-            dfs(r, c, 0, []);
-            return { max: maxCapt, caminhos: melhoresCaminhos };
+        // Retorna o máximo de capturas possível de uma peça e os caminhos ótimos
+        function todosCaminhosCaptura(r, c, cor) {
+            const caminhos = explorarCapturas(r, c, cor, tabuleiro);
+            if (caminhos.length === 0) return { max: 0, caminhos: [] };
+            const max = Math.max(...caminhos.map(c => c.length));
+            return { max, caminhos: caminhos.filter(c => c.length === max) };
         }
 
-        // Retorna a MAIOR quantidade de peças que o jogador pode capturar em todo o tabuleiro
+        function maxCapturasDaPeca(r, c, cor) {
+            return todosCaminhosCaptura(r, c, cor).max;
+        }
+
         function maxCapturasGlobais(cor) {
             let max = 0;
             for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
@@ -2386,7 +2393,6 @@
             return max;
         }
 
-        // Lista as peças do jogador que podem capturar a MAIOR quantidade (obrigatórias)
         function capturasObrigatorias(cor) {
             const maxGlobal = maxCapturasGlobais(cor);
             if (maxGlobal === 0) return [];
@@ -2395,9 +2401,7 @@
                 const p = tabuleiro[r][c];
                 if (!p || !p.startsWith(cor)) continue;
                 const m = maxCapturasDaPeca(r, c, cor);
-                if (m === maxGlobal) {
-                    out.push({ r, c, maxCapturas: m });
-                }
+                if (m === maxGlobal) out.push({ r, c, maxCapturas: m });
             }
             return out;
         }
@@ -2406,20 +2410,16 @@
             return maxCapturasGlobais(cor) > 0;
         }
 
-        // Calcula os movimentos válidos da peça selecionada (com regras brasileiras)
         function calcularMovimentos(r, c) {
             const peca = tabuleiro[r][c];
             if (!peca) return [];
             const cor = peca.startsWith('white') ? 'white' : 'red';
 
-            // 1. Se há captura obrigatória global, só capturas
             const obrig = capturasObrigatorias(cor);
             if (obrig.length > 0) {
                 const estaObrig = obrig.find(o => o.r === r && o.c === c);
-                if (!estaObrig) return []; // esta peça não é obrigada, não mostra nada
-                // Mostra as capturas que fazem parte do melhor caminho
-                const res = melhoresCapturasDaPeca(r, c, cor);
-                if (res.max === 0) return [];
+                if (!estaObrig) return [];
+                const res = todosCaminhosCaptura(r, c, cor);
                 return res.caminhos.map(cam => {
                     const destino = cam[cam.length - 1];
                     return {
@@ -2430,12 +2430,44 @@
                 });
             }
 
-            // 2. Sem capturas obrigatórias: movimentos simples
-            return calcularMovimentosPeca(r, c, cor);
+            const movs = [];
+            const isDama = peca.includes('king');
+            if (isDama) {
+                for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
+                    let nr = r + dr, nc = c + dc;
+                    while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tabuleiro[nr][nc]) {
+                        movs.push({ r: nr, c: nc });
+                        nr += dr; nc += dc;
+                    }
+                }
+            } else {
+                const dirs = cor === 'white' ? [-1] : [+1];
+                for (const dr of dirs) for (const dc of [-1, +1]) {
+                    const nr = r + dr, nc = c + dc;
+                    if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tabuleiro[nr][nc]) {
+                        movs.push({ r: nr, c: nc });
+                    }
+                }
+            }
+            return movs;
         }
 
         // ============================================================
-        // ========== EXECUTAR MOVIMENTO (regras brasileiras) ==========
+        // ========== EMPATE ==========================================
+        // ============================================================
+        function verificarEmpate() {
+            if (lancesSemCaptura >= 40) return true;
+            let soDamas = true;
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                const p = tabuleiro[r][c];
+                if (p && !p.includes('king')) soDamas = false;
+            }
+            if (soDamas && lancesDamas >= 40) return true;
+            return false;
+        }
+
+        // ============================================================
+        // ========== EXECUTAR MOVIMENTO ==============================
         // ============================================================
         async function executarMovimento(deR, deC, paraR, paraC) {
             const mov = movimentosValidos.find(m => m.r === paraR && m.c === paraC);
@@ -2445,7 +2477,6 @@
             const corPeca = pecaMovida.startsWith('white') ? 'white' : 'red';
 
             if (mov.caminhoCompleto && mov.caminhoCompleto.length > 0) {
-                // Captura(s) em cadeia — executa todo o caminho
                 let posAtual = { r: deR, c: deC };
                 for (const passo of mov.caminhoCompleto) {
                     tabuleiro[passo.r][passo.c] = tabuleiro[posAtual.r][posAtual.c];
@@ -2453,21 +2484,20 @@
                     tabuleiro[passo.capturada.r][passo.capturada.c] = null;
                     posAtual = { r: passo.r, c: passo.c };
                 }
-                // Promoção se chegou ao fim
                 if (tabuleiro[posAtual.r][posAtual.c] === 'white' && posAtual.r === 0) tabuleiro[posAtual.r][posAtual.c] = 'white-king';
                 if (tabuleiro[posAtual.r][posAtual.c] === 'red' && posAtual.r === 7) tabuleiro[posAtual.r][posAtual.c] = 'red-king';
                 SoundFX.capture();
                 toast(`⚡ Capturou ${mov.caminhoCompleto.length} peça(s)!`, 'success');
+                lancesSemCaptura = 0;
             } else {
-                // Movimento simples
                 tabuleiro[paraR][paraC] = pecaMovida;
                 tabuleiro[deR][deC] = null;
                 if (pecaMovida === 'white' && paraR === 0) tabuleiro[paraR][paraC] = 'white-king';
                 if (pecaMovida === 'red' && paraR === 7) tabuleiro[paraR][paraC] = 'red-king';
                 SoundFX.move();
+                lancesSemCaptura++;
             }
 
-            // Regista no histórico
             historicoMovimentos.push({
                 tabuleiro: tabuleiroParaFirebase(tabuleiro),
                 turno: turnoAtual,
@@ -2476,6 +2506,13 @@
                 para: `(${paraR},${paraC})`,
                 captura: mov.captura ? `(${mov.captura.r},${mov.captura.c})` : null
             });
+
+            if (verificarEmpate()) {
+                toast('🤝 Empate por repetição!', 'info');
+                jogoEncerrado = true;
+                tratarFimDeJogo('empate', 'empate');
+                return;
+            }
 
             turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
             celulaSelecionada = null;
@@ -2486,6 +2523,16 @@
             pararTimer();
 
             const vencedorPorTabuleiro = verificarFimDeJogo();
+
+            if (modoIA) {
+                if (vencedorPorTabuleiro) {
+                    jogoEncerrado = true;
+                    tratarFimDeJogo(vencedorPorTabuleiro, 'sem-movimentos');
+                    return;
+                }
+                if (turnoAtual !== minhaCor) setTimeout(() => fazerJogadaIA(), 350);
+                return;
+            }
 
             const payload = {
                 tabuleiro: tabuleiroParaFirebase(tabuleiro),
@@ -2514,7 +2561,6 @@
                 const p = tabuleiro[r][c];
                 if (p && p.startsWith(corDaVez)) {
                     if (calcularMovimentos(r, c).length > 0) return null;
-                    // Verifica se tem capturas (que já seriam incluídas em calcularMovimentos via obrigatoriedade)
                 }
             }
             return corDaVez === 'white' ? 'red' : 'white';
@@ -2528,27 +2574,38 @@
             desistenciaProcessada = true;
             pararTimer();
             const euVenci = (vencedor === minhaCor);
-            if (euVenci) {
-                SoundFX.win(); registrarVitoria(); enviarVitoriaRanking();
+            const empate = (vencedor === 'empate');
+
+            if (empate) {
+                SoundFX.notify();
+                toast('🤝 Empate!', 'info');
+                adicionarAoHistorico('empate', nomeOponente || 'Oponente');
+            } else if (euVenci) {
+                SoundFX.win(); registrarVitoria();
+                if (!modoIA) enviarVitoriaRanking();
                 toast('🏆 Você venceu!', 'success');
+                adicionarAoHistorico('vitoria', nomeOponente || 'Oponente');
             } else {
-                SoundFX.lose(); registrarDerrota(); enviarDerrotaRanking();
+                SoundFX.lose(); registrarDerrota();
+                if (!modoIA) enviarDerrotaRanking();
                 toast('😢 Você perdeu.', 'error');
+                adicionarAoHistorico('derrota', nomeOponente || 'Oponente');
             }
-            adicionarAoHistorico(euVenci ? 'vitoria' : 'derrota', nomeOponente || 'Oponente');
+
             const cData = carregarConquistas();
             if (euVenci) {
                 cData.stats.vitorias++;
                 cData.stats.streakAtual = (cData.stats.streakAtual || 0) + 1;
                 cData.stats.maiorStreak = Math.max(cData.stats.maiorStreak || 0, cData.stats.streakAtual);
-            } else {
+                if (modoIA && nivelIA === 5) cData.stats.iaMestreVencida = (cData.stats.iaMestreVencida || 0) + 1;
+            } else if (!empate) {
                 cData.stats.derrotas++;
                 cData.stats.streakAtual = 0;
             }
             salvarConquistas(cData);
             desbloquearConquistas();
 
-            if (modoTorneio > 0) {
+            if (modoTorneio > 0 && !empate && !modoIA) {
                 if (euVenci) torneioPlacar.eu++; else torneioPlacar.op++;
                 document.getElementById('torneio-eu').textContent = torneioPlacar.eu;
                 document.getElementById('torneio-op').textContent = torneioPlacar.op;
@@ -2592,18 +2649,31 @@
             let motivoTxt = '';
             if (motivo === 'desistencia') motivoTxt = (euVenci ? 'O adversário desistiu.' : 'Você desistiu.');
             else if (motivo === 'timeout') motivoTxt = (euVenci ? 'O adversário deixou o tempo esgotar.' : 'Você deixou o tempo esgotar!');
+            else if (motivo === 'empate') motivoTxt = 'Empate por repetição (40 lances).';
             else motivoTxt = (euVenci ? 'O adversário ficou sem movimentos.' : 'Você ficou sem movimentos.');
 
             setTimeout(() => {
-                abrirModal({
-                    icon: euVenci ? '🏆' : (motivo === 'timeout' ? '⏱️' : '💔'),
-                    title: euVenci ? 'Vitória!' : (motivo === 'timeout' ? 'Tempo Esgotado' : 'Derrota'),
-                    message: motivoTxt + '\n\nDeseja jogar novamente?',
-                    actions: [
-                        { label: '🔄 Jogar Novamente', onClick: () => enviarPedidoRevanche() },
-                        { label: '🚪 Sair', onClick: () => { limparSessao(); if (isFullscreen()) sairTelaCheia(); window.location.href = window.location.pathname; } }
-                    ]
-                });
+                if (modoIA) {
+                    abrirModal({
+                        icon: empate ? '🤝' : (euVenci ? '🏆' : '💔'),
+                        title: empate ? 'Empate!' : (euVenci ? 'Vitória contra a IA!' : 'A IA venceu'),
+                        message: motivoTxt + '\n\nDeseja jogar novamente?',
+                        actions: [
+                            { label: '🔄 Jogar Novamente', onClick: () => jogarContraIA(nivelIA) },
+                            { label: '🏠 Menu', onClick: () => { limparSessao(); if (isFullscreen()) sairTelaCheia(); window.location.href = window.location.pathname; } }
+                        ]
+                    });
+                } else {
+                    abrirModal({
+                        icon: empate ? '🤝' : (euVenci ? '🏆' : (motivo === 'timeout' ? '⏱️' : '💔')),
+                        title: empate ? 'Empate!' : (euVenci ? 'Vitória!' : (motivo === 'timeout' ? 'Tempo Esgotado' : 'Derrota')),
+                        message: motivoTxt + '\n\nDeseja jogar novamente?',
+                        actions: [
+                            { label: '🔄 Jogar Novamente', onClick: () => enviarPedidoRevanche() },
+                            { label: '🚪 Sair', onClick: () => { limparSessao(); if (isFullscreen()) sairTelaCheia(); window.location.href = window.location.pathname; } }
+                        ]
+                    });
+                }
             }, 600);
             document.getElementById('div-pos-jogo')?.classList.remove('hidden');
         }
@@ -2615,8 +2685,10 @@
         // ============================================================
         async function enviarPedidoRevanche() {
             SoundFX.click();
+            if (modoIA) { jogarContraIA(nivelIA); return; }
+            if (!firebaseDisponivel) return;
             try {
-                await update(ref(db, `salas_damas/${idSalaAtual}`), {
+                await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), {
                     pedidoRevanche: { de: jogadorSessao.chave, nome: jogadorSessao.nome, em: Date.now() }
                 });
                 toast('⏳ Pedido enviado...', 'info');
@@ -2638,8 +2710,9 @@
         }
         async function aceitarRevanche() {
             SoundFX.click();
+            if (!firebaseDisponivel) return;
             try {
-                const jogadoresSnap = await get(ref(db, `salas_damas/${idSalaAtual}/jogadores`));
+                const jogadoresSnap = await fns.get(fns.ref(db, `salas_damas/${idSalaAtual}/jogadores`));
                 const jogadores = jogadoresSnap.val() || {};
                 const novasCores = {};
                 Object.entries(jogadores).forEach(([uid, j]) => {
@@ -2650,17 +2723,20 @@
                     tabuleiro: tabuleiroParaFirebase(criarTabuleiroInicial()),
                     vencedor: null, motivoFim: null, desistente: null,
                     pedidoRevanche: null, jogadores: novasCores,
-                    reiniciadaEm: serverTimestamp(),
+                    reiniciadaEm: fns.serverTimestamp ? fns.serverTimestamp() : Date.now(),
                     pausaAtiva: null, pausaPedido: null
                 };
                 if (modoTorneio > 0) torneioRodadaAtual++;
-                await update(ref(db, `salas_damas/${idSalaAtual}`), updates);
+                await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), updates);
                 toast('🎮 Nova partida!', 'success');
             } catch (e) { toast('Erro ao aceitar.', 'error'); }
         }
         async function recusarRevanche() {
             SoundFX.click();
-            try { await update(ref(db, `salas_damas/${idSalaAtual}`), { pedidoRevanche: null }); toast('Recusada.', 'info'); } catch (e) {}
+            if (firebaseDisponivel) {
+                try { await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { pedidoRevanche: null }); } catch (e) {}
+            }
+            toast('Recusada.', 'info');
         }
         function resetarParaNovaPartida(dados) {
             desistenciaProcessada = false; pedidoRevancheDe = null;
@@ -2669,6 +2745,7 @@
             euPronto = false; adversarioPronto = false; ambosProntos = false;
             capturaMultiplaAtiva = false; capturaMultiplaPos = null;
             emPausa = false; pausaPendenteDe = null; pausaSolicitadaPorMim = false;
+            lancesSemCaptura = 0; lancesDamas = 0;
             historicoMovimentos = [{
                 tabuleiro: tabuleiroParaFirebase(dados.tabuleiro),
                 turno: 'white', cor: 'white', de: '—', para: '—'
@@ -2697,6 +2774,17 @@
         function confirmarDesistencia() {
             if (modoEspectador) return;
             SoundFX.click();
+            if (modoIA) {
+                abrirModal({
+                    icon: '🏳️', title: 'Sair da partida?',
+                    message: 'O progresso contra a IA será perdido.',
+                    actions: [
+                        { label: 'Cancelar', onClick: () => {} },
+                        { label: 'Sair', onClick: () => { limparSessao(); if (isFullscreen()) sairTelaCheia(); window.location.href = window.location.pathname; } }
+                    ]
+                });
+                return;
+            }
             abrirModal({
                 icon: '🏳️', title: 'Desistir da partida?',
                 message: 'Se você desistir, seu adversário será declarado vencedor.',
@@ -2706,7 +2794,7 @@
                         try {
                             pararTimer();
                             const corAdversaria = minhaCor === 'white' ? 'red' : 'white';
-                            await update(ref(db, `salas_damas/${idSalaAtual}`), {
+                            await updateSeguro(`salas_damas/${idSalaAtual}`, {
                                 status: 'encerrado', vencedor: corAdversaria,
                                 motivoFim: 'desistencia', desistente: jogadorSessao.chave
                             });
@@ -2717,11 +2805,333 @@
         }
 
         // ============================================================
+        // ==================== IA — 5 NÍVEIS =========================
+        // ============================================================
+        const IA = (() => {
+            const NIVEIS = {
+                1: { nome: '🐣 Iniciante', profundidade: 1, aleatoriedade: 0.60, usaPosicao: false },
+                2: { nome: '🐤 Fácil',     profundidade: 1, aleatoriedade: 0.30, usaPosicao: true  },
+                3: { nome: '🦊 Médio',     profundidade: 3, aleatoriedade: 0.10, usaPosicao: true  },
+                4: { nome: '🐺 Difícil',   profundidade: 5, aleatoriedade: 0.03, usaPosicao: true  },
+                5: { nome: '🐉 Mestre',    profundidade: 7, aleatoriedade: 0.00, usaPosicao: true  }
+            };
+
+            function clonarTabuleiro(t) { return t.map(r => r.slice()); }
+
+            function explorarCapturasIA(r, c, cor, tab, capturadasSet = new Set(), profundidade = 0) {
+                if (profundidade > 20) return [];
+                const peca = tab[r][c];
+                if (!peca) return [];
+                const isDama = peca.includes('king');
+                const caminhos = [];
+                const caps = [];
+                if (isDama) {
+                    for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
+                        let nr = r + dr, nc = c + dc;
+                        while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tab[nr][nc]) { nr += dr; nc += dc; }
+                        if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) continue;
+                        const alvo = tab[nr][nc];
+                        if (!alvo || alvo.startsWith(cor)) continue;
+                        if (capturadasSet.has(`${nr},${nc}`)) continue;
+                        const tr = nr + dr, tc = nc + dc;
+                        if (tr >= 0 && tr < 8 && tc >= 0 && tc < 8 && !tab[tr][tc]) {
+                            caps.push({ r: tr, c: tc, capturada: { r: nr, c: nc } });
+                        }
+                    }
+                } else {
+                    for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
+                        const mr = r + dr, mc = c + dc;
+                        const jr = r + 2 * dr, jc = c + 2 * dc;
+                        if (jr < 0 || jr >= 8 || jc < 0 || jc >= 8) continue;
+                        const meio = tab[mr][mc];
+                        if (meio && !meio.startsWith(cor) && !tab[jr][jc] && !capturadasSet.has(`${mr},${mc}`)) {
+                            caps.push({ r: jr, c: jc, capturada: { r: mr, c: mc } });
+                        }
+                    }
+                }
+                if (caps.length === 0) return [];
+                for (const cap of caps) {
+                    const novaTab = tab.map(row => row.slice());
+                    const pecaAtual = novaTab[r][c];
+                    const capturadaOriginal = novaTab[cap.capturada.r][cap.capturada.c];
+                    novaTab[cap.r][cap.c] = pecaAtual;
+                    novaTab[r][c] = null;
+                    novaTab[cap.capturada.r][cap.capturada.c] = null;
+                    if (pecaAtual === 'white' && cap.r === 0) novaTab[cap.r][cap.c] = 'white-king';
+                    if (pecaAtual === 'red' && cap.r === 7) novaTab[cap.r][cap.c] = 'red-king';
+                    const novasCapturadas = new Set(capturadasSet);
+                    novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
+                    const continuacoes = explorarCapturasIA(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
+                    if (continuacoes.length === 0) caminhos.push([cap]);
+                    else for (const cont of continuacoes) caminhos.push([cap, ...cont]);
+                }
+                return caminhos;
+            }
+
+            function gerarMovimentos(tab, cor) {
+                const movs = [];
+                let maxCapt = 0;
+                const capturasPorPeca = [];
+                for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                    const p = tab[r][c];
+                    if (!p || !p.startsWith(cor)) continue;
+                    const caminhos = explorarCapturasIA(r, c, cor, tab);
+                    if (caminhos.length > 0) {
+                        const max = Math.max(...caminhos.map(x => x.length));
+                        if (max > maxCapt) maxCapt = max;
+                        capturasPorPeca.push({ r, c, caminhos, max });
+                    }
+                }
+                if (maxCapt > 0) {
+                    for (const cp of capturasPorPeca) {
+                        if (cp.max !== maxCapt) continue;
+                        for (const cam of cp.caminhos) {
+                            if (cam.length !== maxCapt) continue;
+                            const dest = cam[cam.length - 1];
+                            movs.push({
+                                de: { r: cp.r, c: cp.c },
+                                para: { r: dest.r, c: dest.c },
+                                caminho: cam,
+                                captura: true
+                            });
+                        }
+                    }
+                    return movs;
+                }
+                for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                    const p = tab[r][c];
+                    if (!p || !p.startsWith(cor)) continue;
+                    const isDama = p.includes('king');
+                    if (isDama) {
+                        for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
+                            let nr = r + dr, nc = c + dc;
+                            while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tab[nr][nc]) {
+                                movs.push({ de: { r, c }, para: { r: nr, c: nc }, captura: false });
+                                nr += dr; nc += dc;
+                            }
+                        }
+                    } else {
+                        const dirs = cor === 'white' ? [-1] : [+1];
+                        for (const dr of dirs) for (const dc of [-1, +1]) {
+                            const nr = r + dr, nc = c + dc;
+                            if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tab[nr][nc]) {
+                                movs.push({ de: { r, c }, para: { r: nr, c: nc }, captura: false });
+                            }
+                        }
+                    }
+                }
+                return movs;
+            }
+
+            function aplicarMovimento(tab, mov) {
+                const novo = clonarTabuleiro(tab);
+                const peca = novo[mov.de.r][mov.de.c];
+                if (mov.caminho && mov.caminho.length > 0) {
+                    let pos = { r: mov.de.r, c: mov.de.c };
+                    for (const passo of mov.caminho) {
+                        novo[passo.r][passo.c] = novo[pos.r][pos.c];
+                        novo[pos.r][pos.c] = null;
+                        novo[passo.capturada.r][passo.capturada.c] = null;
+                        pos = { r: passo.r, c: passo.c };
+                    }
+                    if (novo[pos.r][pos.c] === 'white' && pos.r === 0) novo[pos.r][pos.c] = 'white-king';
+                    if (novo[pos.r][pos.c] === 'red' && pos.r === 7) novo[pos.r][pos.c] = 'red-king';
+                } else {
+                    novo[mov.para.r][mov.para.c] = peca;
+                    novo[mov.de.r][mov.de.c] = null;
+                    if (peca === 'white' && mov.para.r === 0) novo[mov.para.r][mov.para.c] = 'white-king';
+                    if (peca === 'red' && mov.para.r === 7) novo[mov.para.r][mov.para.c] = 'red-king';
+                }
+                return novo;
+            }
+
+            function avaliar(tab, cor, usaPosicao) {
+                const oponente = cor === 'white' ? 'red' : 'white';
+                let score = 0;
+                for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                    const p = tab[r][c];
+                    if (!p) continue;
+                    const isDama = p.includes('king');
+                    const valor = isDama ? 5 : 1;
+                    if (p.startsWith(cor)) {
+                        score += valor;
+                        if (usaPosicao) {
+                            if (!isDama) {
+                                const avanco = cor === 'white' ? (7 - r) : r;
+                                score += avanco * 0.08;
+                            }
+                            if (c >= 2 && c <= 5) score += 0.05;
+                        }
+                    } else {
+                        score -= valor;
+                        if (usaPosicao) {
+                            if (!isDama) {
+                                const avanco = oponente === 'white' ? (7 - r) : r;
+                                score -= avanco * 0.08;
+                            }
+                            if (c >= 2 && c <= 5) score -= 0.05;
+                        }
+                    }
+                }
+                return score;
+            }
+
+            function minimax(tab, profundidade, alpha, beta, corAtual, corIA, usaPosicao) {
+                if (profundidade === 0) return avaliar(tab, corIA, usaPosicao);
+                const movs = gerarMovimentos(tab, corAtual);
+                if (movs.length === 0) {
+                    return corAtual === corIA ? -1000 : 1000;
+                }
+                const maximizando = (corAtual === corIA);
+                if (maximizando) {
+                    let melhor = -Infinity;
+                    for (const mov of movs) {
+                        const novoTab = aplicarMovimento(tab, mov);
+                        const val = minimax(novoTab, profundidade - 1, alpha, beta,
+                            corAtual === 'white' ? 'red' : 'white', corIA, usaPosicao);
+                        if (val > melhor) melhor = val;
+                        if (melhor > alpha) alpha = melhor;
+                        if (beta <= alpha) break;
+                    }
+                    return melhor;
+                } else {
+                    let melhor = Infinity;
+                    for (const mov of movs) {
+                        const novoTab = aplicarMovimento(tab, mov);
+                        const val = minimax(novoTab, profundidade - 1, alpha, beta,
+                            corAtual === 'white' ? 'red' : 'white', corIA, usaPosicao);
+                        if (val < melhor) melhor = val;
+                        if (melhor < beta) beta = melhor;
+                        if (beta <= alpha) break;
+                    }
+                    return melhor;
+                }
+            }
+
+            function escolherMovimento(tab, cor, nivel) {
+                const cfg = NIVEIS[nivel] || NIVEIS[3];
+                const movs = gerarMovimentos(tab, cor);
+                if (movs.length === 0) return null;
+
+                if (Math.random() < cfg.aleatoriedade) {
+                    return movs[Math.floor(Math.random() * movs.length)];
+                }
+
+                let melhorMov = movs[0];
+                let melhorVal = -Infinity;
+                for (const mov of movs) {
+                    const novoTab = aplicarMovimento(tab, mov);
+                    const val = minimax(novoTab, cfg.profundidade - 1, -Infinity, Infinity,
+                        cor === 'white' ? 'red' : 'white', cor, cfg.usaPosicao);
+                    if (val > melhorVal) {
+                        melhorVal = val;
+                        melhorMov = mov;
+                    }
+                }
+                return melhorMov;
+            }
+
+            return { NIVEIS, escolherMovimento, gerarMovimentos };
+        })();
+
+        function jogarContraIA(nivel) {
+            SoundFX.click();
+            modoIA = true;
+            nivelIA = nivel;
+            modoEspectador = false;
+            modoTorneio = 0;
+            idSalaAtual = 'IA-' + Date.now().toString(36).toUpperCase();
+            minhaCor = 'white';
+            tabuleiro = criarTabuleiroInicial();
+            turnoAtual = 'white';
+            jogoEncerrado = false;
+            vencedorDeclarado = null;
+            desistenciaProcessada = false;
+            lancesSemCaptura = 0;
+            lancesDamas = 0;
+            celulaSelecionada = null;
+            movimentosValidos = [];
+            emPausa = false;
+            capturaMultiplaAtiva = false;
+            capturaMultiplaPos = null;
+            iaPensando = false;
+            nomeOponente = IA.NIVEIS[nivel].nome;
+            historicoMovimentos = [{
+                tabuleiro: tabuleiroParaFirebase(tabuleiro),
+                turno: 'white', cor: 'white', de: '—', para: '—'
+            }];
+            salaConfirmada = true;
+            entrarInterfaceJogo();
+            toast(`🤖 Modo IA: ${IA.NIVEIS[nivel].nome}`, 'success');
+        }
+
+        async function fazerJogadaIA() {
+            if (!modoIA || jogoEncerrado || iaPensando) return;
+            if (turnoAtual === minhaCor) return;
+            iaPensando = true;
+            renderizarTabuleiro();
+            const delay = nivelIA >= 4 ? 800 : nivelIA >= 3 ? 500 : 350;
+            await new Promise(r => setTimeout(r, delay));
+            const mov = IA.escolherMovimento(tabuleiro, 'red', nivelIA);
+            if (!mov) {
+                iaPensando = false;
+                jogoEncerrado = true;
+                tratarFimDeJogo('white', 'sem-movimentos');
+                return;
+            }
+            const pecaMovida = tabuleiro[mov.de.r][mov.de.c];
+            if (mov.caminho && mov.caminho.length > 0) {
+                let pos = { r: mov.de.r, c: mov.de.c };
+                for (const passo of mov.caminho) {
+                    tabuleiro[passo.r][passo.c] = tabuleiro[pos.r][pos.c];
+                    tabuleiro[pos.r][pos.c] = null;
+                    tabuleiro[passo.capturada.r][passo.capturada.c] = null;
+                    pos = { r: passo.r, c: passo.c };
+                }
+                if (tabuleiro[pos.r][pos.c] === 'red' && pos.r === 7) tabuleiro[pos.r][pos.c] = 'red-king';
+                SoundFX.capture();
+                lancesSemCaptura = 0;
+            } else {
+                tabuleiro[mov.para.r][mov.para.c] = pecaMovida;
+                tabuleiro[mov.de.r][mov.de.c] = null;
+                if (pecaMovida === 'red' && mov.para.r === 7) tabuleiro[mov.para.r][mov.para.c] = 'red-king';
+                SoundFX.move();
+                lancesSemCaptura++;
+            }
+            historicoMovimentos.push({
+                tabuleiro: tabuleiroParaFirebase(tabuleiro),
+                turno: 'red', cor: 'red',
+                de: `(${mov.de.r},${mov.de.c})`,
+                para: `(${mov.para.r},${mov.para.c})`,
+                captura: mov.captura ? 'sim' : null
+            });
+            turnoAtual = 'white';
+            iaPensando = false;
+            renderizarTabuleiro();
+
+            if (verificarEmpate()) {
+                jogoEncerrado = true;
+                toast('🤝 Empate!', 'info');
+                tratarFimDeJogo('empate', 'empate');
+                return;
+            }
+
+            const venc = verificarFimDeJogo();
+            if (venc) {
+                jogoEncerrado = true;
+                tratarFimDeJogo(venc, 'sem-movimentos');
+            } else {
+                iniciarTimer();
+            }
+        }
+
+        // ============================================================
         // ==================== ESCUTA FIREBASE =======================
         // ============================================================
         function escutarFirebase() {
+            if (!firebaseDisponivel) return;
             if (unsubscribeFirebase) unsubscribeFirebase();
-            unsubscribeFirebase = onValue(ref(db, 'salas_damas/' + idSalaAtual), (snapshot) => {
+            unsubscribeFirebase = fns.onValue(fns.ref(db, 'salas_damas/' + idSalaAtual), (snapshot) => {
                 if (!snapshot.exists()) return;
                 const dados = snapshot.val();
                 const turnoAnterior = turnoAtual;
@@ -2808,9 +3218,10 @@
         // ==================== CHAT ==================================
         // ============================================================
         function escutarChat() {
+            if (!firebaseDisponivel) return;
             if (unsubscribeChat) unsubscribeChat();
-            const chatRef = ref(db, `salas_damas/${idSalaAtual}/chat`);
-            unsubscribeChat = onValue(chatRef, (snapshot) => {
+            const chatRef = fns.ref(db, `salas_damas/${idSalaAtual}/chat`);
+            unsubscribeChat = fns.onValue(chatRef, (snapshot) => {
                 const dados = snapshot.val();
                 if (!dados) return;
                 const entradas = Object.entries(dados)
@@ -2828,21 +3239,23 @@
             });
         }
         function enviarEmoji(emoji) {
-            if (!idSalaAtual) return;
+            if (!idSalaAtual || modoIA) return;
+            if (!firebaseDisponivel) return;
             SoundFX.click();
             const nome = modoEspectador ? 'Espectador' : (jogadorSessao?.nome || 'Jogador');
-            const msgRef = push(ref(db, `salas_damas/${idSalaAtual}/chat`));
-            set(msgRef, { emoji, de: jogadorSessao.chave, nome, ts: Date.now() }).catch(() => {});
+            const msgRef = fns.push(fns.ref(db, `salas_damas/${idSalaAtual}/chat`));
+            fns.set(msgRef, { emoji, de: jogadorSessao.chave, nome, ts: Date.now() }).catch(() => {});
             mostrarBalao(emoji, modoEspectador ? '👁️ Espectador' : 'Você', false);
         }
         function enviarTexto(texto) {
-            if (!idSalaAtual || !texto) return;
+            if (!idSalaAtual || modoIA) return;
+            if (!firebaseDisponivel) return;
             const t = texto.trim().slice(0, 120);
             if (!t) return;
             SoundFX.click();
             const nome = modoEspectador ? 'Espectador' : (jogadorSessao?.nome || 'Jogador');
-            const msgRef = push(ref(db, `salas_damas/${idSalaAtual}/chat`));
-            set(msgRef, { texto: t, de: jogadorSessao.chave, nome, ts: Date.now() }).catch(() => {});
+            const msgRef = fns.push(fns.ref(db, `salas_damas/${idSalaAtual}/chat`));
+            fns.set(msgRef, { texto: t, de: jogadorSessao.chave, nome, ts: Date.now() }).catch(() => {});
             mostrarBalao(t, modoEspectador ? '👁️ Espectador' : 'Você', true);
         }
         function mostrarBalao(conteudo, nome, isTexto) {
@@ -2858,20 +3271,20 @@
         }
         document.querySelectorAll('.emoji-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                if (modoEspectador) return;
+                if (modoEspectador || modoIA) return;
                 enviarEmoji(btn.dataset.emoji || '👍');
             });
         });
         document.getElementById('chat-send').addEventListener('click', () => {
             const input = document.getElementById('chat-input');
-            if (modoEspectador) return;
+            if (modoEspectador || modoIA) return;
             enviarTexto(input.value);
             input.value = '';
         });
         document.getElementById('chat-input').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                if (modoEspectador) return;
+                if (modoEspectador || modoIA) return;
                 enviarTexto(e.target.value);
                 e.target.value = '';
             }
@@ -2972,14 +3385,14 @@
         document.getElementById('btn-sair').addEventListener('click', () => {
             SoundFX.click();
             abrirModal({
-                icon: '🚪', title: 'Sair da partida?',
-                message: modoEspectador ? 'Você vai parar de assistir.' : 'Você pode perder o progresso da partida atual.',
+                icon: '🚪', title: 'Sair?',
+                message: modoEspectador ? 'Você vai parar de assistir.' : (modoIA ? 'Você vai sair do modo IA.' : 'Você pode perder o progresso da partida atual.'),
                 actions: [
                     { label: 'Cancelar', onClick: () => {} },
                     { label: 'Sair', onClick: async () => {
                         try {
-                            if (idSalaAtual && jogadorSessao?.chave && !modoEspectador) {
-                                await update(ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), { online: false });
+                            if (idSalaAtual && jogadorSessao?.chave && !modoEspectador && !modoIA && firebaseDisponivel) {
+                                await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), { online: false });
                             }
                         } catch (_) {}
                         limparSessao();
@@ -3005,6 +3418,7 @@
         document.getElementById('btn-recusar-revanche').addEventListener('click', recusarRevanche);
         document.getElementById('btn-whatsapp').addEventListener('click', () => {
             SoundFX.click();
+            if (!idSalaAtual || modoIA) return;
             const link = `${window.location.origin}${window.location.pathname}?sala=${encodeURIComponent(idSalaAtual)}`;
             const senhaTxt = senhaSalaAtual ? `\n🔒 Senha: *${senhaSalaAtual}*` : '';
             const msg = encodeURIComponent(`♟️ *Convite para Damas*\n\nDesafiado(a) por *${jogadorSessao?.nome || 'Alguém'}*!${senhaTxt}\n\n👉 Clique para entrar:\n${link}`);
@@ -3012,6 +3426,7 @@
         });
         document.getElementById('btn-whatsapp-assistir').addEventListener('click', () => {
             SoundFX.click();
+            if (!idSalaAtual || modoIA) return;
             const link = `${window.location.origin}${window.location.pathname}?sala=${encodeURIComponent(idSalaAtual)}&modo=assistir`;
             const msg = encodeURIComponent(`👁️ *Assista à partida de Damas!*\n\nSala: *${idSalaAtual}*\n\n👉 Clique para assistir:\n${link}`);
             window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
@@ -3046,8 +3461,8 @@
         });
         window.addEventListener('beforeunload', () => {
             try {
-                if (idSalaAtual && jogadorSessao?.chave && !modoEspectador) {
-                    update(ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), { online: false });
+                if (firebaseDisponivel && idSalaAtual && jogadorSessao?.chave && !modoEspectador && !modoIA) {
+                    fns.update(fns.ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), { online: false });
                 }
             } catch (_) {}
         });
