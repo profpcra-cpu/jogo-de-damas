@@ -142,9 +142,6 @@
             to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* ═══════════════════════════════════════════════════════
-           MODO TELA CHEIA — apenas expande a largura
-           ═══════════════════════════════════════════════════════ */
         body.is-fullscreen {
             padding: 0;
         }
@@ -188,7 +185,6 @@
             background: rgba(99, 102, 241, 0.95) !important;
         }
 
-        /* ─── Layout base ─── */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -299,9 +295,6 @@
         }
         #turno-status { color: var(--c-amber); }
 
-        /* ═══════════════════════════════════════════════════════
-           TABULEIRO
-           ═══════════════════════════════════════════════════════ */
         .board-wrapper {
             position: relative;
             width: 100%;
@@ -539,7 +532,6 @@
 
         .hidden { display: none !important; }
 
-        /* Modais */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -781,7 +773,7 @@
         <div id="lobby-screen">
             <div class="user-header" style="justify-content: center;">
                 <div class="user-info-left">
-                    <span id="lobby-avatar" class="user-avatar-display">😀</span>
+                    <span id="lobby-avatar" class="user-avatar-display">⏳</span>
                     <strong id="lobby-nome">Conectando…</strong>
                 </div>
             </div>
@@ -789,14 +781,14 @@
             <div class="lobby-box">
                 <h3>♟️ Jogo de Damas Multiplayer</h3>
                 <p>Jogue uma partida clássica de Damas 8x8 em turnos com um colega em tempo real. Crie sua sala e envie o convite pelo WhatsApp!</p>
-                <button id="btn-criar-sala" type="button">🚀 Criar Sala de Damas</button>
+                <button id="btn-criar-sala" type="button" disabled>🚀 Criar Sala de Damas</button>
             </div>
 
             <div class="lobby-box" style="margin-bottom: 0;">
                 <h3>🔗 Entrar com Código</h3>
                 <div style="display: flex; gap: 6px;">
                     <input type="text" id="input-codigo-sala" placeholder="Ex: DAMAS-7812" style="font-family: monospace;">
-                    <button id="btn-entrar-sala" type="button" style="width: 120px;">Entrar</button>
+                    <button id="btn-entrar-sala" type="button" style="width: 120px;" disabled>Entrar</button>
                 </div>
             </div>
         </div>
@@ -994,7 +986,7 @@
     </script>
 
     <!-- ═══════════════════════════════════════════════════════
-         SCRIPT 3 — FULLSCREEN (apenas expande largura)
+         SCRIPT 3 — FULLSCREEN
          ═══════════════════════════════════════════════════════ -->
     <script>
         (function () {
@@ -1013,9 +1005,7 @@
                     || el.mozRequestFullScreen
                     || el.msRequestFullscreen;
 
-                if (req) {
-                    req.call(el).catch(() => {});
-                }
+                if (req) req.call(el).catch(() => {});
                 document.body.classList.add('is-fullscreen');
                 fsAtivo = true;
             }
@@ -1155,7 +1145,7 @@
             return { white: w, red: r };
         }
 
-        /* ═══════════════ SESSÃO COM FIREBASE AUTH ═══════════════ */
+        /* ═══════════════ SESSÃO COM FIREBASE AUTH (v2 — ESTÁVEL) ═══════════════ */
         let jogadorSessao = null;
 
         function gerarNomeAleatorio() {
@@ -1185,34 +1175,32 @@
             } catch (_) {}
         }
 
-        // Promise que resolve quando o Auth estiver pronto
-        const authReadyPromise = new Promise((resolve) => {
-            let resolvido = false;
+        /**
+         * Sessão Auth estável:
+         *  1. Escuta onAuthStateChanged
+         *  2. Reinicia um debounce de 800ms em cada disparo
+         *  3. Só resolve quando o Auth fica "em silêncio" durante 800ms
+         *  4. Confirma que o uid não mudou antes de resolver
+         *
+         * Isto elimina a race condition em que o Firebase substitui
+         * a sessão enquanto o jogo já começou a correr.
+         */
+        async function inicializarAuthUnica() {
+            return new Promise((resolve) => {
+                let resolvido = false;
+                let tentouAnonimo = false;
+                let uidFinal = null;
+                let debounceTimer = null;
 
-            onAuthStateChanged(auth, async (user) => {
-                if (resolvido) return;
-
-                if (user) {
-                    const prefs = obterPreferenciasLocais();
-                    jogadorSessao = {
-                        chave: user.uid,
-                        nome: user.displayName || prefs.nome,
-                        avatar: user.photoURL ? '🌐' : prefs.avatar,
-                        isAnonimo: user.isAnonymous,
-                        email: user.email || null
-                    };
-                    console.log('🔐 Sessão ativa:', user.uid, user.isAnonymous ? '(anónimo)' : '(Google)');
-                    resolvido = true;
-                    resolve(true);
-                    return;
-                }
-
-                try {
-                    await signInAnonymously(auth);
-                    console.log('🎭 Nova sessão anónima criada.');
-                } catch (e) {
-                    console.error('❌ Falha ao iniciar sessão anónima:', e);
-                    // Fallback: sessão local com uid falso (raro, mas não trava o jogo)
+                const timeoutSeguranca = setTimeout(() => {
+                    if (resolvido) return;
+                    if (jogadorSessao) {
+                        console.warn('⏱️ Timeout do Auth — a usar último uid conhecido.');
+                        resolvido = true;
+                        resolve(!!uidFinal);
+                        return;
+                    }
+                    console.error('⏱️ Timeout do Auth — a usar sessão local de emergência.');
                     const prefs = obterPreferenciasLocais();
                     jogadorSessao = {
                         chave: 'local_' + Math.random().toString(36).slice(2, 12),
@@ -1223,21 +1211,83 @@
                     };
                     resolvido = true;
                     resolve(false);
-                }
-            });
-        });
+                }, 8000);
 
-        // ⚠️ ESSENCIAL: esperar o Auth antes de qualquer operação
-        await authReadyPromise;
+                function finalizar() {
+                    if (resolvido) return;
+                    if (!uidFinal) return;
+
+                    const userAtual = auth.currentUser;
+                    if (!userAtual || userAtual.uid !== uidFinal) {
+                        console.warn('⚠️ uid mudou durante o debounce, ignorando.');
+                        return;
+                    }
+
+                    const prefs = obterPreferenciasLocais();
+                    jogadorSessao = {
+                        chave: userAtual.uid,
+                        nome: userAtual.displayName || prefs.nome,
+                        avatar: userAtual.photoURL ? '🌐' : prefs.avatar,
+                        isAnonimo: userAtual.isAnonymous,
+                        email: userAtual.email || null
+                    };
+                    console.log('🔐 Sessão ESTÁVEL:', userAtual.uid, userAtual.isAnonymous ? '(anónimo)' : '(Google)');
+                    clearTimeout(timeoutSeguranca);
+                    resolvido = true;
+                    resolve(true);
+                }
+
+                onAuthStateChanged(auth, async (user) => {
+                    if (resolvido) return;
+
+                    if (user) {
+                        console.log('👤 Auth state:', user.uid, user.isAnonymous ? '(anónimo)' : '(Google)');
+                        if (debounceTimer) clearTimeout(debounceTimer);
+                        uidFinal = user.uid;
+                        debounceTimer = setTimeout(finalizar, 800);
+                        return;
+                    }
+
+                    if (tentouAnonimo) return;
+                    tentouAnonimo = true;
+
+                    try {
+                        console.log('🎭 Criando sessão anónima...');
+                        await signInAnonymously(auth);
+                    } catch (e) {
+                        console.error('❌ Falha ao criar sessão anónima:', e);
+                        const prefs = obterPreferenciasLocais();
+                        jogadorSessao = {
+                            chave: 'local_' + Math.random().toString(36).slice(2, 12),
+                            nome: prefs.nome,
+                            avatar: prefs.avatar,
+                            isAnonimo: true,
+                            email: null
+                        };
+                        clearTimeout(timeoutSeguranca);
+                        if (debounceTimer) clearTimeout(debounceTimer);
+                        resolvido = true;
+                        resolve(false);
+                    }
+                });
+            });
+        }
+
+        // ⚠️ ESSENCIAL: espera o Auth estabilizar antes de qualquer operação
+        await inicializarAuthUnica();
 
         if (!jogadorSessao) {
-            console.error('❌ Não foi possível inicializar sessão.');
+            console.error('❌ Sessão não disponível.');
             document.getElementById('lobby-nome').textContent = 'Erro de conexão';
         } else {
             document.getElementById('lobby-nome').textContent = jogadorSessao.nome;
             document.getElementById('lobby-avatar').textContent = jogadorSessao.avatar;
             document.getElementById('display-nome').textContent = jogadorSessao.nome;
             document.getElementById('display-avatar').textContent = jogadorSessao.avatar;
+
+            // Habilita os botões só depois do Auth
+            document.getElementById('btn-criar-sala').disabled = false;
+            document.getElementById('btn-entrar-sala').disabled = false;
         }
 
         /* ═══════════════ BOTÃO GOOGLE ═══════════════ */
@@ -1246,10 +1296,10 @@
         function atualizarBotaoGoogle() {
             if (!btnGoogle || !jogadorSessao) return;
             if (!jogadorSessao.isAnonimo) {
-                btnGoogle.textContent = '🚪 Sair Google';
+                btnGoogle.textContent = '🚪';
                 btnGoogle.title = 'Sair da conta Google';
             } else {
-                btnGoogle.textContent = '🌐 Google';
+                btnGoogle.textContent = '🌐';
                 btnGoogle.title = 'Entrar com Google';
             }
         }
@@ -1275,8 +1325,6 @@
                 const result = await signInWithPopup(auth, provider);
 
                 const prefs = obterPreferenciasLocais();
-                const nomeAnterior = jogadorSessao.nome;
-
                 jogadorSessao = {
                     chave: result.user.uid,
                     nome: result.user.displayName || prefs.nome,
@@ -1290,10 +1338,8 @@
                 document.getElementById('lobby-avatar').textContent = jogadorSessao.avatar;
                 document.getElementById('display-nome').textContent = jogadorSessao.nome;
                 document.getElementById('display-avatar').textContent = jogadorSessao.avatar;
-
                 atualizarBotaoGoogle();
 
-                // Se estava numa sala, avisa que a identidade mudou
                 if (salaConfirmada) {
                     toast('⚠️ Você entrou com Google. Saia e entre novamente na sala para sincronizar.', 'warn', 5000);
                 } else {
@@ -1319,7 +1365,6 @@
         let oponenteConectado = false;
         let capturaMultiplaEmAndamento = false;
         let ultimaContagemPecas = null;
-        let inicializando = true;
         let salaConfirmada = false;
 
         /* ═══════════════ TEMA ═══════════════ */
@@ -1370,7 +1415,6 @@
         /* ═══════════════ SESSÃO LOCAL / URL ═══════════════ */
         function salvarSessao() {
             if (!idSalaAtual || !minhaCor) return;
-            // Guarda apenas o código da sala. A cor é sempre resolvida pela transação.
             localStorage.setItem('brain_damas_sessao', JSON.stringify({ sala: idSalaAtual }));
         }
 
@@ -1393,9 +1437,7 @@
             }
         }
 
-        /* ═══════════════ DETEÇÃO DE CONVITE ═══════════════
-           Nova arquitetura: só precisamos do ?sala=XXXX.
-           ══════════════════════════════════════════════════ */
+        /* ═══════════════ DETEÇÃO DE CONVITE ═══════════════ */
         function detectarConviteNaURL() {
             const params = new URLSearchParams(window.location.search);
             const sala = params.get('sala');
@@ -1414,21 +1456,34 @@
                 return false;
             }
 
-            console.log(`🎟️ Tentando entrar na sala ${codigo}...`);
+            console.log(`🎟️ [uid=${jogadorSessao.chave}] Tentando entrar na sala ${codigo}...`);
 
-            // Retry: a sala pode ainda não estar sincronizada
             let dados = null;
-            const MAX_TENTATIVAS = 6;
+            let ultimoErro = null;
+            const MAX_TENTATIVAS = 5;
+
             for (let tentativa = 1; tentativa <= MAX_TENTATIVAS; tentativa++) {
                 try {
                     const snap = await get(ref(db, 'salas_damas/' + codigo));
                     if (snap.exists()) {
                         dados = snap.val();
+                        console.log(`✅ Sala encontrada (tentativa ${tentativa}).`);
                         break;
                     }
                     console.log(`⏳ Tentativa ${tentativa}/${MAX_TENTATIVAS}: sala ainda não disponível.`);
                 } catch (e) {
-                    console.warn(`Erro na tentativa ${tentativa}:`, e);
+                    ultimoErro = e;
+                    console.warn(`Erro na tentativa ${tentativa}:`, e.code || e.message);
+                    if (e.code === 'PERMISSION_DENIED' || /permission/i.test(e.message || '')) {
+                        console.error('❌ Permissão negada. Verifique as regras do Firebase.');
+                        abrirModal({
+                            icon: '🔒',
+                            title: 'Sem permissão',
+                            message: 'Não foi possível ler a sala. As regras do Firebase podem estar a bloquear. Contacte o administrador.',
+                            actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }]
+                        });
+                        return false;
+                    }
                 }
                 if (tentativa < MAX_TENTATIVAS) {
                     await new Promise(r => setTimeout(r, 400 + tentativa * 200));
@@ -1436,10 +1491,11 @@
             }
 
             if (!dados) {
+                console.error('❌ Sala não encontrada após retries.', ultimoErro);
                 abrirModal({
                     icon: '🚫',
                     title: 'Sala não encontrada',
-                    message: 'O convite expirou, a sala foi encerrada, ou ainda está a sincronizar. Tente novamente em alguns segundos.',
+                    message: 'O convite expirou, a sala foi encerrada, ou ainda está a sincronizar.',
                     actions: [
                         { label: 'Tentar de novo', onClick: () => entrarDiretoPorConvite(codigo) },
                         { label: 'Voltar ao lobby', secondary: true, onClick: voltarAoLobby }
@@ -1460,7 +1516,6 @@
 
             const jogadores = dados.jogadores || {};
 
-            // Já estou na sala? Reconecta.
             if (jogadores[jogadorSessao.chave]) {
                 console.log('🔄 Já estava na sala. Reconectando...');
                 idSalaAtual = codigo;
@@ -1479,7 +1534,6 @@
                 return true;
             }
 
-            // Sala cheia?
             if (Object.keys(jogadores).length >= 2) {
                 abrirModal({
                     icon: '👥',
@@ -1493,11 +1547,12 @@
                 return false;
             }
 
-            // Entrar via transação atómica
             let corEscolhida = null;
             let motivoFalha = null;
 
             try {
+                console.log(`🔄 Executando transação (uid=${jogadorSessao.chave})...`);
+
                 const resultado = await runTransaction(ref(db, 'salas_damas/' + codigo), (atual) => {
                     if (!atual) { motivoFalha = 'REMOVIDA'; return; }
                     if (atual.status === 'encerrado') { motivoFalha = 'ENCERRADA'; return; }
@@ -1568,33 +1623,26 @@
                 return true;
 
             } catch (e) {
-                console.error('Erro ao entrar na sala:', e);
-                toast('Erro ao entrar.', 'error');
+                console.error('Erro na transação:', e);
+                toast('Erro ao entrar: ' + (e.code || e.message || 'desconhecido'), 'error');
                 return false;
             }
         }
 
         /* ═══════════════ INICIALIZAÇÃO ═══════════════ */
         async function inicializarPerfil() {
-            if (!jogadorSessao) {
-                inicializando = false;
-                return;
-            }
+            if (!jogadorSessao) return;
 
             document.getElementById('display-nome').textContent = jogadorSessao.nome;
             document.getElementById('display-avatar').textContent = jogadorSessao.avatar;
 
-            // 1) Link com ?sala=XXX → tentar entrar direto
             const convite = detectarConviteNaURL();
             if (convite.tipo === 'convite') {
                 localStorage.removeItem('brain_damas_sessao');
-                const entrou = await entrarDiretoPorConvite(convite.sala);
-                inicializando = false;
-                if (entrou) return;
+                await entrarDiretoPorConvite(convite.sala);
                 return;
             }
 
-            // 2) Sessão anterior guardada → tentar reentrar
             let sessaoSalva = null;
             try { sessaoSalva = JSON.parse(localStorage.getItem('brain_damas_sessao')); } catch (_) {}
 
@@ -1605,18 +1653,15 @@
                         limparSessao();
                     } else {
                         await entrarDiretoPorConvite(sessaoSalva.sala);
-                        inicializando = false;
-                        return;
                     }
                 } catch (e) {
                     console.warn('Erro ao validar sessão antiga:', e);
                 }
             }
-
-            inicializando = false;
         }
 
-        inicializarPerfil();
+        // Só corre depois do Auth estável
+        if (jogadorSessao) inicializarPerfil();
 
         /* ═══════════════ LOBBY ═══════════════ */
         document.getElementById('btn-criar-sala').addEventListener('click', async () => {
@@ -1678,7 +1723,6 @@
 
         /* ═══════════════ WHATSAPP ═══════════════ */
         document.getElementById('btn-whatsapp').addEventListener('click', () => {
-            // Link minimalista: só o código.
             const baseUrl = window.location.origin + window.location.pathname;
             const link = `${baseUrl}?sala=${encodeURIComponent(idSalaAtual)}`;
 
@@ -2024,7 +2068,7 @@
             }
         });
 
-        console.log('✅ Jogo de Damas inicializado com Firebase Auth.');
+        console.log('✅ Jogo de Damas inicializado com Firebase Auth estável.');
     </script>
 </body>
 </html>
