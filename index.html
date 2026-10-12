@@ -131,8 +131,25 @@
             to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
+        /* === MODO TELA CHEIA === */
         body.is-fullscreen { padding: 0; }
-        body.is-fullscreen .container { max-width: 100vw; border-radius: 0; padding: 12px; animation: none; }
+        body.is-fullscreen .container {
+            max-width: 100vw;
+            width: 100vw;
+            border-radius: 0;
+            padding: 10px;
+            animation: none;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        body.is-fullscreen #lobby-screen { max-width: 520px; margin: 0 auto; width: 100%; }
+        body.is-fullscreen #game-screen {
+            max-width: min(100vw, calc(100dvh - 20px));
+            margin: 0 auto;
+            width: 100%;
+        }
         body.is-fullscreen #btn-fullscreen { display: none; }
 
         .fs-exit-btn {
@@ -189,18 +206,33 @@
         #turno-status { color: var(--c-amber); }
 
         .board-wrapper {
-            position: relative; width: 100%; aspect-ratio: 1 / 1; padding: 22px;
+            position: relative;
+            width: 100%;
+            max-width: min(100%, calc(100dvh - 280px));
+            aspect-ratio: 1 / 1;
+            padding: 22px;
             background: linear-gradient(145deg, var(--board-frame-1) 0%, var(--board-frame-2) 100%);
-            border-radius: 12px; box-shadow: 0 14px 40px -12px rgba(0, 0, 0, 0.75); margin-bottom: 12px; user-select: none;
+            border-radius: 12px; box-shadow: 0 14px 40px -12px rgba(0, 0, 0, 0.75); margin: 0 auto 12px; user-select: none;
         }
 
-        .board-ruler { position: absolute; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--board-coord); pointer-events: none; z-index: 2; }
+        /* === REGRAS / COORDENADAS DO TABULEIRO === */
+        .board-ruler {
+            position: absolute; font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; font-weight: 700; color: var(--board-coord);
+            pointer-events: none; z-index: 2;
+        }
         .board-ruler-top { top: 0; left: 22px; right: 22px; height: 22px; display: grid; grid-template-columns: repeat(8, 1fr); align-items: center; }
         .board-ruler-bottom { bottom: 0; left: 22px; right: 22px; height: 22px; display: grid; grid-template-columns: repeat(8, 1fr); align-items: center; }
         .board-ruler-left { top: 22px; bottom: 22px; left: 0; width: 22px; display: grid; grid-template-rows: repeat(8, 1fr); align-items: center; }
         .board-ruler-right { top: 22px; bottom: 22px; right: 0; width: 22px; display: grid; grid-template-rows: repeat(8, 1fr); align-items: center; }
-        .board-ruler .coord { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9); }
+        .board-ruler .coord {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 100%;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9);
+            letter-spacing: 0.5px;
+        }
         .board-ruler .coord.edge { font-weight: 800; color: var(--board-coord-edge); }
+        .board-ruler .coord.corner-mark { color: var(--board-coord-edge); font-size: 9px; }
 
         .checkers-grid {
             display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr);
@@ -235,6 +267,7 @@
             background: var(--input-bg); color: var(--text-color); cursor: pointer;
         }
         button { border: none; color: #fff; background: linear-gradient(135deg, var(--btn-primary), var(--btn-accent)); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-whatsapp { background: linear-gradient(135deg, #16a34a, #22c55e); display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; }
 
         .hidden { display: none !important; }
@@ -252,6 +285,36 @@
         .toast { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid var(--c-blue); padding: 10px 16px; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; color: var(--text-color); }
         .toast.success { border-left-color: var(--c-green); }
         .toast.error { border-left-color: var(--c-red); }
+
+        /* === RESPONSIVO: OCUPAÇÃO MÁXIMA NO CELULAR === */
+        @media (max-width: 600px) {
+            body { padding: 6px; align-items: flex-start; }
+            .container { padding: 12px; max-width: 100vw; border-radius: 16px; }
+            .board-wrapper { max-width: 100%; padding: 20px; border-radius: 10px; }
+            .board-ruler { font-size: 10px; }
+            .board-ruler-top, .board-ruler-bottom { left: 20px; right: 20px; height: 20px; }
+            .board-ruler-left, .board-ruler-right { top: 20px; bottom: 20px; width: 20px; }
+            .top-bar { margin-bottom: 8px; }
+            .user-header { padding: 6px 10px; margin-bottom: 8px; }
+            .match-info-bar { padding: 6px 10px; font-size: 11.5px; margin-bottom: 8px; }
+            .instructions { font-size: 11.5px; margin: 4px 0 8px; }
+            .piece.king::after { font-size: 14px; }
+        }
+
+        @media (max-width: 380px) {
+            .board-ruler { font-size: 9px; }
+            .board-ruler-top, .board-ruler-bottom { left: 18px; right: 18px; height: 18px; }
+            .board-ruler-left, .board-ruler-right { top: 18px; bottom: 18px; width: 18px; }
+            .board-wrapper { padding: 18px; }
+        }
+
+        /* Em landscape no celular, o tabuleiro usa a altura disponível */
+        @media (max-height: 500px) and (orientation: landscape) {
+            body { padding: 4px; }
+            .container { padding: 8px; max-width: 100vw; }
+            .board-wrapper { max-width: min(100%, calc(100dvh - 120px)); }
+            .user-header, .match-info-bar { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -263,6 +326,7 @@
             <button id="btn-sair" class="btn-small" type="button">🚪 Sair</button>
             <div style="display:flex; gap:6px;">
                 <button id="btn-google" class="btn-small" type="button">🌐 Google</button>
+                <button id="btn-som" class="btn-small" type="button" title="Ativar/Desativar som">🔊</button>
                 <button id="btn-fullscreen" class="btn-small" type="button">⛶</button>
                 <button id="theme-toggle" class="btn-small" type="button">🌙</button>
             </div>
@@ -362,12 +426,82 @@
         let capturaMultiplaEmAndamento = false;
         let salaConfirmada = false;
 
+        // ============================================================
+        // ============== SISTEMA DE SOM (Web Audio API) ==============
+        // ============================================================
+        const SoundFX = (() => {
+            let ctx = null;
+            let ativo = true;
+
+            function init() {
+                if (!ctx) {
+                    try {
+                        ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) { ativo = false; }
+                }
+                if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
+            }
+
+            function beep({ freq = 440, type = 'sine', duration = 0.12, gain = 0.15, sweepTo = null, delay = 0 }) {
+                if (!ativo) return;
+                init();
+                if (!ctx) return;
+                const now = ctx.currentTime + delay;
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, now);
+                if (sweepTo) osc.frequency.exponentialRampToValueAtTime(sweepTo, now + duration);
+                g.gain.setValueAtTime(0.0001, now);
+                g.gain.exponentialRampToValueAtTime(gain, now + 0.01);
+                g.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+                osc.connect(g); g.connect(ctx.destination);
+                osc.start(now); osc.stop(now + duration + 0.02);
+            }
+
+            return {
+                get ativo() { return ativo; },
+                toggle() { ativo = !ativo; if (ativo) { init(); this.click(); } return ativo; },
+                click() { beep({ freq: 600, type: 'triangle', duration: 0.05, gain: 0.06 }); },
+                select() { beep({ freq: 880, type: 'sine', duration: 0.08, gain: 0.08 }); },
+                move() {
+                    beep({ freq: 320, type: 'triangle', duration: 0.08, gain: 0.10 });
+                    beep({ freq: 480, type: 'sine', duration: 0.10, gain: 0.08, delay: 0.05 });
+                },
+                capture() {
+                    beep({ freq: 220, type: 'sawtooth', duration: 0.10, gain: 0.10 });
+                    beep({ freq: 160, type: 'square', duration: 0.14, gain: 0.08, delay: 0.08 });
+                },
+                king() {
+                    beep({ freq: 523, type: 'sine', duration: 0.10, gain: 0.10 });
+                    beep({ freq: 659, type: 'sine', duration: 0.10, gain: 0.10, delay: 0.10 });
+                    beep({ freq: 784, type: 'sine', duration: 0.16, gain: 0.12, delay: 0.20 });
+                },
+                win() {
+                    const notas = [523, 659, 784, 1046];
+                    notas.forEach((f, i) => beep({ freq: f, type: 'sine', duration: 0.18, gain: 0.12, delay: i * 0.13 }));
+                },
+                lose() {
+                    const notas = [440, 392, 330, 262];
+                    notas.forEach((f, i) => beep({ freq: f, type: 'triangle', duration: 0.20, gain: 0.11, delay: i * 0.15 }));
+                },
+                notify() {
+                    beep({ freq: 740, type: 'sine', duration: 0.09, gain: 0.09 });
+                    beep({ freq: 880, type: 'sine', duration: 0.11, gain: 0.09, delay: 0.09 });
+                },
+                error() {
+                    beep({ freq: 200, type: 'square', duration: 0.16, gain: 0.10 });
+                }
+            };
+        })();
+
         function toast(mensagem, tipo = 'info') {
             const container = document.getElementById('toast-container');
             const el = document.createElement('div');
             el.className = `toast ${tipo}`;
             el.textContent = mensagem;
             container.appendChild(el);
+            if (tipo === 'success' || tipo === 'error') SoundFX.notify();
             setTimeout(() => el.remove(), 3500);
         }
 
@@ -380,10 +514,15 @@
             actions.forEach(acao => {
                 const btn = document.createElement('button');
                 btn.textContent = acao.label;
-                btn.onclick = () => { document.getElementById('modal-overlay').classList.remove('active'); acao.onClick(); };
+                btn.onclick = () => {
+                    SoundFX.click();
+                    document.getElementById('modal-overlay').classList.remove('active');
+                    acao.onClick();
+                };
                 container.appendChild(btn);
             });
             document.getElementById('modal-overlay').classList.add('active');
+            SoundFX.notify();
         }
 
         function criarTabuleiroInicial() {
@@ -416,7 +555,7 @@
             window.history.replaceState({}, '', url.pathname);
         }
 
-        // --- AUTENTICAÇÃO INSTANT NEA ---
+        // --- AUTENTICAÇÃO INSTANTÂNEA ---
         async function garantirAutenticacao() {
             if (auth.currentUser) {
                 return auth.currentUser.uid;
@@ -535,6 +674,7 @@
         })();
 
         document.getElementById('btn-criar-sala').addEventListener('click', async () => {
+            SoundFX.click();
             try {
                 idSalaAtual = 'DAMAS-' + Date.now().toString(36).toUpperCase();
                 minhaCor = 'white';
@@ -566,7 +706,8 @@
 
         document.getElementById('btn-entrar-sala').addEventListener('click', async () => {
             const codigo = document.getElementById('input-codigo-sala').value.trim().toUpperCase();
-            if (!codigo) { toast('Digite o código da sala.', 'warn'); return; }
+            if (!codigo) { toast('Digite o código da sala.', 'warn'); SoundFX.error(); return; }
+            SoundFX.click();
             window.location.href = `${window.location.pathname}?sala=${codigo}`;
         });
 
@@ -579,10 +720,49 @@
         }
 
         document.getElementById('btn-whatsapp').addEventListener('click', () => {
+            SoundFX.click();
             const link = `${window.location.origin}${window.location.pathname}?sala=${encodeURIComponent(idSalaAtual)}`;
             const msg = encodeURIComponent(`♟️ *Convite para Damas*\n\nDesafiado(a) por *${jogadorSessao.nome}*!\n\n👉 Clique para entrar direto:\n${link}`);
             window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
         });
+
+        // ============================================================
+        // =============== RENDERIZAÇÃO DAS REGRAS ====================
+        // ============================================================
+        function renderizarReguas() {
+            const invertido = (minhaCor === 'red');
+            // Colunas: a b c d e f g h  (com borda a/h destacada)
+            const colunas = ['a','b','c','d','e','f','g','h'];
+            // Linhas: 8 7 6 5 4 3 2 1  (do topo para baixo no tabuleiro padrão)
+            const linhas = ['8','7','6','5','4','3','2','1'];
+
+            const topo    = invertido ? linhas.slice().reverse() : linhas.slice();
+            const base    = invertido ? linhas.slice()           : linhas.slice().reverse();
+            const esquerda = invertido ? colunas.slice().reverse() : colunas.slice();
+            const direita  = invertido ? colunas.slice()           : colunas.slice().reverse();
+
+            const buildCols = (arr) => arr.map((v, i) => {
+                const edge = (i === 0 || i === arr.length - 1) ? ' edge' : '';
+                return `<div class="coord${edge}">${v}</div>`;
+            }).join('');
+
+            const buildRows = (arr) => arr.map((v, i) => {
+                const edge = (i === 0 || i === arr.length - 1) ? ' edge' : '';
+                return `<div class="coord${edge}">${v}</div>`;
+            }).join('');
+
+            const lt = document.getElementById('labels-top');
+            const lb = document.getElementById('labels-bottom');
+            const ll = document.getElementById('labels-left');
+            const lr = document.getElementById('labels-right');
+
+            // Topo e base mostram LETRAS das colunas
+            if (lt) lt.innerHTML = buildCols(topo);
+            if (lb) lb.innerHTML = buildCols(base);
+            // Esquerda e direita mostram NÚMEROS das linhas
+            if (ll) ll.innerHTML = buildRows(esquerda);
+            if (lr) lr.innerHTML = buildRows(direita);
+        }
 
         function renderizarTabuleiro() {
             const grid = document.getElementById('checkers-board');
@@ -618,6 +798,9 @@
                     grid.appendChild(square);
                 }
             }
+
+            renderizarReguas();
+
             document.getElementById('turno-status').textContent = jogoEncerrado ? '🏁 Fim' : (turnoAtual === minhaCor ? 'Sua vez!' : 'Vez do oponente...');
         }
 
@@ -631,6 +814,7 @@
             }
 
             if (peca && peca.startsWith(minhaCor)) {
+                SoundFX.select();
                 celulaSelecionada = { r, c };
                 movimentosValidos = calcularMovimentos(r, c);
                 renderizarTabuleiro();
@@ -642,6 +826,7 @@
                 return;
             }
 
+            SoundFX.click();
             celulaSelecionada = null;
             movimentosValidos = [];
             renderizarTabuleiro();
@@ -697,10 +882,20 @@
             tabuleiro[paraR][paraC] = pecaMovida;
             tabuleiro[deR][deC] = null;
 
-            if (mov.captura) tabuleiro[mov.captura.r][mov.captura.c] = null;
+            if (mov.captura) {
+                tabuleiro[mov.captura.r][mov.captura.c] = null;
+                SoundFX.capture();
+            } else {
+                SoundFX.move();
+            }
 
-            if (pecaMovida === 'white' && paraR === 0) tabuleiro[paraR][paraC] = 'white-king';
-            if (pecaMovida === 'red' && paraR === 7) tabuleiro[paraR][paraC] = 'red-king';
+            let promoveu = false;
+            if (pecaMovida === 'white' && paraR === 0) { tabuleiro[paraR][paraC] = 'white-king'; promoveu = true; }
+            if (pecaMovida === 'red' && paraR === 7) { tabuleiro[paraR][paraC] = 'red-king'; promoveu = true; }
+            if (promoveu) {
+                setTimeout(() => SoundFX.king(), 120);
+                toast('♛ Dama promovida!', 'success');
+            }
 
             turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
             celulaSelecionada = null;
@@ -719,12 +914,149 @@
             unsubscribeFirebase = onValue(ref(db, 'salas_damas/' + idSalaAtual), (snapshot) => {
                 if (!snapshot.exists()) return;
                 const dados = snapshot.val();
+                const turnoAnterior = turnoAtual;
                 tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
                 turnoAtual = dados.turno || 'white';
                 jogoEncerrado = dados.status === 'encerrado';
+
+                // Som de notificação quando a vez muda para o jogador
+                if (turnoAnterior !== turnoAtual && turnoAtual === minhaCor && !jogoEncerrado) {
+                    setTimeout(() => SoundFX.notify(), 150);
+                }
+
                 renderizarTabuleiro();
             });
         }
+
+        // ============================================================
+        // ============== TELA CHEIA (desktop e mobile) ===============
+        // ============================================================
+        function isFullscreen() {
+            return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+        }
+
+        async function entrarTelaCheia() {
+            const el = document.documentElement;
+            try {
+                if (el.requestFullscreen) {
+                    await el.requestFullscreen({ navigationUI: 'hide' });
+                } else if (el.webkitRequestFullscreen) {
+                    el.webkitRequestFullscreen();
+                } else if (el.msRequestFullscreen) {
+                    el.msRequestFullscreen();
+                } else {
+                    // Fallback iOS Safari: pseudo-fullscreen via CSS
+                    document.body.classList.add('is-fullscreen');
+                    toast('Modo imersivo ativado (iOS).', 'info');
+                    return;
+                }
+                document.body.classList.add('is-fullscreen');
+                SoundFX.click();
+            } catch (e) {
+                // Fallback CSS caso o navegador bloqueie
+                document.body.classList.add('is-fullscreen');
+            }
+        }
+
+        async function sairTelaCheia() {
+            try {
+                if (document.exitFullscreen) await document.exitFullscreen();
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                else if (document.msExitFullscreen) document.msExitFullscreen();
+            } catch (_) {}
+            document.body.classList.remove('is-fullscreen');
+        }
+
+        function alternarTelaCheia() {
+            if (isFullscreen() || document.body.classList.contains('is-fullscreen')) {
+                sairTelaCheia();
+            } else {
+                entrarTelaCheia();
+            }
+        }
+
+        // Sincroniza o estado da classe com o evento nativo
+        ['fullscreenchange', 'webkitfullscreenchange', 'msfullscreenchange'].forEach(evt => {
+            document.addEventListener(evt, () => {
+                if (isFullscreen()) {
+                    document.body.classList.add('is-fullscreen');
+                } else if (!document.body.classList.contains('is-fullscreen')) {
+                    document.body.classList.remove('is-fullscreen');
+                }
+            });
+        });
+
+        // Botões de tela cheia
+        document.getElementById('btn-fullscreen').addEventListener('click', alternarTelaCheia);
+        document.getElementById('btn-fullscreen-game').addEventListener('click', alternarTelaCheia);
+        document.getElementById('fs-exit').addEventListener('click', () => { SoundFX.click(); sairTelaCheia(); });
+
+        // ============================================================
+        // ============== BOTÕES DE SOM E TEMA ========================
+        // ============================================================
+        const btnSom = document.getElementById('btn-som');
+        // Estado inicial salvo
+        const somPreferido = localStorage.getItem('brain_damas_som');
+        if (somPreferido === 'off') {
+            SoundFX.toggle(); // desativa
+            btnSom.textContent = '🔇';
+        }
+        btnSom.addEventListener('click', () => {
+            const ativo = SoundFX.toggle();
+            btnSom.textContent = ativo ? '🔊' : '🔇';
+            localStorage.setItem('brain_damas_som', ativo ? 'on' : 'off');
+        });
+
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            SoundFX.click();
+            const html = document.documentElement;
+            const atual = html.getAttribute('data-theme');
+            const novo = atual === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', novo);
+            themeToggle.textContent = novo === 'dark' ? '🌙' : '☀️';
+            localStorage.setItem('brain_damas_tema', novo);
+        });
+
+        // Aplica tema salvo
+        const temaSalvo = localStorage.getItem('brain_damas_tema');
+        if (temaSalvo) {
+            document.documentElement.setAttribute('data-theme', temaSalvo);
+            themeToggle.textContent = temaSalvo === 'dark' ? '🌙' : '☀️';
+        }
+
+        // ============================================================
+        // ============== SAIR DO JOGO =================================
+        // ============================================================
+        document.getElementById('btn-sair').addEventListener('click', () => {
+            SoundFX.click();
+            abrirModal({
+                icon: '🚪',
+                title: 'Sair da partida?',
+                message: 'Você pode perder o progresso da partida atual.',
+                actions: [
+                    { label: 'Cancelar', onClick: () => {} },
+                    {
+                        label: 'Sair',
+                        onClick: async () => {
+                            try {
+                                if (idSalaAtual && jogadorSessao?.chave) {
+                                    await update(ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), { online: false });
+                                }
+                            } catch (_) {}
+                            limparSessao();
+                            if (isFullscreen()) await sairTelaCheia();
+                            window.location.href = window.location.pathname;
+                        }
+                    }
+                ]
+            });
+        });
+
+        // Desbloqueia o áudio no primeiro toque do usuário (política de autoplay)
+        ['pointerdown', 'touchstart', 'keydown'].forEach(evt => {
+            window.addEventListener(evt, () => SoundFX.click(), { once: true });
+        });
     </script>
 </body>
 </html>
