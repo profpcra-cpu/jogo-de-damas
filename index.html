@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1020">
-    <title>Brain Damas - Duelo Multiplayer (v1.3 - Grupos 1-8)</title>
+    <title>Brain Damas - Duelo Multiplayer (v1.4 - Grupos 1-11)</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -269,9 +269,6 @@
         }
         @keyframes obrigPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
-        /* ============================================================
-           GRUPO 6: Pausa mútua
-           ============================================================ */
         .board-wrapper.paused::after {
             content: "⏸️ PAUSADO";
             position: absolute; inset: 0;
@@ -297,16 +294,10 @@
         }
         .btn-pausa { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
 
-        /* ============================================================
-           GRUPO 7: Chat de texto
-           ============================================================ */
         .chat-input-row { display: flex; gap: 6px; margin-top: 6px; width: 100%; }
         .chat-input-row input { flex: 1; padding: 8px 12px; font-size: 13px; }
         .chat-input-row button { width: auto; padding: 8px 14px; font-size: 13px; }
 
-        /* ============================================================
-           GRUPO 8: Senha
-           ============================================================ */
         .senha-badge {
             display: inline-flex; align-items: center; gap: 4px;
             background: linear-gradient(135deg, #7c3aed, #a855f7);
@@ -314,21 +305,41 @@
             padding: 2px 6px; border-radius: 999px; letter-spacing: 0.5px;
             margin-left: 6px;
         }
-        .sala-row {
+
+        /* ============================================================
+           GRUPO 9: Gravação
+           ============================================================ */
+        .rec-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            color: #fff; font-size: 10.5px; font-weight: 800;
+            padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px;
+            animation: recPulse 1.2s infinite;
+        }
+        @keyframes recPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+
+        /* ============================================================
+           GRUPO 10: Replay
+           ============================================================ */
+        .replay-board {
+            display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr);
+            width: 100%; max-width: 320px; aspect-ratio: 1/1; margin: 0 auto 10px;
+            border-radius: 6px; overflow: hidden;
+            box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.55);
+        }
+        .replay-controls { display: flex; gap: 6px; justify-content: center; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+        .replay-controls button { width: auto; padding: 8px 14px; font-size: 13px; }
+        .replay-move-info { text-align: center; font-size: 12px; color: var(--text-muted); margin: 6px 0; font-family: 'JetBrains Mono', monospace; }
+        .historico-item {
             display: flex; align-items: center; justify-content: space-between; gap: 8px;
-            padding: 10px 12px; border-radius: var(--radius-sm);
-            background: var(--input-bg); border: 1px solid var(--border-color); margin-bottom: 6px;
-            font-size: 12.5px;
+            padding: 8px 10px; border-radius: var(--radius-sm); background: var(--input-bg);
+            border: 1px solid var(--border-color); margin-bottom: 6px; font-size: 12px;
         }
-        .sala-info { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; flex: 1; min-width: 0; }
-        .sala-nome { font-weight: 700; color: var(--c-blue); font-family: 'JetBrains Mono', monospace; }
-        .sala-meta { font-size: 11px; color: var(--text-muted); }
-        .sala-join {
-            width: auto; padding: 6px 12px; font-size: 11.5px; font-weight: 700;
-            background: linear-gradient(135deg, #16a34a, #22c55e); color: #fff;
-            border: none; border-radius: 999px; cursor: pointer;
-        }
-        .sala-vazia { text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px; }
+        .historico-item.vitoria { border-left: 4px solid var(--c-green); }
+        .historico-item.derrota { border-left: 4px solid var(--c-red); }
+        .historico-info { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; flex: 1; }
+        .historico-data { font-size: 10.5px; color: var(--text-muted); }
+        .historico-btn { width: auto; padding: 5px 10px; font-size: 11px; }
 
         .placar-bar {
             display: flex; justify-content: space-around; align-items: center;
@@ -431,7 +442,7 @@
             z-index: 1000; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.25s;
         }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 24px; max-width: 380px; width: 100%; text-align: center; max-height: 85vh; overflow-y: auto; }
+        .modal-card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 24px; max-width: 420px; width: 100%; text-align: center; max-height: 85vh; overflow-y: auto; }
         .modal-actions { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
         .modal-actions button { flex: 1; min-width: 100px; }
 
@@ -476,9 +487,9 @@
             padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px;
         }
 
-        .tabs { display: flex; gap: 4px; margin-bottom: 10px; background: var(--input-bg); padding: 4px; border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+        .tabs { display: flex; gap: 4px; margin-bottom: 10px; background: var(--input-bg); padding: 4px; border-radius: var(--radius-md); border: 1px solid var(--border-color); flex-wrap: wrap; }
         .tab-btn {
-            flex: 1; padding: 8px 10px; font-size: 12px; font-weight: 700;
+            flex: 1; min-width: 80px; padding: 8px 10px; font-size: 12px; font-weight: 700;
             background: transparent; color: var(--text-muted); border: none; border-radius: var(--radius-sm);
             cursor: pointer; transition: background 0.15s, color 0.15s;
         }
@@ -591,6 +602,7 @@
 
             <div class="tabs" id="lobby-tabs">
                 <button class="tab-btn active" data-tab="jogo" type="button">🎮 Jogo</button>
+                <button class="tab-btn" data-tab="historico" type="button">📜 Histórico</button>
                 <button class="tab-btn" data-tab="ranking" type="button">🌐 Ranking</button>
                 <button class="tab-btn" data-tab="conquistas" type="button">🏅 Conquistas</button>
                 <button class="tab-btn" data-tab="config" type="button">⚙️ Config</button>
@@ -641,6 +653,18 @@
                             <span class="placar-num" id="placar-derrotas">0</span>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- TAB: HISTÓRICO -->
+            <div id="tab-historico" class="hidden">
+                <div class="lobby-box" style="margin-bottom:0;">
+                    <h3>📜 Histórico de Partidas</h3>
+                    <p>Suas últimas partidas com replay disponível.</p>
+                    <div id="historico-list">
+                        <div class="sala-vazia" style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">Nenhuma partida registada ainda.</div>
+                    </div>
+                    <button id="btn-limpar-historico" type="button" class="btn-secundario" style="margin-top:10px; font-size:12px;">🗑️ Limpar histórico</button>
                 </div>
             </div>
 
@@ -695,6 +719,7 @@
                     <strong id="display-nome"></strong>
                     <span id="oponente-status" class="status-dot"></span>
                     <span id="badge-espectador" class="espectador-badge hidden">👁️ ASSISTINDO</span>
+                    <span id="badge-rec" class="rec-badge hidden">🔴 REC</span>
                     <span id="badge-pausa" class="pausa-badge hidden">⏸️ EM PAUSA</span>
                 </div>
                 <span id="display-sala-tag" style="font-size: 11px; color: var(--c-blue);">Sala</span>
@@ -708,11 +733,11 @@
                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
                     <button id="btn-pausa" class="btn-small btn-pausa hidden" type="button" style="padding: 4px 10px; font-size: 11px;">⏸️ Pausa</button>
                     <button id="btn-desistir" class="btn-small" type="button" style="padding: 4px 10px; font-size: 11px;">🏳️ Desistir</button>
+                    <button id="btn-rec" class="btn-small hidden" type="button" style="padding: 4px 10px; font-size: 11px;">🎥 Gravar</button>
                     <button id="btn-fullscreen-game" class="btn-small" type="button" style="padding: 4px 10px; font-size: 11px;">⛶</button>
                 </div>
             </div>
 
-            <!-- GRUPO 6: Pedido de pausa -->
             <div id="div-pausa-pendente" class="pausa-pedido hidden">
                 <span>⏸️ <strong id="pausa-msg">Adversário</strong> pediu pausa!</span>
                 <div style="display:flex; gap:6px;">
@@ -764,7 +789,6 @@
                 <button class="emoji-btn" data-emoji="👏" type="button" title="Aplausos!">👏</button>
                 <button class="emoji-btn" data-emoji="😂" type="button" title="Haha!">😂</button>
                 <button class="emoji-btn" data-emoji="💪" type="button" title="Vamos!">💪</button>
-                <!-- GRUPO 7: Chat de texto -->
                 <div class="chat-input-row">
                     <input type="text" id="chat-input" placeholder="Escreva uma mensagem..." maxlength="120">
                     <button id="chat-send" type="button">Enviar</button>
@@ -798,6 +822,26 @@
             <h2 id="modal-title" style="margin: 0 0 10px; font-size: 18px;">Título</h2>
             <p id="modal-message" style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 15px; white-space: pre-line;"></p>
             <div class="modal-actions" id="modal-actions"></div>
+        </div>
+    </div>
+
+    <!-- MODAL DE REPLAY -->
+    <div class="modal-overlay" id="replay-overlay">
+        <div class="modal-card" style="max-width: 460px;">
+            <div style="font-size: 32px; margin-bottom: 8px;">📜</div>
+            <h2 style="margin: 0 0 8px; font-size: 16px;">Replay da Partida</h2>
+            <div id="replay-info" class="replay-move-info">Passo 0 / 0</div>
+            <div class="replay-board" id="replay-board"></div>
+            <div class="replay-controls">
+                <button id="replay-first" type="button" class="btn-secundario" style="padding:6px 12px;">⏮️</button>
+                <button id="replay-prev" type="button" class="btn-secundario" style="padding:6px 12px;">◀️</button>
+                <button id="replay-play" type="button" style="padding:6px 14px;">▶️ Play</button>
+                <button id="replay-next" type="button" class="btn-secundario" style="padding:6px 12px;">▶️</button>
+                <button id="replay-last" type="button" class="btn-secundario" style="padding:6px 12px;">⏭️</button>
+            </div>
+            <div class="modal-actions" style="margin-top:12px;">
+                <button id="replay-close" type="button" class="btn-secundario">Fechar</button>
+            </div>
         </div>
     </div>
 
@@ -858,13 +902,24 @@
         let capturaMultiplaAtiva = false;
         let capturaMultiplaPos = null;
 
-        // === GRUPO 6: Pausa ===
+        // === GRUPO 6 ===
         let emPausa = false;
         let pausaPendenteDe = null;
         let pausaSolicitadaPorMim = false;
 
-        // === GRUPO 8: Senha ===
+        // === GRUPO 8 ===
         let senhaSalaAtual = null;
+
+        // === GRUPO 9: Gravação ===
+        let canvasRecorder = null;
+        let canvasStream = null;
+        let recordedChunks = [];
+        let gravandoCanvas = false;
+        let gravandoIntervalId = null;
+
+        // === GRUPO 10: Histórico + Replay ===
+        let historicoMovimentos = [];
+        let historicoPartidas = [];
 
         // SFX pack atual
         let sfxPack = 'classic';
@@ -1331,7 +1386,7 @@
         }
 
         // ============================================================
-        // ============== GRUPO 1: HANDSHAKE INFORMATIVO ==============
+        // ============== GRUPO 1: HANDSHAKE ==========================
         // ============================================================
         function marcarPronto() {
             if (euPronto) return;
@@ -1377,9 +1432,6 @@
             }
         }
 
-        // ============================================================
-        // ============== GRUPO 1: WRAPPER SEGURO FIREBASE ============
-        // ============================================================
         async function updateSeguro(path, dados) {
             try {
                 await update(ref(db, path), dados);
@@ -1491,7 +1543,7 @@
         }
 
         // ============================================================
-        // ============== GRUPO 6: PAUSA MÚTUA ========================
+        // ============== GRUPO 6: PAUSA ==============================
         // ============================================================
         function pedirPausa() {
             if (modoEspectador || jogoEncerrado || emPausa) return;
@@ -1584,6 +1636,216 @@
             } else {
                 pedirPausa();
             }
+        }
+
+        // ============================================================
+        // ============== GRUPO 9: GRAVAÇÃO POR CANVAS ================
+        // ============================================================
+        function desenharTabuleiroNoCanvas(ctx, canvas, tab) {
+            const size = canvas.width;
+            const cell = size / 8;
+            ctx.fillStyle = '#4a2f1e';
+            ctx.fillRect(0, 0, size, size);
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                const isDark = (r + c) % 2 === 1;
+                ctx.fillStyle = isDark ? '#8b5a2b' : '#e8d4a8';
+                ctx.fillRect(c * cell, r * cell, cell, cell);
+            }
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                const p = tab[r][c];
+                if (!p) continue;
+                const cx = c * cell + cell / 2;
+                const cy = r * cell + cell / 2;
+                const radius = cell * 0.4;
+                const grad = ctx.createRadialGradient(cx - radius*0.3, cy - radius*0.3, radius*0.1, cx, cy, radius);
+                if (p.startsWith('white')) {
+                    grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.75, '#cdb896'); grad.addColorStop(1, '#a08768');
+                    ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.fill();
+                    ctx.strokeStyle = '#7a6350'; ctx.lineWidth = 2; ctx.stroke();
+                } else {
+                    grad.addColorStop(0, '#dc2626'); grad.addColorStop(0.8, '#6b0f0f'); grad.addColorStop(1, '#450808');
+                    ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.fill();
+                    ctx.strokeStyle = '#2d0606'; ctx.lineWidth = 2; ctx.stroke();
+                }
+                if (p.includes('king')) {
+                    ctx.fillStyle = '#fbbf24'; ctx.font = `bold ${cell*0.5}px sans-serif`;
+                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText('♛', cx, cy + 2);
+                }
+            }
+            ctx.fillStyle = 'rgba(232,212,168,0.9)';
+            ctx.font = `bold ${cell*0.28}px monospace`;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            const colunas = ['a','b','c','d','e','f','g','h'];
+            for (let i = 0; i < 8; i++) {
+                ctx.fillText(colunas[i], i * cell + cell/2, 8);
+                ctx.fillText(colunas[i], i * cell + cell/2, size - 6);
+                ctx.fillText(8 - i, 6, i * cell + cell/2);
+                ctx.fillText(8 - i, size - 8, i * cell + cell/2);
+            }
+        }
+
+        async function toggleGravacaoCanvas() {
+            const btn = document.getElementById('btn-rec');
+            const badge = document.getElementById('badge-rec');
+            if (gravandoCanvas) {
+                try { if (canvasRecorder && canvasRecorder.state !== 'inactive') canvasRecorder.stop(); } catch (_) {}
+                if (gravandoIntervalId) { cancelAnimationFrame(gravandoIntervalId); gravandoIntervalId = null; }
+                if (canvasStream) { canvasStream.getTracks().forEach(t => t.stop()); canvasStream = null; }
+                gravandoCanvas = false;
+                btn.textContent = '🎥 Gravar';
+                badge.classList.add('hidden');
+                return;
+            }
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 640; canvas.height = 640;
+                const ctx = canvas.getContext('2d');
+                canvasStream = canvas.captureStream(30);
+                const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+                    ? 'video/webm;codecs=vp9'
+                    : (MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : '');
+                canvasRecorder = new MediaRecorder(canvasStream, mimeType ? { mimeType } : undefined);
+                recordedChunks = [];
+                canvasRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+                canvasRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `brain-damas-${idSalaAtual || 'partida'}-${Date.now()}.webm`;
+                    document.body.appendChild(a); a.click();
+                    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+                    toast('🎥 Vídeo guardado!', 'success');
+                };
+                canvasRecorder.start(1000);
+                gravandoCanvas = true;
+                btn.textContent = '⏹️ Parar';
+                badge.classList.remove('hidden');
+                toast('🔴 A gravar apenas o tabuleiro.', 'info');
+                function drawLoop() {
+                    if (!gravandoCanvas) return;
+                    desenharTabuleiroNoCanvas(ctx, canvas, tabuleiro);
+                    gravandoIntervalId = requestAnimationFrame(drawLoop);
+                }
+                drawLoop();
+            } catch (e) {
+                toast('Erro ao iniciar gravação.', 'error');
+                gravandoCanvas = false;
+            }
+        }
+
+        // ============================================================
+        // ============== GRUPO 10: HISTÓRICO + REPLAY ================
+        // ============================================================
+        function carregarHistorico() {
+            try { historicoPartidas = JSON.parse(localStorage.getItem('brain_damas_historico') || '[]'); }
+            catch (_) { historicoPartidas = []; }
+        }
+        function salvarHistorico() {
+            if (historicoPartidas.length > 20) historicoPartidas = historicoPartidas.slice(0, 20);
+            try { localStorage.setItem('brain_damas_historico', JSON.stringify(historicoPartidas)); }
+            catch (_) { historicoPartidas = historicoPartidas.slice(0, 10); localStorage.setItem('brain_damas_historico', JSON.stringify(historicoPartidas)); }
+        }
+        function adicionarAoHistorico(resultado, oponente) {
+            historicoPartidas.unshift({
+                id: 'P-' + Date.now().toString(36).toUpperCase(),
+                data: new Date().toISOString(),
+                resultado,
+                oponente: oponente || 'Oponente',
+                sala: idSalaAtual,
+                movimentos: historicoMovimentos.slice()
+            });
+            salvarHistorico();
+        }
+        function renderizarHistorico() {
+            const list = document.getElementById('historico-list');
+            if (!list) return;
+            if (historicoPartidas.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">Nenhuma partida registada ainda.</div>';
+                return;
+            }
+            list.innerHTML = historicoPartidas.map((p, i) => {
+                const d = new Date(p.data);
+                const dataFmt = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+                const cls = p.resultado === 'vitoria' ? 'vitoria' : 'derrota';
+                const emoji = p.resultado === 'vitoria' ? '🏆' : '💔';
+                return `<div class="historico-item ${cls}">
+                    <div class="historico-info">
+                        <strong>${emoji} ${p.resultado === 'vitoria' ? 'Vitória' : 'Derrota'}</strong>
+                        <span class="historico-data">vs ${p.oponente} · ${dataFmt} · ${p.movimentos.length} jogadas</span>
+                    </div>
+                    <button class="historico-btn btn-secundario" data-idx="${i}">▶️ Replay</button>
+                </div>`;
+            }).join('');
+            list.querySelectorAll('.historico-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    SoundFX.click();
+                    abrirReplay(historicoPartidas[parseInt(btn.dataset.idx)]);
+                });
+            });
+        }
+
+        // ============================================================
+        // ============== GRUPO 10: REPLAY ============================
+        // ============================================================
+        let replayState = { movimentos: [], idx: 0, timer: null };
+        function abrirReplay(partida) {
+            if (!partida.movimentos || partida.movimentos.length === 0) {
+                toast('Sem movimentos gravados.', 'info');
+                return;
+            }
+            replayState.movimentos = partida.movimentos;
+            replayState.idx = 0;
+            document.getElementById('replay-overlay').classList.add('active');
+            renderizarReplay();
+        }
+        function renderizarReplay() {
+            const board = document.getElementById('replay-board');
+            if (!board) return;
+            const movs = replayState.movimentos;
+            const idx = replayState.idx;
+            const estado = movs[idx] || { tabuleiro: criarTabuleiroInicial() };
+            const t = firebaseParaTabuleiro(estado.tabuleiro);
+            board.innerHTML = '';
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                const isDark = (r + c) % 2 === 1;
+                const div = document.createElement('div');
+                div.style.background = isDark ? 'var(--board-dark)' : 'var(--board-light)';
+                div.style.display = 'flex'; div.style.alignItems = 'center'; div.style.justifyContent = 'center';
+                const peca = t[r]?.[c];
+                if (peca) {
+                    const piece = document.createElement('div');
+                    piece.className = `piece ${peca.startsWith('white') ? 'white' : 'red'}${peca.includes('king') ? ' king' : ''}`;
+                    piece.style.width = '80%'; piece.style.height = '80%';
+                    div.appendChild(piece);
+                }
+                board.appendChild(div);
+            }
+            const info = document.getElementById('replay-info');
+            if (idx === 0) info.textContent = `Início · ${movs.length} jogadas no total`;
+            else {
+                const m = movs[idx];
+                info.textContent = `Jogada ${idx}/${movs.length} · ${m.cor === 'white' ? '⚪' : '🔴'} ${m.de}→${m.para}${m.captura ? ' 🎯' : ''}`;
+            }
+        }
+        function replayPlay() {
+            if (replayState.timer) {
+                clearInterval(replayState.timer);
+                replayState.timer = null;
+                document.getElementById('replay-play').textContent = '▶️ Play';
+                return;
+            }
+            if (replayState.idx >= replayState.movimentos.length) replayState.idx = 0;
+            document.getElementById('replay-play').textContent = '⏸️ Pause';
+            replayState.timer = setInterval(() => {
+                if (replayState.idx < replayState.movimentos.length) {
+                    replayState.idx++; renderizarReplay(); SoundFX.move();
+                } else {
+                    clearInterval(replayState.timer); replayState.timer = null;
+                    document.getElementById('replay-play').textContent = '▶️ Play';
+                }
+            }, 850);
         }
 
         // ============================================================
@@ -1689,6 +1951,35 @@
         }
 
         // ============================================================
+        // ============== GRUPO 11: LOGIN GOOGLE (bónus) ==============
+        // ============================================================
+        async function loginGoogle() {
+            SoundFX.click();
+            try {
+                const provider = new GoogleAuthProvider();
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                if (user) {
+                    jogadorSessao = {
+                        chave: user.uid,
+                        nome: user.displayName || 'Jogador',
+                        avatar: '👤',
+                        isAnonimo: false
+                    };
+                    localStorage.setItem('brain_damas_prefs', JSON.stringify({ nome: jogadorSessao.nome, avatar: jogadorSessao.avatar }));
+                    document.getElementById('lobby-nome').textContent = jogadorSessao.nome;
+                    document.getElementById('display-nome').textContent = jogadorSessao.nome;
+                    document.getElementById('lobby-avatar').textContent = jogadorSessao.avatar;
+                    document.getElementById('display-avatar').textContent = jogadorSessao.avatar;
+                    toast(`✅ Bem-vindo, ${jogadorSessao.nome}!`, 'success');
+                }
+            } catch (e) {
+                console.warn('[Google] Login cancelado ou falhou:', e);
+                toast('Login Google cancelado.', 'info');
+            }
+        }
+
+        // ============================================================
         // ==================== ENTRADA VIA LINK ======================
         // ============================================================
         async function processarEntradaViaLink() {
@@ -1726,7 +2017,6 @@
 
             if (dados.tempoLimite !== undefined) tempoLimiteSegundos = dados.tempoLimite;
 
-            // === GRUPO 8: Verifica senha antes de deixar entrar ===
             if (dados.senha && !querEspectador) {
                 const jogadores = dados.jogadores || {};
                 if (!jogadores[uid]) {
@@ -1734,9 +2024,8 @@
                         icon: '🔒', title: 'Sala Protegida',
                         message: 'Digite a senha da sala:',
                         onConfirm: (s) => {
-                            if (s === dados.senha) {
-                                continuarEntradaSala(uid, nomeUser, codigoSala, dados, querEspectador);
-                            } else {
+                            if (s === dados.senha) continuarEntradaSala(uid, nomeUser, codigoSala, dados, querEspectador);
+                            else {
                                 toast('Senha incorreta.', 'error');
                                 setTimeout(() => { limparSessao(); window.location.href = window.location.pathname; }, 1000);
                             }
@@ -1752,7 +2041,6 @@
 
         async function continuarEntradaSala(uid, nomeUser, codigoSala, dados, querEspectador) {
             const jogadores = dados.jogadores || {};
-            // === RECONEXÃO ===
             if (jogadores[uid] && !querEspectador) {
                 idSalaAtual = codigoSala;
                 minhaCor = jogadores[uid].cor;
@@ -1832,6 +2120,8 @@
             carregarPlacarLocal();
             carregarConquistas();
             atualizarGridConquistas();
+            carregarHistorico();
+            renderizarHistorico();
 
             const temaSalvo = localStorage.getItem('brain_damas_tema') || 'dark';
             document.documentElement.setAttribute('data-theme', temaSalvo);
@@ -1871,11 +2161,12 @@
                 document.querySelectorAll('#lobby-tabs .tab-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 const tab = btn.dataset.tab;
-                ['jogo', 'ranking', 'conquistas', 'config'].forEach(t => {
+                ['jogo', 'historico', 'ranking', 'conquistas', 'config'].forEach(t => {
                     document.getElementById('tab-' + t)?.classList.toggle('hidden', t !== tab);
                 });
                 if (tab === 'ranking') carregarRanking();
                 if (tab === 'conquistas') atualizarGridConquistas();
+                if (tab === 'historico') { carregarHistorico(); renderizarHistorico(); }
             });
         });
 
@@ -1919,6 +2210,10 @@
                 emPausa = false;
                 pausaPendenteDe = null;
                 pausaSolicitadaPorMim = false;
+                historicoMovimentos = [{
+                    tabuleiro: tabuleiroParaFirebase(tabuleiro),
+                    turno: 'white', cor: 'white', de: '—', para: '—'
+                }];
 
                 const dados = {
                     status: 'jogando',
@@ -1932,7 +2227,6 @@
                     }
                 };
 
-                // GRUPO 8: Senha
                 if (comSenha) {
                     senhaSalaAtual = gerarSenha();
                     dados.senha = senhaSalaAtual;
@@ -1983,12 +2277,14 @@
             const badge = document.getElementById('badge-espectador');
             const desistirBtn = document.getElementById('btn-desistir');
             const pausaBtn = document.getElementById('btn-pausa');
+            const recBtn = document.getElementById('btn-rec');
             const chatBar = document.getElementById('chat-bar');
 
             if (modoEspectador) {
                 badge.classList.remove('hidden');
                 desistirBtn.classList.add('hidden');
                 pausaBtn.classList.add('hidden');
+                recBtn.classList.add('hidden');
                 document.getElementById('info-minha-cor-wrap').style.display = 'none';
                 document.getElementById('display-avatar').textContent = '👁️';
                 document.getElementById('display-nome').textContent = 'Espectador';
@@ -2001,6 +2297,7 @@
                 document.getElementById('info-minha-cor-wrap').style.display = '';
                 document.getElementById('info-minha-cor').textContent = minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
                 pausaBtn.classList.remove('hidden');
+                recBtn.classList.remove('hidden');
             }
 
             renderizarTabuleiro();
@@ -2242,6 +2539,16 @@
                 toast('♛ Dama promovida!', 'success');
             }
 
+            // GRUPO 10: registar jogada
+            historicoMovimentos.push({
+                tabuleiro: tabuleiroParaFirebase(tabuleiro),
+                turno: turnoAtual,
+                cor: corPeca,
+                de: `(${deR},${deC})`,
+                para: `(${paraR},${paraC})`,
+                captura: mov.captura ? `(${mov.captura.r},${mov.captura.c})` : null
+            });
+
             if (mov.captura && !pecaMovida.includes('king')) {
                 const maisCapturas = capturasEmCadeia(paraR, paraC, corPeca);
                 if (maisCapturas.length > 0) {
@@ -2320,6 +2627,9 @@
                 enviarDerrotaRanking();
                 toast('😢 Você perdeu a partida.', 'error');
             }
+
+            // GRUPO 10: guarda no histórico
+            adicionarAoHistorico(euVenci ? 'vitoria' : 'derrota', nomeOponente || 'Oponente');
 
             const cData = carregarConquistas();
             if (euVenci) {
@@ -2443,6 +2753,11 @@
             emPausa = false;
             pausaPendenteDe = null;
             pausaSolicitadaPorMim = false;
+            // GRUPO 10: reset dos movimentos
+            historicoMovimentos = [{
+                tabuleiro: tabuleiroParaFirebase(dados.tabuleiro),
+                turno: 'white', cor: 'white', de: '—', para: '—'
+            }];
             tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
             turnoAtual = dados.turno || 'white';
 
@@ -2502,7 +2817,6 @@
 
                 if (dados.tempoLimite !== undefined) tempoLimiteSegundos = dados.tempoLimite;
 
-                // GRUPO 6: Pausa
                 const pausaAtivaRemota = !!dados.pausaAtiva;
                 if (pausaAtivaRemota && !emPausa) {
                     ativarPausaLocal('acordo mútuo');
@@ -2653,7 +2967,6 @@
             });
         });
 
-        // GRUPO 7: Chat de texto — Enter e botão
         document.getElementById('chat-send').addEventListener('click', () => {
             const input = document.getElementById('chat-input');
             if (modoEspectador) return;
@@ -2796,10 +3109,13 @@
             });
         });
 
+        document.getElementById('btn-google').addEventListener('click', loginGoogle);
+
         document.getElementById('btn-desistir').addEventListener('click', confirmarDesistencia);
         document.getElementById('btn-pausa').addEventListener('click', togglePausa);
         document.getElementById('btn-aceitar-pausa').addEventListener('click', aceitarPausa);
         document.getElementById('btn-recusar-pausa').addEventListener('click', recusarPausa);
+        document.getElementById('btn-rec').addEventListener('click', toggleGravacaoCanvas);
         document.getElementById('btn-jogar-novamente').addEventListener('click', enviarPedidoRevanche);
         document.getElementById('btn-sair-pos-jogo').addEventListener('click', () => {
             SoundFX.click();
@@ -2823,6 +3139,33 @@
             const link = `${window.location.origin}${window.location.pathname}?sala=${encodeURIComponent(idSalaAtual)}&modo=assistir`;
             const msg = encodeURIComponent(`👁️ *Assista à partida de Damas!*\n\nSala: *${idSalaAtual}*\n\n👉 Clique para assistir:\n${link}`);
             window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
+        });
+
+        document.getElementById('btn-limpar-historico').addEventListener('click', () => {
+            SoundFX.click();
+            abrirModal({
+                icon: '🗑️', title: 'Limpar histórico?',
+                message: 'Isso apaga todas as partidas gravadas.',
+                actions: [
+                    { label: 'Cancelar', onClick: () => {} },
+                    { label: 'Limpar', onClick: () => {
+                        historicoPartidas = [];
+                        localStorage.removeItem('brain_damas_historico');
+                        renderizarHistorico();
+                        toast('Histórico limpo.', 'success');
+                    } }
+                ]
+            });
+        });
+
+        document.getElementById('replay-first').addEventListener('click', () => { replayState.idx = 0; renderizarReplay(); });
+        document.getElementById('replay-prev').addEventListener('click', () => { if (replayState.idx > 0) replayState.idx--; renderizarReplay(); });
+        document.getElementById('replay-next').addEventListener('click', () => { if (replayState.idx < replayState.movimentos.length) replayState.idx++; renderizarReplay(); });
+        document.getElementById('replay-last').addEventListener('click', () => { replayState.idx = replayState.movimentos.length; renderizarReplay(); });
+        document.getElementById('replay-play').addEventListener('click', replayPlay);
+        document.getElementById('replay-close').addEventListener('click', () => {
+            if (replayState.timer) { clearInterval(replayState.timer); replayState.timer = null; }
+            document.getElementById('replay-overlay').classList.remove('active');
         });
 
         ['pointerdown', 'touchstart', 'keydown'].forEach(evt => {
