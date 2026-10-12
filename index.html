@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1020">
-    <title>Brain Damas - Duelo Multiplayer (v1.2 - Grupos 1-5)</title>
+    <title>Brain Damas - Duelo Multiplayer (v1.3 - Grupos 1-8)</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -195,9 +195,6 @@
         }
         #turno-status { color: var(--c-amber); }
 
-        /* ============================================================
-           GRUPO 1: Banner de handshake
-           ============================================================ */
         .handshake-bar {
             display: flex; align-items: center; justify-content: center;
             padding: 10px 14px; border-radius: var(--radius-md);
@@ -212,9 +209,6 @@
             50% { opacity: 0.65; }
         }
 
-        /* ============================================================
-           GRUPO 1: Indicador de conexão
-           ============================================================ */
         .connection-status {
             position: fixed; top: 12px; left: 50%; transform: translateX(-50%);
             background: linear-gradient(135deg, #dc2626, #991b1b);
@@ -230,9 +224,6 @@
             50% { transform: translateX(-50%) scale(1.05); }
         }
 
-        /* ============================================================
-           GRUPO 2: Timer de jogada
-           ============================================================ */
         .timer-bar-wrap {
             position: relative; width: 100%; height: 6px;
             background: rgba(148, 163, 184, 0.18); border-radius: 999px;
@@ -245,6 +236,7 @@
         }
         .timer-bar-fill.warn { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
         .timer-bar-fill.danger { background: linear-gradient(90deg, #dc2626, #f43f5e); animation: timerPulse 0.8s infinite; }
+        .timer-bar-fill.paused { background: linear-gradient(90deg, #6366f1, #8b5cf6) !important; }
         @keyframes timerPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
         .timer-display {
             display: inline-flex; align-items: center; gap: 4px;
@@ -255,6 +247,7 @@
         }
         .timer-display.warn { color: var(--c-amber); border-color: rgba(245, 158, 11, 0.5); }
         .timer-display.danger { color: var(--c-red); border-color: rgba(239, 68, 68, 0.6); animation: timerPulse 0.8s infinite; }
+        .timer-display.paused { color: #a5b4fc; border-color: rgba(139, 92, 246, 0.6); }
 
         @keyframes flashRed {
             0%, 100% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); }
@@ -262,9 +255,6 @@
         }
         .board-wrapper.flash-5s { animation: flashRed 0.8s infinite; }
 
-        /* ============================================================
-           GRUPO 4: Captura obrigatória
-           ============================================================ */
         .square.capture-mandatory {
             box-shadow: inset 0 0 0 3px rgba(251, 191, 36, 0.95), 0 0 16px rgba(251, 191, 36, 0.7) !important;
             animation: mandatoryPulse 1.6s infinite;
@@ -278,6 +268,67 @@
             animation: obrigPulse 1.4s infinite;
         }
         @keyframes obrigPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+        /* ============================================================
+           GRUPO 6: Pausa mútua
+           ============================================================ */
+        .board-wrapper.paused::after {
+            content: "⏸️ PAUSADO";
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(15, 23, 42, 0.7);
+            color: #fff; font-size: 22px; font-weight: 800;
+            letter-spacing: 3px; border-radius: 12px;
+            backdrop-filter: blur(4px);
+            z-index: 20;
+        }
+        .pausa-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff; font-size: 10.5px; font-weight: 800;
+            padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px;
+        }
+        .pausa-pedido {
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            padding: 10px 14px; border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.15));
+            border: 1px solid rgba(139, 92, 246, 0.5);
+            margin-bottom: 10px; font-size: 13px; font-weight: 700;
+        }
+        .btn-pausa { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+
+        /* ============================================================
+           GRUPO 7: Chat de texto
+           ============================================================ */
+        .chat-input-row { display: flex; gap: 6px; margin-top: 6px; width: 100%; }
+        .chat-input-row input { flex: 1; padding: 8px 12px; font-size: 13px; }
+        .chat-input-row button { width: auto; padding: 8px 14px; font-size: 13px; }
+
+        /* ============================================================
+           GRUPO 8: Senha
+           ============================================================ */
+        .senha-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: #fff; font-size: 10px; font-weight: 800;
+            padding: 2px 6px; border-radius: 999px; letter-spacing: 0.5px;
+            margin-left: 6px;
+        }
+        .sala-row {
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            padding: 10px 12px; border-radius: var(--radius-sm);
+            background: var(--input-bg); border: 1px solid var(--border-color); margin-bottom: 6px;
+            font-size: 12.5px;
+        }
+        .sala-info { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; flex: 1; min-width: 0; }
+        .sala-nome { font-weight: 700; color: var(--c-blue); font-family: 'JetBrains Mono', monospace; }
+        .sala-meta { font-size: 11px; color: var(--text-muted); }
+        .sala-join {
+            width: auto; padding: 6px 12px; font-size: 11.5px; font-weight: 700;
+            background: linear-gradient(135deg, #16a34a, #22c55e); color: #fff;
+            border: none; border-radius: 999px; cursor: pointer;
+        }
+        .sala-vazia { text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px; }
 
         .placar-bar {
             display: flex; justify-content: space-around; align-items: center;
@@ -407,13 +458,14 @@
         .bubble {
             background: rgba(15, 23, 42, 0.92);
             border: 1px solid var(--border-strong);
-            color: #fff; font-size: 26px; line-height: 1;
+            color: #fff; font-size: 22px; line-height: 1.2;
             padding: 8px 14px; border-radius: 16px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
-            animation: bubbleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1), bubbleOut 0.4s 2.1s forwards;
-            display: flex; align-items: center; gap: 8px;
+            animation: bubbleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1), bubbleOut 0.4s 3.1s forwards;
+            display: flex; align-items: center; gap: 8px; max-width: 90%;
+            word-break: break-word;
         }
-        .bubble .bubble-nome { font-size: 11px; font-weight: 700; color: var(--c-blue); }
+        .bubble .bubble-nome { font-size: 11px; font-weight: 700; color: var(--c-blue); flex-shrink: 0; }
         @keyframes bubbleIn { from { opacity: 0; transform: translateY(-14px) scale(0.85); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes bubbleOut { to { opacity: 0; transform: translateY(-14px) scale(0.9); } }
 
@@ -462,7 +514,6 @@
         }
         .theme-opt.active { border-color: var(--c-amber) !important; background: rgba(245, 158, 11, 0.15) !important; }
 
-        /* === GRUPO 2: Selector de tempo === */
         .tempo-selector { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
         .tempo-opt {
             padding: 6px 10px; font-size: 11px; font-weight: 700;
@@ -486,11 +537,12 @@
             .piece.king::after { font-size: 14px; }
             .chat-bar { padding: 6px; gap: 4px; }
             .emoji-btn { font-size: 16px; padding: 5px 8px; }
-            .bubble { font-size: 22px; padding: 6px 12px; }
+            .bubble { font-size: 16px; padding: 6px 12px; }
             .ach-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
             .ach-item { font-size: 16px; }
             .ach-item .ach-label { font-size: 7.5px; }
             .connection-status { font-size: 11px; padding: 5px 12px; }
+            .board-wrapper.paused::after { font-size: 18px; letter-spacing: 2px; }
         }
 
         @media (max-width: 380px) {
@@ -550,9 +602,9 @@
                     <h3>♟️ Jogo de Damas Multiplayer</h3>
                     <p>Jogue uma partida clássica de Damas 8x8 em tempo real. Crie a sua sala e envie o link pelo WhatsApp!</p>
                     <button id="btn-criar-sala" type="button" disabled>🚀 Criar Sala de Damas</button>
+                    <button id="btn-criar-sala-senha" type="button" class="btn-secundario" style="margin-top:6px;" disabled>🔒 Criar Sala com Senha</button>
                 </div>
 
-                <!-- GRUPO 2: Selector de tempo -->
                 <div class="lobby-box">
                     <h3>⏱️ Tempo de Jogada</h3>
                     <p>Se o jogador não jogar dentro deste tempo, perde automaticamente.</p>
@@ -571,6 +623,7 @@
                         <input type="text" id="input-codigo-sala" placeholder="Ex: DAMAS-7812" style="font-family: monospace;">
                         <button id="btn-entrar-sala" type="button" style="width: 120px;" disabled>Entrar</button>
                     </div>
+                    <input type="password" id="input-senha-sala" placeholder="Senha (se a sala tiver)" style="margin-top:6px; font-family: monospace;">
                     <button id="btn-assistir-sala" type="button" class="btn-secundario" style="margin-top:8px; font-size:12.5px;">👁️ Assistir (espectador)</button>
                 </div>
 
@@ -642,6 +695,7 @@
                     <strong id="display-nome"></strong>
                     <span id="oponente-status" class="status-dot"></span>
                     <span id="badge-espectador" class="espectador-badge hidden">👁️ ASSISTINDO</span>
+                    <span id="badge-pausa" class="pausa-badge hidden">⏸️ EM PAUSA</span>
                 </div>
                 <span id="display-sala-tag" style="font-size: 11px; color: var(--c-blue);">Sala</span>
             </div>
@@ -651,9 +705,19 @@
                 <span id="turno-status">Aguardando...</span>
                 <span id="badge-obrigatoria" class="obrigatoria-badge hidden">⚡ CAPTURA OBRIGATÓRIA</span>
                 <span id="timer-display" class="timer-display hidden">⏱️ 40s</span>
-                <div style="display:flex; gap:6px;">
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button id="btn-pausa" class="btn-small btn-pausa hidden" type="button" style="padding: 4px 10px; font-size: 11px;">⏸️ Pausa</button>
                     <button id="btn-desistir" class="btn-small" type="button" style="padding: 4px 10px; font-size: 11px;">🏳️ Desistir</button>
                     <button id="btn-fullscreen-game" class="btn-small" type="button" style="padding: 4px 10px; font-size: 11px;">⛶</button>
+                </div>
+            </div>
+
+            <!-- GRUPO 6: Pedido de pausa -->
+            <div id="div-pausa-pendente" class="pausa-pedido hidden">
+                <span>⏸️ <strong id="pausa-msg">Adversário</strong> pediu pausa!</span>
+                <div style="display:flex; gap:6px;">
+                    <button id="btn-aceitar-pausa" type="button" style="width:auto; padding:6px 12px; font-size:11px; background: linear-gradient(135deg, #16a34a, #22c55e);">✅ Aceitar</button>
+                    <button id="btn-recusar-pausa" type="button" style="width:auto; padding:6px 12px; font-size:11px;" class="btn-secundario">❌ Recusar</button>
                 </div>
             </div>
 
@@ -661,7 +725,6 @@
                 <span id="handshake-msg">⏳ A aguardar adversário…</span>
             </div>
 
-            <!-- GRUPO 2: Barra do timer -->
             <div id="timer-bar-wrap" class="timer-bar-wrap hidden">
                 <div id="timer-bar-fill" class="timer-bar-fill"></div>
             </div>
@@ -701,6 +764,11 @@
                 <button class="emoji-btn" data-emoji="👏" type="button" title="Aplausos!">👏</button>
                 <button class="emoji-btn" data-emoji="😂" type="button" title="Haha!">😂</button>
                 <button class="emoji-btn" data-emoji="💪" type="button" title="Vamos!">💪</button>
+                <!-- GRUPO 7: Chat de texto -->
+                <div class="chat-input-row">
+                    <input type="text" id="chat-input" placeholder="Escreva uma mensagem..." maxlength="120">
+                    <button id="chat-send" type="button">Enviar</button>
+                </div>
             </div>
 
             <div id="div-pos-jogo" class="hidden" style="display:flex; gap:8px; margin-top:8px;">
@@ -772,25 +840,31 @@
         let nomeOponente = 'Oponente';
         let ultimoChatTs = 0;
 
-        // === GRUPO 1: Handshake informativo ===
+        // === GRUPO 1 ===
         let euPronto = false;
         let adversarioPronto = false;
         let ambosProntos = false;
-
-        // === GRUPO 1: Indicador de conexão ===
         let ultimaRespostaFirebase = 0;
         let connectionCheckInterval = null;
 
-        // === GRUPO 2: Timer ===
+        // === GRUPO 2+3 ===
         let tempoLimiteSegundos = 40;
         let timerIntervalId = null;
         let timerSegundosRestantes = 40;
         let timerAtivo = false;
         let aviso5sDisparado = false;
 
-        // === GRUPO 5: Captura múltipla em cadeia ===
+        // === GRUPO 5 ===
         let capturaMultiplaAtiva = false;
         let capturaMultiplaPos = null;
+
+        // === GRUPO 6: Pausa ===
+        let emPausa = false;
+        let pausaPendenteDe = null;
+        let pausaSolicitadaPorMim = false;
+
+        // === GRUPO 8: Senha ===
+        let senhaSalaAtual = null;
 
         // SFX pack atual
         let sfxPack = 'classic';
@@ -930,7 +1004,11 @@
                               { freq: 400, type: 'square', duration: 0.14, gain: 0.11, delay: 0.20 },
                               { freq: 200, type: 'square', duration: 0.24, gain: 0.12, delay: 0.34 }],
                     alert5s: [{ freq: 1600, type: 'square', duration: 0.20, gain: 0.24 },
-                              { freq: 1400, type: 'square', duration: 0.22, gain: 0.24, delay: 0.22 }]
+                              { freq: 1400, type: 'square', duration: 0.22, gain: 0.24, delay: 0.22 }],
+                    pause: [{ freq: 500, type: 'sine', duration: 0.10, gain: 0.10 },
+                            { freq: 400, type: 'sine', duration: 0.14, gain: 0.10, delay: 0.10 }],
+                    unpause: [{ freq: 400, type: 'sine', duration: 0.10, gain: 0.10 },
+                              { freq: 600, type: 'sine', duration: 0.14, gain: 0.10, delay: 0.10 }]
                 };
                 if (sfxPack === 'suave') return {
                     click: { freq: 500, type: 'sine', duration: 0.06, gain: 0.05 },
@@ -964,7 +1042,11 @@
                               { freq: 360, type: 'sine', duration: 0.20, gain: 0.08, delay: 0.32 },
                               { freq: 240, type: 'sine', duration: 0.28, gain: 0.09, delay: 0.52 }],
                     alert5s: [{ freq: 1000, type: 'sine', duration: 0.24, gain: 0.20 },
-                              { freq: 800, type: 'sine', duration: 0.28, gain: 0.20, delay: 0.26 }]
+                              { freq: 800, type: 'sine', duration: 0.28, gain: 0.20, delay: 0.26 }],
+                    pause: [{ freq: 400, type: 'sine', duration: 0.14, gain: 0.07 },
+                            { freq: 320, type: 'sine', duration: 0.18, gain: 0.07, delay: 0.14 }],
+                    unpause: [{ freq: 320, type: 'sine', duration: 0.14, gain: 0.07 },
+                              { freq: 480, type: 'sine', duration: 0.18, gain: 0.07, delay: 0.14 }]
                 };
                 return {
                     click: { freq: 600, type: 'triangle', duration: 0.05, gain: 0.06 },
@@ -999,7 +1081,11 @@
                               { freq: 220, type: 'triangle', duration: 0.18, gain: 0.10, delay: 0.28 },
                               { freq: 160, type: 'triangle', duration: 0.30, gain: 0.11, delay: 0.46 }],
                     alert5s: [{ freq: 880, type: 'triangle', duration: 0.22, gain: 0.22 },
-                              { freq: 700, type: 'triangle', duration: 0.26, gain: 0.22, delay: 0.24 }]
+                              { freq: 700, type: 'triangle', duration: 0.26, gain: 0.22, delay: 0.24 }],
+                    pause: [{ freq: 600, type: 'triangle', duration: 0.12, gain: 0.09 },
+                            { freq: 480, type: 'triangle', duration: 0.16, gain: 0.09, delay: 0.12 }],
+                    unpause: [{ freq: 480, type: 'triangle', duration: 0.12, gain: 0.09 },
+                              { freq: 700, type: 'triangle', duration: 0.16, gain: 0.09, delay: 0.12 }]
                 };
             }
 
@@ -1026,7 +1112,9 @@
                 achievement() { play(P().achievement); },
                 tick() { play(P().tick); },
                 timeout() { play(P().timeout); },
-                alert5s() { play(P().alert5s); }
+                alert5s() { play(P().alert5s); },
+                pause() { play(P().pause); },
+                unpause() { play(P().unpause); }
             };
         })();
 
@@ -1137,6 +1225,36 @@
             SoundFX.notify();
         }
 
+        function abrirPrompt({ icon = '🔒', title, message, onConfirm }) {
+            document.getElementById('modal-icon').textContent = icon;
+            document.getElementById('modal-title').textContent = title;
+            const msgEl = document.getElementById('modal-message');
+            msgEl.textContent = message || '';
+            const container = document.getElementById('modal-actions');
+            container.innerHTML = '';
+            const input = document.createElement('input');
+            input.type = 'password'; input.placeholder = 'Digite a senha...';
+            input.style.marginBottom = '10px';
+            msgEl.after(input);
+            const okBtn = document.createElement('button');
+            okBtn.textContent = 'Entrar';
+            okBtn.style.background = 'linear-gradient(135deg, #16a34a, #22c55e)';
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancelar';
+            okBtn.onclick = () => {
+                const s = input.value.trim();
+                document.getElementById('modal-overlay').classList.remove('active');
+                if (input.parentNode) input.remove();
+                onConfirm(s);
+            };
+            cancelBtn.onclick = () => {
+                document.getElementById('modal-overlay').classList.remove('active');
+                if (input.parentNode) input.remove();
+            };
+            container.appendChild(okBtn); container.appendChild(cancelBtn);
+            document.getElementById('modal-overlay').classList.add('active');
+        }
+
         function criarTabuleiroInicial() {
             const t = Array.from({ length: 8 }, () => Array(8).fill(null));
             for (let r = 0; r < 3; r++) for (let c = 0; c < 8; c++) if ((r + c) % 2 === 1) t[r][c] = 'red';
@@ -1169,6 +1287,8 @@
             pararMonitorConexao();
             pararTimer();
         }
+
+        function gerarSenha() { return Math.floor(1000 + Math.random() * 9000).toString(); }
 
         // ============================================================
         // ============== GRUPO 1: INDICADOR DE CONEXÃO ===============
@@ -1286,6 +1406,7 @@
             pararTimer();
             if (tempoLimiteSegundos <= 0) return;
             if (jogoEncerrado || modoEspectador) return;
+            if (emPausa) return;
             if (turnoAtual !== minhaCor) return;
 
             timerSegundosRestantes = tempoLimiteSegundos;
@@ -1296,13 +1417,14 @@
             const display = document.getElementById('timer-display');
             if (barWrap) barWrap.classList.remove('hidden');
             if (display) {
-                display.classList.remove('hidden', 'warn', 'danger');
+                display.classList.remove('hidden', 'warn', 'danger', 'paused');
                 display.textContent = `⏱️ ${timerSegundosRestantes}s`;
             }
             atualizarBarraTimer();
 
             timerIntervalId = setInterval(() => {
                 if (jogoEncerrado) { pararTimer(); return; }
+                if (emPausa) return;
                 if (turnoAtual !== minhaCor) { pararTimer(); return; }
                 timerSegundosRestantes--;
                 if (timerSegundosRestantes <= 10 && timerSegundosRestantes > 5) SoundFX.tick();
@@ -1332,7 +1454,7 @@
             if (!barFill) return;
             const pct = Math.max(0, (timerSegundosRestantes / tempoLimiteSegundos) * 100);
             barFill.style.width = pct + '%';
-            barFill.classList.remove('warn', 'danger');
+            barFill.classList.remove('warn', 'danger', 'paused');
             if (timerSegundosRestantes <= 10) barFill.classList.add('danger');
             else if (timerSegundosRestantes <= 20) barFill.classList.add('warn');
         }
@@ -1366,6 +1488,102 @@
         }
         function jogadorTemCapturaObrigatoria(cor) {
             return capturasObrigatorias(cor).length > 0;
+        }
+
+        // ============================================================
+        // ============== GRUPO 6: PAUSA MÚTUA ========================
+        // ============================================================
+        function pedirPausa() {
+            if (modoEspectador || jogoEncerrado || emPausa) return;
+            SoundFX.click();
+            pausaSolicitadaPorMim = true;
+            update(ref(db, `salas_damas/${idSalaAtual}`), {
+                pausaPedido: {
+                    de: jogadorSessao.chave,
+                    nome: jogadorSessao.nome,
+                    em: Date.now()
+                }
+            }).catch(() => {});
+            toast('⏸️ Pedido de pausa enviado...', 'info');
+        }
+
+        function ativarPausaLocal(porQuem) {
+            if (emPausa) return;
+            emPausa = true;
+            if (timerIntervalId) { clearInterval(timerIntervalId); timerIntervalId = null; }
+            timerAtivo = false;
+            document.getElementById('board-wrapper-el')?.classList.add('paused');
+            document.getElementById('badge-pausa')?.classList.remove('hidden');
+            const disp = document.getElementById('timer-display');
+            if (disp) { disp.classList.add('paused'); disp.classList.remove('warn', 'danger'); }
+            const barFill = document.getElementById('timer-bar-fill');
+            if (barFill) { barFill.classList.add('paused'); barFill.classList.remove('warn', 'danger'); }
+            const btnPausa = document.getElementById('btn-pausa');
+            if (btnPausa) btnPausa.textContent = '▶️ Retomar';
+            SoundFX.pause();
+            toast(`⏸️ Partida em pausa${porQuem ? ' por ' + porQuem : ''}.`, 'info');
+        }
+
+        function retomarPausaLocal() {
+            if (!emPausa) return;
+            emPausa = false;
+            pausaSolicitadaPorMim = false;
+            pausaPendenteDe = null;
+            document.getElementById('board-wrapper-el')?.classList.remove('paused');
+            document.getElementById('badge-pausa')?.classList.add('hidden');
+            document.getElementById('div-pausa-pendente')?.classList.add('hidden');
+            const btnPausa = document.getElementById('btn-pausa');
+            if (btnPausa) btnPausa.textContent = '⏸️ Pausa';
+            const disp = document.getElementById('timer-display');
+            if (disp) disp.classList.remove('paused');
+            const barFill = document.getElementById('timer-bar-fill');
+            if (barFill) barFill.classList.remove('paused');
+            SoundFX.unpause();
+            if (!jogoEncerrado && turnoAtual === minhaCor) {
+                setTimeout(() => iniciarTimer(), 200);
+            }
+            toast('▶️ Partida retomada!', 'success');
+        }
+
+        function mostrarPedidoPausa(nome) {
+            const div = document.getElementById('div-pausa-pendente');
+            if (!div) return;
+            div.classList.remove('hidden');
+            document.getElementById('pausa-msg').textContent = nome || 'Adversário';
+        }
+
+        async function aceitarPausa() {
+            SoundFX.click();
+            try {
+                await update(ref(db, `salas_damas/${idSalaAtual}`), {
+                    pausaAtiva: true,
+                    pausaPedido: null
+                });
+            } catch (e) {}
+            ativarPausaLocal('acordo mútuo');
+            document.getElementById('div-pausa-pendente')?.classList.add('hidden');
+        }
+
+        async function recusarPausa() {
+            SoundFX.click();
+            try {
+                await update(ref(db, `salas_damas/${idSalaAtual}`), { pausaPedido: null });
+                toast('Pausa recusada.', 'info');
+            } catch (e) {}
+            document.getElementById('div-pausa-pendente')?.classList.add('hidden');
+        }
+
+        function togglePausa() {
+            if (emPausa) {
+                SoundFX.click();
+                update(ref(db, `salas_damas/${idSalaAtual}`), {
+                    pausaAtiva: null,
+                    pausaPedido: null
+                }).catch(() => {});
+                retomarPausaLocal();
+            } else {
+                pedirPausa();
+            }
         }
 
         // ============================================================
@@ -1506,10 +1724,35 @@
                 return true;
             }
 
-            // GRUPO 2: Carrega tempo da sala (se existir)
             if (dados.tempoLimite !== undefined) tempoLimiteSegundos = dados.tempoLimite;
 
+            // === GRUPO 8: Verifica senha antes de deixar entrar ===
+            if (dados.senha && !querEspectador) {
+                const jogadores = dados.jogadores || {};
+                if (!jogadores[uid]) {
+                    abrirPrompt({
+                        icon: '🔒', title: 'Sala Protegida',
+                        message: 'Digite a senha da sala:',
+                        onConfirm: (s) => {
+                            if (s === dados.senha) {
+                                continuarEntradaSala(uid, nomeUser, codigoSala, dados, querEspectador);
+                            } else {
+                                toast('Senha incorreta.', 'error');
+                                setTimeout(() => { limparSessao(); window.location.href = window.location.pathname; }, 1000);
+                            }
+                        }
+                    });
+                    return true;
+                }
+            }
+
+            continuarEntradaSala(uid, nomeUser, codigoSala, dados, querEspectador);
+            return true;
+        }
+
+        async function continuarEntradaSala(uid, nomeUser, codigoSala, dados, querEspectador) {
             const jogadores = dados.jogadores || {};
+            // === RECONEXÃO ===
             if (jogadores[uid] && !querEspectador) {
                 idSalaAtual = codigoSala;
                 minhaCor = jogadores[uid].cor;
@@ -1523,7 +1766,7 @@
                 escutarFirebase();
                 escutarChat();
                 toast('✅ Reconectado com sucesso!', 'success');
-                return true;
+                return;
             }
 
             if (querEspectador) {
@@ -1539,7 +1782,7 @@
                 escutarFirebase();
                 escutarChat();
                 toast('👁️ Você está assistindo à partida.', 'info');
-                return true;
+                return;
             }
 
             if (Object.keys(jogadores).length >= 2) {
@@ -1555,7 +1798,7 @@
                         { label: 'Voltar', onClick: () => { limparSessao(); window.location.href = window.location.pathname; } }
                     ]
                 });
-                return true;
+                return;
             }
 
             const coresExistentes = Object.values(jogadores).map(j => j.cor);
@@ -1577,10 +1820,8 @@
                 escutarFirebase();
                 escutarChat();
                 toast(`🎉 Entrou na partida como ${minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas'}!`, 'success');
-                return true;
             } catch (e) {
                 toast('Erro ao entrar automaticamente na sala.', 'error');
-                return false;
             }
         }
 
@@ -1601,7 +1842,6 @@
             SoundFX.setPack(sfxSalvo);
             atualizarSeletorSfx();
 
-            // GRUPO 2: Carrega tempo salvo
             const tempoSalvo = localStorage.getItem('brain_damas_tempo');
             if (tempoSalvo !== null) tempoLimiteSegundos = parseInt(tempoSalvo);
             atualizarSeletorTempo();
@@ -1618,6 +1858,7 @@
             document.getElementById('display-nome').textContent = jogadorSessao.nome;
             document.getElementById('display-avatar').textContent = jogadorSessao.avatar;
             document.getElementById('btn-criar-sala').disabled = false;
+            document.getElementById('btn-criar-sala-senha').disabled = false;
             document.getElementById('btn-entrar-sala').disabled = false;
         })();
 
@@ -1639,7 +1880,7 @@
         });
 
         // ============================================================
-        // ==================== GRUPO 2: SELECTOR DE TEMPO ============
+        // ==================== SELECTOR DE TEMPO =====================
         // ============================================================
         function atualizarSeletorTempo() {
             document.querySelectorAll('#tempo-selector .tempo-opt').forEach(btn => {
@@ -1658,9 +1899,9 @@
         });
 
         // ============================================================
-        // ==================== CRIAR / ENTRAR SALA ===================
+        // ==================== CRIAR SALA ============================
         // ============================================================
-        document.getElementById('btn-criar-sala').addEventListener('click', async () => {
+        async function criarSala({ comSenha = false } = {}) {
             SoundFX.click();
             try {
                 idSalaAtual = 'DAMAS-' + Date.now().toString(36).toUpperCase();
@@ -1675,8 +1916,11 @@
                 ambosProntos = false;
                 capturaMultiplaAtiva = false;
                 capturaMultiplaPos = null;
+                emPausa = false;
+                pausaPendenteDe = null;
+                pausaSolicitadaPorMim = false;
 
-                await set(ref(db, 'salas_damas/' + idSalaAtual), {
+                const dados = {
                     status: 'jogando',
                     turno: 'white',
                     tabuleiro: tabuleiroParaFirebase(tabuleiro),
@@ -1686,7 +1930,17 @@
                     jogadores: {
                         [jogadorSessao.chave]: { nome: jogadorSessao.nome, cor: 'white', online: true }
                     }
-                });
+                };
+
+                // GRUPO 8: Senha
+                if (comSenha) {
+                    senhaSalaAtual = gerarSenha();
+                    dados.senha = senhaSalaAtual;
+                } else {
+                    senhaSalaAtual = null;
+                }
+
+                await set(ref(db, 'salas_damas/' + idSalaAtual), dados);
 
                 salaConfirmada = true;
                 salvarSessao();
@@ -1694,11 +1948,15 @@
                 document.getElementById('div-whatsapp').classList.remove('hidden');
                 escutarFirebase();
                 escutarChat();
-                toast('Sala criada com sucesso!', 'success');
+                if (comSenha) toast(`🔒 Sala criada! Senha: ${senhaSalaAtual}`, 'success');
+                else toast('Sala criada com sucesso!', 'success');
             } catch (e) {
                 toast('Erro ao criar sala.', 'error');
             }
-        });
+        }
+
+        document.getElementById('btn-criar-sala').addEventListener('click', () => criarSala({ comSenha: false }));
+        document.getElementById('btn-criar-sala-senha').addEventListener('click', () => criarSala({ comSenha: true }));
 
         document.getElementById('btn-entrar-sala').addEventListener('click', async () => {
             const codigo = document.getElementById('input-codigo-sala').value.trim().toUpperCase();
@@ -1724,11 +1982,13 @@
 
             const badge = document.getElementById('badge-espectador');
             const desistirBtn = document.getElementById('btn-desistir');
+            const pausaBtn = document.getElementById('btn-pausa');
             const chatBar = document.getElementById('chat-bar');
 
             if (modoEspectador) {
                 badge.classList.remove('hidden');
                 desistirBtn.classList.add('hidden');
+                pausaBtn.classList.add('hidden');
                 document.getElementById('info-minha-cor-wrap').style.display = 'none';
                 document.getElementById('display-avatar').textContent = '👁️';
                 document.getElementById('display-nome').textContent = 'Espectador';
@@ -1740,6 +2000,7 @@
                 badge.classList.add('hidden');
                 document.getElementById('info-minha-cor-wrap').style.display = '';
                 document.getElementById('info-minha-cor').textContent = minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
+                pausaBtn.classList.remove('hidden');
             }
 
             renderizarTabuleiro();
@@ -1785,9 +2046,8 @@
             grid.innerHTML = '';
             const invertido = (minhaCor === 'red');
 
-            // GRUPO 4: Calcula capturas obrigatórias
             const corDaVez = turnoAtual;
-            const obrigatorias = (!jogoEncerrado && !modoEspectador && turnoAtual === minhaCor && !capturaMultiplaAtiva)
+            const obrigatorias = (!jogoEncerrado && !modoEspectador && turnoAtual === minhaCor && !capturaMultiplaAtiva && !emPausa)
                 ? capturasObrigatorias(corDaVez) : [];
             const pecasObrigadas = new Set(obrigatorias.map(o => `${o.r},${o.c}`));
             const temObrigatoria = pecasObrigadas.size > 0;
@@ -1804,7 +2064,6 @@
                     const mov = movimentosValidos.find(m => m.r === r && m.c === c);
                     if (mov) square.classList.add(mov.captura ? 'capture-target' : 'highlight');
 
-                    // GRUPO 4: destaque das peças obrigadas
                     if (temObrigatoria && pecasObrigadas.has(`${r},${c}`) && !celulaSelecionada) {
                         square.classList.add('capture-mandatory');
                     }
@@ -1821,14 +2080,13 @@
                         square.appendChild(wrapper);
                     }
 
-                    if (isDark && !modoEspectador) square.addEventListener('click', () => clicarCasa(r, c));
+                    if (isDark && !modoEspectador && !emPausa) square.addEventListener('click', () => clicarCasa(r, c));
                     grid.appendChild(square);
                 }
             }
 
             renderizarReguas();
 
-            // GRUPO 4: Badge "CAPTURA OBRIGATÓRIA"
             const badgeObrig = document.getElementById('badge-obrigatoria');
             if (badgeObrig) {
                 if (!jogoEncerrado && !modoEspectador && turnoAtual === minhaCor && temObrigatoria) {
@@ -1838,9 +2096,16 @@
                 }
             }
 
+            const badgePausa = document.getElementById('badge-pausa');
+            if (badgePausa) {
+                if (emPausa) badgePausa.classList.remove('hidden');
+                else badgePausa.classList.add('hidden');
+            }
+
             const turnoEl = document.getElementById('turno-status');
             if (turnoEl) {
                 if (jogoEncerrado) turnoEl.textContent = '🏁 Fim';
+                else if (emPausa) turnoEl.textContent = '⏸️ Em pausa';
                 else if (modoEspectador) turnoEl.textContent = turnoAtual === 'white' ? '⚪ Brancas jogam' : '🔴 Vermelhas jogam';
                 else turnoEl.textContent = (turnoAtual === minhaCor ? 'Sua vez!' : 'Vez do oponente...');
             }
@@ -1853,10 +2118,9 @@
         // ==================== INTERAÇÃO =============================
         // ============================================================
         function clicarCasa(r, c) {
-            if (modoEspectador) return;
+            if (modoEspectador || emPausa) return;
             if (jogoEncerrado || turnoAtual !== minhaCor) return;
 
-            // GRUPO 5: Se há captura múltipla em andamento, só pode continuar
             if (capturaMultiplaAtiva) {
                 if (movimentosValidos.some(m => m.r === r && m.c === c)) {
                     executarMovimento(capturaMultiplaPos.r, capturaMultiplaPos.c, r, c);
@@ -1870,7 +2134,6 @@
                 const temObrigatoria = jogadorTemCapturaObrigatoria(minhaCor);
                 const movs = calcularMovimentos(r, c);
 
-                // GRUPO 4: Se há captura obrigatória e esta peça não pode capturar, bloqueia
                 if (temObrigatoria) {
                     const caps = movs.filter(m => m.captura);
                     if (caps.length === 0) {
@@ -1979,7 +2242,6 @@
                 toast('♛ Dama promovida!', 'success');
             }
 
-            // GRUPO 5: Verifica se há capturas em cadeia
             if (mov.captura && !pecaMovida.includes('king')) {
                 const maisCapturas = capturasEmCadeia(paraR, paraC, corPeca);
                 if (maisCapturas.length > 0) {
@@ -1989,12 +2251,10 @@
                     movimentosValidos = maisCapturas;
                     renderizarTabuleiro();
                     toast('⚡ Captura em cadeia! Continue capturando.', 'info');
-                    // GRUPO 2: mantém o timer a correr (o jogador continua a jogar)
                     return;
                 }
             }
 
-            // Turno passa
             turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
             celulaSelecionada = null;
             movimentosValidos = [];
@@ -2002,7 +2262,6 @@
             capturaMultiplaPos = null;
             renderizarTabuleiro();
 
-            // GRUPO 2: Para o timer local (a vez mudou)
             pararTimer();
 
             const vencedorPorTabuleiro = verificarFimDeJogo();
@@ -2153,7 +2412,9 @@
                     desistente: null,
                     pedidoRevanche: null,
                     jogadores: novasCores,
-                    reiniciadaEm: serverTimestamp()
+                    reiniciadaEm: serverTimestamp(),
+                    pausaAtiva: null,
+                    pausaPedido: null
                 });
                 toast('🎮 Nova partida iniciada!', 'success');
             } catch (e) { toast('Erro ao aceitar revanche.', 'error'); }
@@ -2179,6 +2440,9 @@
             ambosProntos = false;
             capturaMultiplaAtiva = false;
             capturaMultiplaPos = null;
+            emPausa = false;
+            pausaPendenteDe = null;
+            pausaSolicitadaPorMim = false;
             tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
             turnoAtual = dados.turno || 'white';
 
@@ -2236,8 +2500,26 @@
                 jogoEncerrado = dados.status === 'encerrado';
                 vencedorDeclarado = dados.vencedor || null;
 
-                // GRUPO 2: Atualiza tempo se veio do Firebase
                 if (dados.tempoLimite !== undefined) tempoLimiteSegundos = dados.tempoLimite;
+
+                // GRUPO 6: Pausa
+                const pausaAtivaRemota = !!dados.pausaAtiva;
+                if (pausaAtivaRemota && !emPausa) {
+                    ativarPausaLocal('acordo mútuo');
+                } else if (!pausaAtivaRemota && emPausa) {
+                    retomarPausaLocal();
+                }
+                const pedidoPausa = dados.pausaPedido;
+                if (pedidoPausa && pedidoPausa.de !== jogadorSessao.chave && !modoEspectador) {
+                    if (pausaPendenteDe !== pedidoPausa.de) {
+                        pausaPendenteDe = pedidoPausa.de;
+                        SoundFX.notify();
+                        mostrarPedidoPausa(pedidoPausa.nome || 'Adversário');
+                    }
+                } else if (!pedidoPausa) {
+                    pausaPendenteDe = null;
+                    document.getElementById('div-pausa-pendente')?.classList.add('hidden');
+                }
 
                 const jogadores = dados.jogadores || {};
                 const uids = Object.keys(jogadores);
@@ -2249,7 +2531,6 @@
                 }
                 document.getElementById('placar-nome-eu').textContent = modoEspectador ? '⚪ Brancas' : 'Você';
 
-                // GRUPO 1: marca Firebase vivo + atualiza handshake
                 marcarFirebaseVivo();
                 atualizarHandshake(dados, uids);
 
@@ -2290,15 +2571,12 @@
                     }
                 }
 
-                // GRUPO 2+3: Timer
-                // Se a vez mudou para mim, inicia timer
-                // Se a vez mudou para o adversário, para timer
                 if (turnoAnterior !== turnoAtual) {
                     celulaSelecionada = null;
                     movimentosValidos = [];
                     capturaMultiplaAtiva = false;
                     capturaMultiplaPos = null;
-                    if (!jogoEncerrado && !modoEspectador) {
+                    if (!jogoEncerrado && !modoEspectador && !emPausa) {
                         if (turnoAtual === minhaCor) {
                             setTimeout(() => SoundFX.notify(), 150);
                             iniciarTimer();
@@ -2328,7 +2606,8 @@
                 entradas.forEach(msg => {
                     ultimoChatTs = Math.max(ultimoChatTs, msg.ts || 0);
                     if (msg.de !== jogadorSessao.chave) {
-                        mostrarBalao(msg.emoji, msg.nome || 'Oponente');
+                        if (msg.texto) mostrarBalao(msg.texto, msg.nome || 'Oponente', true);
+                        else if (msg.emoji) mostrarBalao(msg.emoji, msg.nome || 'Oponente', false);
                         SoundFX.chat();
                     }
                 });
@@ -2341,19 +2620,30 @@
             const nome = modoEspectador ? 'Espectador' : (jogadorSessao?.nome || 'Jogador');
             const msgRef = push(ref(db, `salas_damas/${idSalaAtual}/chat`));
             set(msgRef, { emoji, de: jogadorSessao.chave, nome, ts: Date.now() }).catch(() => {});
-            mostrarBalao(emoji, modoEspectador ? '👁️ Espectador' : 'Você');
+            mostrarBalao(emoji, modoEspectador ? '👁️ Espectador' : 'Você', false);
         }
 
-        function mostrarBalao(emoji, nome) {
+        function enviarTexto(texto) {
+            if (!idSalaAtual || !texto) return;
+            const t = texto.trim().slice(0, 120);
+            if (!t) return;
+            SoundFX.click();
+            const nome = modoEspectador ? 'Espectador' : (jogadorSessao?.nome || 'Jogador');
+            const msgRef = push(ref(db, `salas_damas/${idSalaAtual}/chat`));
+            set(msgRef, { texto: t, de: jogadorSessao.chave, nome, ts: Date.now() }).catch(() => {});
+            mostrarBalao(t, modoEspectador ? '👁️ Espectador' : 'Você', true);
+        }
+
+        function mostrarBalao(conteudo, nome, isTexto) {
             const layer = document.getElementById('bubble-layer');
             if (!layer) return;
             const el = document.createElement('div');
             el.className = 'bubble';
-            el.innerHTML = `<span class="bubble-nome">${nome}</span><span>${emoji}</span>`;
+            el.innerHTML = `<span class="bubble-nome">${nome}</span><span style="${isTexto ? 'font-size:13px; font-weight:600;' : ''}">${conteudo}</span>`;
             layer.appendChild(el);
             const bubbles = layer.querySelectorAll('.bubble');
             if (bubbles.length > 3) bubbles[0].remove();
-            setTimeout(() => el.remove(), 2600);
+            setTimeout(() => el.remove(), 3600);
         }
 
         document.querySelectorAll('.emoji-btn').forEach(btn => {
@@ -2361,6 +2651,22 @@
                 if (modoEspectador) return;
                 enviarEmoji(btn.dataset.emoji || '👍');
             });
+        });
+
+        // GRUPO 7: Chat de texto — Enter e botão
+        document.getElementById('chat-send').addEventListener('click', () => {
+            const input = document.getElementById('chat-input');
+            if (modoEspectador) return;
+            enviarTexto(input.value);
+            input.value = '';
+        });
+        document.getElementById('chat-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (modoEspectador) return;
+                enviarTexto(e.target.value);
+                e.target.value = '';
+            }
         });
 
         // ============================================================
@@ -2491,6 +2797,9 @@
         });
 
         document.getElementById('btn-desistir').addEventListener('click', confirmarDesistencia);
+        document.getElementById('btn-pausa').addEventListener('click', togglePausa);
+        document.getElementById('btn-aceitar-pausa').addEventListener('click', aceitarPausa);
+        document.getElementById('btn-recusar-pausa').addEventListener('click', recusarPausa);
         document.getElementById('btn-jogar-novamente').addEventListener('click', enviarPedidoRevanche);
         document.getElementById('btn-sair-pos-jogo').addEventListener('click', () => {
             SoundFX.click();
@@ -2504,7 +2813,8 @@
         document.getElementById('btn-whatsapp').addEventListener('click', () => {
             SoundFX.click();
             const link = `${window.location.origin}${window.location.pathname}?sala=${encodeURIComponent(idSalaAtual)}`;
-            const msg = encodeURIComponent(`♟️ *Convite para Damas*\n\nDesafiado(a) por *${jogadorSessao?.nome || 'Alguém'}*!\n\n👉 Clique para entrar direto:\n${link}`);
+            const senhaTxt = senhaSalaAtual ? `\n🔒 Senha: *${senhaSalaAtual}*` : '';
+            const msg = encodeURIComponent(`♟️ *Convite para Damas*\n\nDesafiado(a) por *${jogadorSessao?.nome || 'Alguém'}*!${senhaTxt}\n\n👉 Clique para entrar direto:\n${link}`);
             window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
         });
 
