@@ -975,9 +975,10 @@
          SCRIPT PRINCIPAL — Continua na próxima mensagem
          ============================================================ -->
 
-            <script type="module">
+        <script type="module">
         // ============================================================
-        // Brain Damas v7.1 — Motor completo com correção de imobilização
+        // Brain Damas v7.2 — Motor completo
+        // Correções: captura total + ordem correta de fim de jogo
         // ============================================================
 
         // === FIREBASE ===
@@ -1528,11 +1529,23 @@
         }
 
         // ============================================================
-        // v7.1: FUNÇÃO CENTRAL DE VERIFICAÇÃO DE IMOBILIZAÇÃO
+        // v7.2: FUNÇÕES CENTRAIS DE FIM DE JOGO
         // ============================================================
+
         /**
-         * Verifica se o jogador da cor indicada tem algum movimento legal.
-         * Retorna true se PELO MENOS UM movimento existir.
+         * Conta peças de uma cor no tabuleiro.
+         */
+        function contarPecasDaCor(cor) {
+            let n = 0;
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                const p = tabuleiro[r][c];
+                if (p && p.startsWith(cor)) n++;
+            }
+            return n;
+        }
+
+        /**
+         * Verifica se um jogador tem algum movimento legal.
          */
         function jogadorTemAlgumMovimento(cor) {
             for (let r = 0; r < 8; r++) {
@@ -1547,31 +1560,49 @@
         }
 
         /**
-         * Verifica fim de jogo por imobilização.
-         * Retorna a cor vencedora ou null.
+         * VERIFICAÇÃO DEFINITIVA DE FIM DE JOGO (regras CBD)
+         * Ordem de prioridade:
+         * 1. Vitória por CAPTURA TOTAL (adversário sem peças)
+         * 2. Vitória por IMOBILIZAÇÃO (adversário sem movimentos)
+         * 3. Empate (40 lances, repetição, finais específicos)
+         * 
+         * Retorna: null (jogo continua) ou { tipo, vencedor?, motivo }
          */
-        function verificarImobilizacao() {
-            // Se o jogador atual não tem peças → adversário vence
-            let temWhite = false, temRed = false;
-            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-                const p = tabuleiro[r][c]; if (!p) continue;
-                if (p.startsWith('white')) temWhite = true;
-                if (p.startsWith('red')) temRed = true;
-            }
-            if (!temWhite) return 'red';
-            if (!temRed) return 'white';
+        function verificarFimDeJogoCompleto() {
+            const pecasBrancas = contarPecasDaCor('white');
+            const pecasPretas = contarPecasDaCor('red');
 
-            // Se o jogador da vez não tem movimentos → adversário vence
+            // === 1. CAPTURA TOTAL ===
+            if (pecasBrancas === 0 && pecasPretas === 0) {
+                return { tipo: 'empate', motivo: 'tabuleiro-vazio' };
+            }
+            if (pecasBrancas === 0) {
+                return { tipo: 'vitoria', vencedor: 'red', motivo: 'sem-pecas' };
+            }
+            if (pecasPretas === 0) {
+                return { tipo: 'vitoria', vencedor: 'white', motivo: 'sem-pecas' };
+            }
+
+            // === 2. IMOBILIZAÇÃO ===
             const corDaVez = turnoAtual;
             if (!jogadorTemAlgumMovimento(corDaVez)) {
-                return corDaVez === 'white' ? 'red' : 'white';
+                return {
+                    tipo: 'vitoria',
+                    vencedor: corDaVez === 'white' ? 'red' : 'white',
+                    motivo: 'sem-movimentos'
+                };
             }
+
+            // === 3. EMPATE ===
+            const resEmpate = verificarEmpate();
+            if (resEmpate.empate) {
+                return { tipo: 'empate', motivo: resEmpate.motivo };
+            }
+
             return null;
         }
 
-        // ============================================================
-        // TIMER
-        // ============================================================
+        // === TIMER ===
         function pararTimer() {
             if (timerIntervalId) { clearInterval(timerIntervalId); timerIntervalId = null; }
             document.getElementById('timer-bar-wrap')?.classList.add('hidden');
@@ -1585,13 +1616,17 @@
             const minhaVez = modoHotSeat ? true : (turnoAtual === minhaCor);
             if (!minhaVez) return;
 
-            // ⚡ v7.1: verificação preventiva — se eu não tenho movimentos, perco
+            // v7.2: verificação preventiva
             if (!desistenciaProcessada) {
                 const minhaCorLocal = modoHotSeat ? turnoAtual : minhaCor;
-                if (!jogadorTemAlgumMovimento(minhaCorLocal)) {
+                const fim = verificarFimDeJogoCompleto();
+                if (fim) {
                     jogoEncerrado = true;
-                    const vencedor = minhaCorLocal === 'white' ? 'red' : 'white';
-                    tratarFimDeJogo(vencedor, 'sem-movimentos');
+                    if (fim.tipo === 'empate') {
+                        tratarFimDeJogo('empate', 'empate');
+                    } else {
+                        tratarFimDeJogo(fim.vencedor, fim.motivo);
+                    }
                     return;
                 }
             }
@@ -1668,9 +1703,9 @@
                         ultimaAtividade: Date.now()
                     };
                 });
-                if (!resultado.committed) console.log('[v7.1] Timeout já processado por outro cliente');
+                if (!resultado.committed) console.log('[v7.2] Timeout já processado');
             } catch (e) {
-                console.error('[v7.1] Erro na transação de timeout:', e);
+                console.error('[v7.2] Erro na transação de timeout:', e);
             }
         }
 
@@ -2042,7 +2077,7 @@
             if (vop) vop.textContent = placarSessao.derrotas;
         }
 
-        // === RANKING (desativado) ===
+        // === RANKING ===
         async function carregarRanking() {
             const container = document.getElementById('ranking-list');
             if (!container) return;
@@ -2824,7 +2859,7 @@
         }
 
         // ============================================================
-        // v7.1: EXECUTAR MOVIMENTO com verificação correta de imobilização
+        // v7.2: EXECUTAR MOVIMENTO com ordem correta de verificação
         // ============================================================
         async function executarMovimento(deR, deC, paraR, paraC) {
             const mov = movimentosValidos.find(m => m.r === paraR && m.c === paraC);
@@ -2834,6 +2869,7 @@
             const isDamaMovida = pecaMovida.includes('king');
             let promoveu = false;
 
+            // Aplica o lance no tabuleiro local
             if (mov.caminhoCompleto && mov.caminhoCompleto.length > 0) {
                 let posAtual = { r: deR, c: deC };
                 let passos = 0;
@@ -2869,17 +2905,27 @@
             });
             adicionarNotacao(corPeca, { r: deR, c: deC }, { r: paraR, c: paraC }, !!mov.captura, isDamaMovida || promoveu, mov.caminhoCompleto);
             atualizarContadoresAposLance({ capturada: mov.captura, pecaOriginal: pecaMovida });
+            celulaSelecionada = null;
+            movimentosValidos = [];
+            renderizarTabuleiro();
 
-            // Verifica empate primeiro
-            const resEmpate = verificarEmpate();
-            if (resEmpate.empate) {
-                toast(`🤝 Empate! (${resEmpate.motivo})`, 'info');
+            // ⚡ v7.2 CORREÇÃO PRINCIPAL:
+            // 1. PRIMEIRO verifica se o ADVERSÁRIO ficou sem peças (captura total)
+            const corAdversaria = corPeca === 'white' ? 'red' : 'white';
+            const pecasAdversario = contarPecasDaCor(corAdversaria);
+            if (pecasAdversario === 0) {
+                console.log('[v7.2] CAPTURA TOTAL! Adversário sem peças. Vencedor:', corPeca);
                 jogoEncerrado = true;
-                await encerrarPartidaComTransacao('empate', 'empate');
+                pararTimer(); pararRelogio();
+                if (modoIA || modoHotSeat) {
+                    tratarFimDeJogo(corPeca, 'sem-pecas');
+                } else {
+                    await encerrarPartidaComTransacao(corPeca, 'sem-pecas');
+                }
                 return;
             }
 
-            // Muda turno
+            // 2. DEPOIS muda o turno
             turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
             turnoInicioServidor = Date.now();
 
@@ -2888,37 +2934,51 @@
                 minhaCor = turnoAtual;
                 atualizarCorHotSeat();
             }
-            celulaSelecionada = null; movimentosValidos = [];
-            renderizarTabuleiro();
-            pararTimer(); pararRelogio();
+
+            // 3. Aplica incremento de relógio
             aplicarIncremento(corPeca);
             atualizarRelogioUI();
 
-            // ⚡ v7.1: Verifica fim de jogo (imobilização) APÓS mudar turno
-            const vencedorPorImobilizacao = verificarImobilizacao();
-
-            // Modo IA
-            if (modoIA) {
-                if (vencedorPorImobilizacao) {
-                    jogoEncerrado = true;
-                    tratarFimDeJogo(vencedorPorImobilizacao, 'sem-movimentos');
-                    return;
+            // 4. Verifica empate (só depois da captura total)
+            const resEmpate = verificarEmpate();
+            if (resEmpate.empate) {
+                console.log('[v7.2] Empate:', resEmpate.motivo);
+                jogoEncerrado = true;
+                pararTimer(); pararRelogio();
+                if (modoIA || modoHotSeat) {
+                    tratarFimDeJogo('empate', 'empate');
+                } else {
+                    await encerrarPartidaComTransacao('empate', 'empate');
                 }
+                return;
+            }
+
+            // 5. Verifica se o NOVO jogador da vez está imobilizado
+            const vencedorPorImobilizacao = verificarImobilizacao();
+            if (vencedorPorImobilizacao) {
+                console.log('[v7.2] IMOBILIZAÇÃO! Vencedor:', vencedorPorImobilizacao);
+                jogoEncerrado = true;
+                pararTimer(); pararRelogio();
+                if (modoIA || modoHotSeat) {
+                    tratarFimDeJogo(vencedorPorImobilizacao, 'sem-movimentos');
+                } else {
+                    await encerrarPartidaComTransacao(vencedorPorImobilizacao, 'sem-movimentos');
+                }
+                return;
+            }
+
+            // 6. Modo IA
+            if (modoIA) {
                 if (turnoAtual !== minhaCor) setTimeout(() => fazerJogadaIA(), 350);
                 return;
             }
-            // Modo Hot-Seat
+            // 7. Modo Hot-Seat
             if (modoHotSeat) {
-                if (vencedorPorImobilizacao) {
-                    jogoEncerrado = true;
-                    tratarFimDeJogo(vencedorPorImobilizacao, 'sem-movimentos');
-                    return;
-                }
                 setTimeout(() => { iniciarTimer(); iniciarRelogio(); }, 300);
                 return;
             }
 
-            // Modo Online: transação atómica
+            // 8. Modo Online: transação atómica
             try {
                 const resultado = await fns.runTransaction(fns.ref(db, `salas_damas/${idSalaAtual}`), (atual) => {
                     if (!atual) return null;
@@ -2938,15 +2998,12 @@
                             ts: Date.now(),
                             jogador: jogadorSessao.chave
                         },
-                        status: vencedorPorImobilizacao ? 'encerrado' : 'jogando',
-                        vencedor: vencedorPorImobilizacao || atual.vencedor || null,
-                        motivoFim: vencedorPorImobilizacao ? 'sem-movimentos' : atual.motivoFim || null,
                         ultimaAtividade: Date.now()
                     };
                 });
 
                 if (!resultado.committed) {
-                    console.warn('[v7.1] Lance rejeitado — ressincronizando');
+                    console.warn('[v7.2] Lance rejeitado — ressincronizando');
                     toast('⚠️ Lance rejeitado, a ressincronizar...', 'warn');
                     const snap = await fns.get(fns.ref(db, `salas_damas/${idSalaAtual}`));
                     if (snap.exists()) {
@@ -2961,9 +3018,23 @@
                     marcarAtividadeSala();
                 }
             } catch (e) {
-                console.error('[v7.1] Erro na transação:', e);
+                console.error('[v7.2] Erro na transação:', e);
                 toast('⚠️ Erro ao enviar lance.', 'error');
             }
+        }
+
+        // === verificarImobilizacao: compatível com chamadas antigas ===
+        function verificarImobilizacao() {
+            const pecasBrancas = contarPecasDaCor('white');
+            const pecasPretas = contarPecasDaCor('red');
+            if (!pecasBrancas && !pecasPretas) return null;
+            if (!pecasBrancas) return 'red';
+            if (!pecasPretas) return 'white';
+            const corDaVez = turnoAtual;
+            if (!jogadorTemAlgumMovimento(corDaVez)) {
+                return corDaVez === 'white' ? 'red' : 'white';
+            }
+            return null;
         }
 
         async function encerrarPartidaComTransacao(vencedor, motivo) {
@@ -2981,9 +3052,9 @@
                         ultimaAtividade: Date.now()
                     };
                 });
-                if (!resultado.committed) console.log('[v7.1] Partida já encerrada por outro cliente');
+                if (!resultado.committed) console.log('[v7.2] Partida já encerrada por outro cliente');
             } catch (e) {
-                console.error('[v7.1] Erro ao encerrar:', e);
+                console.error('[v7.2] Erro ao encerrar:', e);
             }
         }
 
@@ -3027,7 +3098,9 @@
             if (motivo === 'desistencia') motivoTxt = (euVenci ? 'O adversário desistiu.' : 'Você desistiu.');
             else if (motivo === 'timeout') motivoTxt = (euVenci ? 'O adversário deixou o tempo esgotar.' : 'Você deixou o tempo esgotar!');
             else if (motivo === 'empate') motivoTxt = 'Empate por regra oficial.';
-            else motivoTxt = (euVenci ? 'O adversário ficou sem movimentos.' : 'Você ficou sem movimentos.');
+            else if (motivo === 'sem-pecas') motivoTxt = (euVenci ? 'Capturaste TODAS as peças do adversário!' : 'Ficaste sem peças.');
+            else if (motivo === 'sem-movimentos') motivoTxt = (euVenci ? 'O adversário ficou sem movimentos.' : 'Você ficou sem movimentos.');
+            else motivoTxt = 'Fim da partida.';
 
             setTimeout(() => {
                 const acoes = [];
@@ -3407,6 +3480,24 @@
             iaPensando = false;
             renderizarTabuleiro();
 
+            // ⚡ v7.2: PRIMEIRO verifica se IA capturou TUDO (humano ficou sem peças)
+            const pecasHumano = contarPecasDaCor('white');
+            if (pecasHumano === 0) {
+                console.log('[v7.2 IA] IA capturou tudo. Vencedor: red');
+                jogoEncerrado = true;
+                tratarFimDeJogo('red', 'sem-pecas');
+                return;
+            }
+            // Verifica se IA ficou sem peças (não deveria acontecer, mas proteção)
+            const pecasIA = contarPecasDaCor('red');
+            if (pecasIA === 0) {
+                console.log('[v7.2 IA] Humano capturou tudo. Vencedor: white');
+                jogoEncerrado = true;
+                tratarFimDeJogo('white', 'sem-pecas');
+                return;
+            }
+
+            // Empate
             const resEmpate = verificarEmpate();
             if (resEmpate.empate) {
                 jogoEncerrado = true;
@@ -3415,7 +3506,7 @@
                 return;
             }
 
-            // ⚡ v7.1: após IA jogar, verifica imobilização de ambos os lados
+            // Imobilização
             const vencedorImob = verificarImobilizacao();
             if (vencedorImob) {
                 jogoEncerrado = true;
@@ -3501,17 +3592,24 @@
                 marcarFirebaseVivo();
                 atualizarHandshake(dados, uids);
 
-                if (jogoEncerrado && dados.motivoFim === 'desistencia' && !desistenciaProcessada && !modoEspectador) {
-                    desistenciaProcessada = true; tratarFimDeJogo(vencedorDeclarado, 'desistencia');
+                // ⚡ v7.2: se a partida acabou de encerrar, processa e RETORNA
+                if (jogoEncerrado && !statusAnteriorEncerrado && !desistenciaProcessada && !modoEspectador) {
+                    desistenciaProcessada = true;
+                    renderizarTabuleiro();
+                    const motivos = ['sem-pecas', 'sem-movimentos', 'desistencia', 'timeout', 'empate'];
+                    const motivo = motivos.includes(dados.motivoFim) ? dados.motivoFim : 'sem-movimentos';
+                    if (motivo === 'empate') {
+                        tratarFimDeJogo('empate', 'empate');
+                    } else {
+                        tratarFimDeJogo(vencedorDeclarado, motivo);
+                    }
+                    return;
                 }
-                if (jogoEncerrado && dados.motivoFim === 'sem-movimentos' && !desistenciaProcessada && !modoEspectador) {
-                    desistenciaProcessada = true; tratarFimDeJogo(vencedorDeclarado, 'sem-movimentos');
-                }
-                if (jogoEncerrado && dados.motivoFim === 'timeout' && !desistenciaProcessada && !modoEspectador) {
-                    desistenciaProcessada = true; tratarFimDeJogo(vencedorDeclarado, 'timeout');
-                }
-                if (jogoEncerrado && dados.motivoFim === 'empate' && !desistenciaProcessada && !modoEspectador) {
-                    desistenciaProcessada = true; tratarFimDeJogo('empate', 'empate');
+
+                // Se já estava encerrado e continua, não faz mais nada
+                if (jogoEncerrado && desistenciaProcessada) {
+                    renderizarTabuleiro();
+                    return;
                 }
 
                 const pedido = dados.pedidoRevanche || null;
@@ -3533,10 +3631,27 @@
                     }
                 }
 
-                // ⚡ v7.1: quando o turno muda, verificar imobilização ANTES de arrancar timer
+                // ⚡ v7.2: quando o turno muda, verificar fim de jogo ANTES de arrancar timer
                 if (turnoAnterior !== turnoAtual) {
                     celulaSelecionada = null; movimentosValidos = [];
 
+                    // 1. Verifica captura total
+                    const pecasBrancas = contarPecasDaCor('white');
+                    const pecasPretas = contarPecasDaCor('red');
+                    if (pecasBrancas === 0) {
+                        jogoEncerrado = true;
+                        renderizarTabuleiro();
+                        tratarFimDeJogo('red', 'sem-pecas');
+                        return;
+                    }
+                    if (pecasPretas === 0) {
+                        jogoEncerrado = true;
+                        renderizarTabuleiro();
+                        tratarFimDeJogo('white', 'sem-pecas');
+                        return;
+                    }
+
+                    // 2. Verifica imobilização
                     if (!jogoEncerrado && !desistenciaProcessada && !modoEspectador) {
                         const vencedorImob = verificarImobilizacao();
                         if (vencedorImob) {
@@ -3547,6 +3662,7 @@
                         }
                     }
 
+                    // 3. Arranca timer se aplicável
                     if (!jogoEncerrado && !modoEspectador && !emPausa) {
                         if (turnoAtual === minhaCor) {
                             setTimeout(() => SoundFX.notify(), 150);
@@ -3832,7 +3948,7 @@
             pararTimer(); pararRelogio(); pararHeartbeat(); pararMonitorSala(); pararMonitorAdversario(); pararMonitorConexao();
         });
 
-        console.log('[Brain Damas v7.1] Carregado — correção de imobilização aplicada');
-    </script>
-       </body>
+        console.log('[Brain Damas v7.2] Carregado — correção de captura total aplicada');
+    </script>            
+</body>
 </html>
