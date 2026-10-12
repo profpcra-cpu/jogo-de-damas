@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1020">
-    <title>Brain Damas - Regras Brasileiras Oficiais (v4.0)</title>
+    <title>Brain Damas v5.0 — Regras Brasileiras Oficiais</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -214,6 +214,16 @@
         .timer-display.danger { color: var(--c-red); border-color: rgba(239, 68, 68, 0.6); animation: timerPulse 0.8s infinite; }
         .timer-display.paused { color: #a5b4fc; border-color: rgba(139, 92, 246, 0.6); }
 
+        .clock-display {
+            display: flex; gap: 12px; justify-content: center; align-items: center;
+            background: var(--input-bg); border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); padding: 6px 12px; margin-bottom: 10px;
+            font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px;
+        }
+        .clock-player { display: flex; align-items: center; gap: 6px; }
+        .clock-player.active { color: var(--c-green); }
+        .clock-player.danger { color: var(--c-red); animation: timerPulse 0.8s infinite; }
+
         @keyframes flashRed {
             0%, 100% { box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0); }
             50% { box-shadow: inset 0 0 0 6px rgba(239, 68, 68, 0.35); }
@@ -259,6 +269,15 @@
         }
         .btn-pausa { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
 
+        .empate-pedido {
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            padding: 10px 14px; border-radius: var(--radius-md);
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(217, 119, 6, 0.15));
+            border: 1px solid rgba(251, 191, 36, 0.55);
+            margin-bottom: 10px; font-size: 13px; font-weight: 700;
+        }
+        .btn-empate { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
         .chat-input-row { display: flex; gap: 6px; margin-top: 6px; width: 100%; }
         .chat-input-row input { flex: 1; padding: 8px 12px; font-size: 13px; }
         .chat-input-row button { width: auto; padding: 8px 14px; font-size: 13px; }
@@ -277,6 +296,30 @@
             background: linear-gradient(135deg, #7c3aed, #a855f7);
             color: #fff; font-size: 10.5px; font-weight: 800;
             padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px;
+        }
+        .hotseat-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: linear-gradient(135deg, #0891b2, #06b6d4);
+            color: #fff; font-size: 10.5px; font-weight: 800;
+            padding: 3px 8px; border-radius: 999px; letter-spacing: 0.5px;
+        }
+
+        /* === NOTAÇÃO === */
+        .notacao-panel {
+            background: var(--input-bg); border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 10px;
+            max-height: 120px; overflow-y: auto; font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; text-align: left; line-height: 1.6;
+        }
+        .notacao-panel .mov-num { color: var(--text-subtle); margin-right: 4px; }
+        .notacao-panel .mov-branca { color: var(--c-blue); }
+        .notacao-panel .mov-preta { color: var(--c-red); }
+        .notacao-panel .mov-captura { font-weight: 800; }
+        .notacao-vazia { color: var(--text-subtle); font-style: italic; }
+        .notacao-copy-btn {
+            width: auto; padding: 4px 10px; font-size: 10.5px; border-radius: 6px;
+            background: var(--card-bg); color: var(--text-color);
+            border: 1px solid var(--border-color); cursor: pointer;
         }
 
         .replay-board {
@@ -333,7 +376,7 @@
 
         .board-wrapper {
             position: relative; width: 100%;
-            max-width: min(100%, calc(100dvh - 300px));
+            max-width: min(100%, calc(100dvh - 340px));
             aspect-ratio: 1 / 1; padding: 22px;
             background: linear-gradient(145deg, var(--board-frame-1) 0%, var(--board-frame-2) 100%);
             border-radius: 12px; box-shadow: 0 14px 40px -12px rgba(0, 0, 0, 0.75);
@@ -365,10 +408,12 @@
         .square.selected { box-shadow: inset 0 0 0 3px rgba(99, 102, 241, 0.95) !important; }
         .square.highlight { box-shadow: inset 0 0 0 3px rgba(74, 222, 128, 0.95) !important; }
         .square.capture-target { box-shadow: inset 0 0 0 3px rgba(239, 68, 68, 0.95) !important; }
+        .square.ultimo-lance { box-shadow: inset 0 0 0 2px rgba(56, 189, 248, 0.7) !important; }
         [data-theme="neon"] .square.selected { box-shadow: inset 0 0 0 3px #ec4899, 0 0 20px #ec4899 !important; }
         [data-theme="neon"] .square.highlight { box-shadow: inset 0 0 0 3px #22d3ee, 0 0 20px #22d3ee !important; }
         [data-theme="neon"] .square.capture-target { box-shadow: inset 0 0 0 3px #f43f5e, 0 0 20px #f43f5e !important; }
         [data-theme="neon"] .square.capture-mandatory { box-shadow: inset 0 0 0 3px #fbbf24, 0 0 20px #fbbf24 !important; }
+        [data-theme="neon"] .square.ultimo-lance { box-shadow: inset 0 0 0 2px #22d3ee, 0 0 16px #22d3ee !important; }
 
         .piece {
             width: 80%; height: 80%; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -390,7 +435,7 @@
 
         .instructions { font-size: 12px; color: var(--text-muted); margin: 4px 0 10px; min-height: 18px; }
 
-        button, input {
+        button, input, select {
             width: 100%; padding: 10px 12px; border: 1px solid var(--border-color);
             border-radius: var(--radius-md); font-size: 13.5px; font-family: inherit; font-weight: 600;
             background: var(--input-bg); color: var(--text-color); cursor: pointer;
@@ -499,6 +544,21 @@
         }
         .tipo-opt.active { border-color: var(--c-amber) !important; background: rgba(245, 158, 11, 0.15) !important; }
         .ia-opt.active { border-color: #a855f7 !important; background: rgba(168, 85, 247, 0.18) !important; }
+        .clock-opt.active { border-color: #22d3ee !important; background: rgba(34, 211, 238, 0.15) !important; }
+
+        .menu-inicial { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+        .menu-btn {
+            display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+            border-radius: var(--radius-md); background: var(--input-bg);
+            border: 1px solid var(--border-color); cursor: pointer;
+            text-align: left; color: var(--text-color); font-weight: 700; font-size: 14px;
+            transition: all 0.2s;
+        }
+        .menu-btn:hover { border-color: var(--c-blue); background: var(--card-bg); transform: translateY(-2px); }
+        .menu-btn .menu-emoji { font-size: 26px; flex-shrink: 0; }
+        .menu-btn .menu-info { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+        .menu-btn .menu-titulo { font-size: 14px; font-weight: 800; }
+        .menu-btn .menu-desc { font-size: 11.5px; color: var(--text-muted); font-weight: 500; }
 
         @media (max-width: 600px) {
             body { padding: 6px; align-items: flex-start; }
@@ -520,6 +580,7 @@
             .ach-item .ach-label { font-size: 7.5px; }
             .connection-status { font-size: 11px; padding: 5px 12px; }
             .board-wrapper.paused::after { font-size: 18px; letter-spacing: 2px; }
+            .notacao-panel { font-size: 11px; max-height: 90px; }
         }
 
         @media (max-width: 380px) {
@@ -533,7 +594,7 @@
             body { padding: 4px; }
             .container { padding: 8px; max-width: 100vw; }
             .board-wrapper { max-width: min(100%, calc(100dvh - 120px)); }
-            .user-header, .match-info-bar, .placar-bar { display: none; }
+            .user-header, .match-info-bar, .placar-bar, .notacao-panel { display: none; }
         }
     </style>
 </head>
@@ -575,11 +636,40 @@
                 <button class="tab-btn" data-tab="config" type="button">⚙️ Config</button>
             </div>
 
-            <!-- TAB: JOGO -->
+            <!-- TAB: JOGO — MENU INICIAL -->
             <div id="tab-jogo">
-                <div class="lobby-box">
-                    <h3>🤖 Jogar contra o Computador</h3>
-                    <p>Escolha o nível de dificuldade. Regras brasileiras oficiais (CBD) aplicadas integralmente.</p>
+                <!-- Menu de escolha de modo -->
+                <div id="menu-inicial" class="lobby-box">
+                    <h3>🎯 Escolha o Modo de Jogo</h3>
+                    <p>Damas Brasileiras Oficiais (CBD) — captura obrigatória pela maioria, dama voadora, empates por regra.</p>
+                    <div class="menu-inicial">
+                        <button class="menu-btn" id="menu-btn-hotseat" type="button">
+                            <span class="menu-emoji">👥</span>
+                            <div class="menu-info">
+                                <span class="menu-titulo">Hot-Seat (2 jogadores)</span>
+                                <span class="menu-desc">Joguem no mesmo aparelho, alternando a vez</span>
+                            </div>
+                        </button>
+                        <button class="menu-btn" id="menu-btn-ia" type="button">
+                            <span class="menu-emoji">🤖</span>
+                            <div class="menu-info">
+                                <span class="menu-titulo">Contra o Computador</span>
+                                <span class="menu-desc">5 níveis de dificuldade, do Iniciante ao Mestre</span>
+                            </div>
+                        </button>
+                        <button class="menu-btn" id="menu-btn-online" type="button">
+                            <span class="menu-emoji">🌐</span>
+                            <div class="menu-info">
+                                <span class="menu-titulo">Multiplayer Online</span>
+                                <span class="menu-desc">Crie sala, envie link, jogue com amigos</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Painel IA -->
+                <div id="painel-ia" class="lobby-box hidden">
+                    <h3>🤖 Nível da IA</h3>
                     <div class="tipo-selector" id="ia-selector">
                         <button class="tipo-opt ia-opt" data-nivel="1" type="button">🐣 Iniciante</button>
                         <button class="tipo-opt ia-opt" data-nivel="2" type="button">🐤 Fácil</button>
@@ -587,39 +677,55 @@
                         <button class="tipo-opt ia-opt" data-nivel="4" type="button">🐺 Difícil</button>
                         <button class="tipo-opt ia-opt" data-nivel="5" type="button">🐉 Mestre</button>
                     </div>
-                    <button id="btn-jogar-ia" type="button" style="margin-top:8px; background: linear-gradient(135deg, #7c3aed, #a855f7);" disabled>🤖 Iniciar Partida contra IA</button>
+                    <button id="btn-jogar-ia" type="button" style="margin-top:10px; background: linear-gradient(135deg, #7c3aed, #a855f7);">▶️ Iniciar Partida</button>
+                    <button id="btn-voltar-menu-1" type="button" class="btn-secundario" style="margin-top:6px; font-size:12px;">↩️ Voltar</button>
                 </div>
 
-                <div class="lobby-box">
-                    <h3>♟️ Multiplayer Online</h3>
-                    <p><strong>Regras brasileiras oficiais</strong>: captura obrigatória pela maior quantidade; dama captura em cadeia; empate após 20 lances.</p>
-                    <button id="btn-criar-sala" type="button" disabled>🚀 Criar Sala</button>
-                    <button id="btn-criar-sala-senha" type="button" class="btn-secundario" style="margin-top:6px;" disabled>🔒 Criar Sala com Senha</button>
+                <!-- Painel Hot-Seat -->
+                <div id="painel-hotseat" class="lobby-box hidden">
+                    <h3>👥 Hot-Seat (2 Jogadores)</h3>
+                    <p>Os dois jogadores usam o mesmo aparelho. A tela roda automaticamente entre os turnos.</p>
+                    <label style="font-size:12.5px; color:var(--text-muted); display:block; margin-bottom:4px;">Nome do Jogador 1 (Brancas):</label>
+                    <input type="text" id="hotseat-nome-1" placeholder="Jogador 1" style="margin-bottom:8px;">
+                    <label style="font-size:12.5px; color:var(--text-muted); display:block; margin-bottom:4px;">Nome do Jogador 2 (Vermelhas):</label>
+                    <input type="text" id="hotseat-nome-2" placeholder="Jogador 2" style="margin-bottom:10px;">
+                    <button id="btn-iniciar-hotseat" type="button" style="background: linear-gradient(135deg, #0891b2, #06b6d4);">▶️ Iniciar Hot-Seat</button>
+                    <button id="btn-voltar-menu-2" type="button" class="btn-secundario" style="margin-top:6px; font-size:12px;">↩️ Voltar</button>
+                </div>
+
+                <!-- Painel Online -->
+                <div id="painel-online" class="lobby-box hidden">
+                    <h3>🌐 Multiplayer Online</h3>
+                    <button id="btn-criar-sala" type="button">🚀 Criar Sala</button>
+                    <button id="btn-criar-sala-senha" type="button" class="btn-secundario" style="margin-top:6px;">🔒 Criar Sala com Senha</button>
                     <div style="display:flex; gap:6px; margin-top:6px;">
-                        <button id="btn-criar-torneio3" type="button" class="btn-secundario" disabled style="font-size:12px;">🏆 Torneio MD3</button>
-                        <button id="btn-criar-torneio5" type="button" class="btn-secundario" disabled style="font-size:12px;">🏆 Torneio MD5</button>
+                        <button id="btn-criar-torneio3" type="button" class="btn-secundario" style="font-size:12px;">🏆 Torneio MD3</button>
+                        <button id="btn-criar-torneio5" type="button" class="btn-secundario" style="font-size:12px;">🏆 Torneio MD5</button>
                     </div>
-                </div>
-
-                <div class="lobby-box">
-                    <h3>⏱️ Tempo de Jogada</h3>
-                    <p>Se o jogador não jogar dentro deste tempo, perde automaticamente.</p>
-                    <div class="tempo-selector" id="tempo-selector">
-                        <button class="tempo-opt" data-tempo="20" type="button">20s</button>
-                        <button class="tempo-opt" data-tempo="40" type="button">40s</button>
-                        <button class="tempo-opt" data-tempo="60" type="button">60s</button>
-                        <button class="tempo-opt" data-tempo="120" type="button">120s</button>
-                        <button class="tempo-opt" data-tempo="0" type="button">∞ Sem tempo</button>
-                    </div>
-                </div>
-
-                <div class="lobby-box">
-                    <h3>🔗 Entrar com Código</h3>
-                    <div style="display: flex; gap: 6px;">
+                    <div style="display: flex; gap: 6px; margin-top:10px;">
                         <input type="text" id="input-codigo-sala" placeholder="Ex: DAMAS-7812" style="font-family: monospace;">
-                        <button id="btn-entrar-sala" type="button" style="width: 120px;" disabled>Entrar</button>
+                        <button id="btn-entrar-sala" type="button" style="width: 120px;">Entrar</button>
                     </div>
-                    <button id="btn-assistir-sala" type="button" class="btn-secundario" style="margin-top:8px; font-size:12.5px;">👁️ Assistir (espectador)</button>
+                    <button id="btn-assistir-sala" type="button" class="btn-secundario" style="margin-top:6px; font-size:12px;">👁️ Assistir (espectador)</button>
+                    <button id="btn-voltar-menu-3" type="button" class="btn-secundario" style="margin-top:10px; font-size:12px;">↩️ Voltar</button>
+                </div>
+
+                <!-- Configuração de tempo e relógio -->
+                <div class="lobby-box">
+                    <h3>⏱️ Modo de Tempo</h3>
+                    <div class="tempo-selector" id="tempo-selector">
+                        <button class="tempo-opt active" data-tempo="0" type="button">∞ Sem tempo</button>
+                        <button class="tempo-opt" data-tempo="20" type="button">20s/lance</button>
+                        <button class="tempo-opt" data-tempo="40" type="button">40s/lance</button>
+                        <button class="tempo-opt" data-tempo="60" type="button">60s/lance</button>
+                    </div>
+                    <p style="margin-top:10px; margin-bottom:4px;"><strong>Relógio acumulado</strong> (opcional):</p>
+                    <div class="tempo-selector" id="clock-selector">
+                        <button class="tempo-opt clock-opt active" data-clock="none" type="button">Desligado</button>
+                        <button class="tempo-opt clock-opt" data-clock="fischer-180-2" type="button">Fischer 3min+2s</button>
+                        <button class="tempo-opt clock-opt" data-clock="fischer-300-3" type="button">Fischer 5min+3s</button>
+                        <button class="tempo-opt clock-opt" data-clock="fischer-600-0" type="button">Fischer 10min</button>
+                    </div>
                 </div>
 
                 <div class="lobby-box" style="margin-bottom: 0;">
@@ -653,7 +759,7 @@
             <div id="tab-agenda" class="hidden">
                 <div class="lobby-box">
                     <h3>📅 Agendar Novo Torneio</h3>
-                    <input type="text" id="agenda-titulo" placeholder="Nome do torneio (ex: Taça de Sábado)" style="margin-bottom:6px;">
+                    <input type="text" id="agenda-titulo" placeholder="Nome do torneio" style="margin-bottom:6px;">
                     <input type="datetime-local" id="agenda-data" style="margin-bottom:6px;">
                     <select id="agenda-md" style="margin-bottom:6px;">
                         <option value="3">Melhor de 3 (MD3)</option>
@@ -663,8 +769,7 @@
                         <option value="40">⏱️ 40 segundos por jogada</option>
                         <option value="20">⏱️ 20 segundos por jogada</option>
                         <option value="60">⏱️ 60 segundos por jogada</option>
-                        <option value="120">⏱️ 120 segundos por jogada</option>
-                        <option value="0">∞ Sem limite de tempo</option>
+                        <option value="0">∞ Sem limite</option>
                     </select>
                     <button id="btn-criar-agenda" type="button">📅 Agendar Torneio</button>
                 </div>
@@ -678,7 +783,6 @@
             <div id="tab-ranking" class="hidden">
                 <div class="lobby-box" style="margin-bottom:0;">
                     <h3>🌐 Ranking Global (Top 10)</h3>
-                    <p>Vitórias acumuladas por todos os jogadores no mundo.</p>
                     <div id="ranking-list">
                         <div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">A carregar ranking…</div>
                     </div>
@@ -725,6 +829,7 @@
                     <strong id="display-nome"></strong>
                     <span id="oponente-status" class="status-dot"></span>
                     <span id="badge-ia" class="ia-badge hidden">🤖 IA</span>
+                    <span id="badge-hotseat" class="hotseat-badge hidden">👥 HOT-SEAT</span>
                     <span id="badge-espectador" class="espectador-badge hidden">👁️ ASSISTINDO</span>
                     <span id="badge-rec" class="rec-badge hidden">🔴 REC</span>
                     <span id="badge-pausa" class="pausa-badge hidden">⏸️ EM PAUSA</span>
@@ -749,9 +854,24 @@
                 <span id="timer-display" class="timer-display hidden">⏱️ 40s</span>
                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
                     <button id="btn-pausa" class="btn-small btn-pausa hidden" type="button" style="padding: 4px 10px; font-size: 11px;">⏸️ Pausa</button>
+                    <button id="btn-empate" class="btn-small btn-empate hidden" type="button" style="padding: 4px 10px; font-size: 11px;">🤝 Empate</button>
                     <button id="btn-desistir" class="btn-small" type="button" style="padding: 4px 10px; font-size: 11px;">🏳️ Desistir</button>
                     <button id="btn-rec" class="btn-small hidden" type="button" style="padding: 4px 10px; font-size: 11px;">🎥 Gravar</button>
                     <button id="btn-fullscreen-game" class="btn-small" type="button" style="padding: 4px 10px; font-size: 11px;">⛶</button>
+                </div>
+            </div>
+
+            <div id="clock-display" class="clock-display hidden">
+                <div class="clock-player" id="clock-white">⚪ <span id="clock-white-txt">5:00</span></div>
+                <div style="color: var(--text-subtle);">|</div>
+                <div class="clock-player" id="clock-red">🔴 <span id="clock-red-txt">5:00</span></div>
+            </div>
+
+            <div id="div-empate-pendente" class="empate-pedido hidden">
+                <span>🤝 <strong id="empate-msg">Adversário</strong> oferece empate!</span>
+                <div style="display:flex; gap:6px;">
+                    <button id="btn-aceitar-empate" type="button" style="width:auto; padding:6px 12px; font-size:11px; background: linear-gradient(135deg, #16a34a, #22c55e);">✅ Aceitar</button>
+                    <button id="btn-recusar-empate" type="button" style="width:auto; padding:6px 12px; font-size:11px;" class="btn-secundario">❌ Recusar</button>
                 </div>
             </div>
 
@@ -793,6 +913,15 @@
                 <div class="board-ruler board-ruler-left" id="labels-left"></div>
                 <div class="board-ruler board-ruler-right" id="labels-right"></div>
                 <div class="checkers-grid" id="checkers-board"></div>
+            </div>
+
+            <!-- === NOTAÇÃO === -->
+            <div style="display: flex; gap:6px; align-items: center; margin-bottom: 6px;">
+                <strong style="font-size: 12.5px; color: var(--c-blue);">📝 Notação</strong>
+                <button class="notacao-copy-btn" id="btn-copiar-notacao" type="button">📋 Copiar</button>
+            </div>
+            <div class="notacao-panel" id="notacao-panel">
+                <span class="notacao-vazia">A partida ainda não começou…</span>
             </div>
 
             <div id="chat-bar" class="chat-bar">
@@ -915,6 +1044,7 @@
 
         let historicoMovimentos = [];
         let historicoPartidas = [];
+        let notacaoAtual = [];
 
         let euPronto = false;
         let adversarioPronto = false;
@@ -922,21 +1052,35 @@
         let ultimaRespostaFirebase = 0;
         let connectionCheckInterval = null;
 
-        let tempoLimiteSegundos = 40;
+        let tempoLimiteSegundos = 0;
         let timerIntervalId = null;
-        let timerSegundosRestantes = 40;
+        let timerSegundosRestantes = 0;
         let timerAtivo = false;
         let aviso5sDisparado = false;
+
+        // === RELÓGIO ACUMULADO (Fischer/Bronstein) ===
+        let modoRelogio = 'none';
+        let tempoInicialRelogio = 0;
+        let incrementoRelogio = 0;
+        let relogioBrancas = 0;
+        let relogioPretas = 0;
+        let relogioIntervalId = null;
 
         let capturaMultiplaAtiva = false;
         let capturaMultiplaPos = null;
 
-        // === CONTADORES DE EMPATE (regras brasileiras oficiais) ===
-        let lancesDamasSemCaptura = 0;  // 20 lances sucessivos de damas sem captura/deslocamento
-        let lancesFinaisEspeciais = 0;   // 5 lances para finais específicos
-        let posicoesRepetidas = {};      // para repetição 3x
-        let tipoFinalEspecial = null;   // '2v2', '2v1', '1v1+pedra', etc.
+        // === CONTADORES DE EMPATE ===
+        let lancesDamasSemCaptura = 0;
+        let lancesFinaisEspeciais = 0;
+        let posicoesRepetidas = {};
+        let tipoFinalEspecial = null;
+        let lancesTotais = 0;
 
+        // === EMPATE ===
+        let empatePendenteDe = null;
+        let empateOferecidoPorMim = false;
+
+        // === PAUSA ===
         let emPausa = false;
         let pausaPendenteDe = null;
         let pausaSolicitadaPorMim = false;
@@ -951,9 +1095,19 @@
 
         let sfxPack = 'classic';
 
+        // === MODOS ===
         let modoIA = false;
+        let modoHotSeat = false;
         let nivelIA = 3;
         let iaPensando = false;
+
+        // Hot-seat
+        let hotSeatNome1 = 'Jogador 1';
+        let hotSeatNome2 = 'Jogador 2';
+        let hotSeatJogadorAtual = 'white'; // qual cor está no controle do aparelho
+
+        // Última jogada (para destacar)
+        let ultimaJogadaDestino = null;
 
         // ============================================================
         // ==================== CONQUISTAS ============================
@@ -966,6 +1120,8 @@
             { id: 'streak5', emoji: '⚡', nome: 'Imparável', desc: '5 vitórias consecutivas', check: (s) => s.maiorStreak >= 5 },
             { id: 'torneio', emoji: '🏆', nome: 'Campeão', desc: 'Vença um torneio', check: (s) => s.torneiosVencidos >= 1 },
             { id: 'ia_mestre', emoji: '🐉', nome: 'Caçador de Dragões', desc: 'Vença a IA Mestre', check: (s) => s.iaMestreVencida >= 1 },
+            { id: 'empate', emoji: '🤝', nome: 'Diplomata', desc: 'Faça um empate', check: (s) => s.empates >= 1 },
+            { id: 'hotseat', emoji: '👥', nome: 'Hot-Seat', desc: 'Jogue em modo Hot-Seat', check: (s) => s.hotseatJogado >= 1 },
             { id: 'maratonista', emoji: '🎮', nome: 'Maratonista', desc: 'Jogue 10 partidas', check: (s) => (s.vitorias + s.derrotas) >= 10 }
         ];
 
@@ -975,12 +1131,12 @@
                 return {
                     unlocked: raw.unlocked || {},
                     stats: raw.stats || {
-                        vitorias: 0, derrotas: 0, maiorStreak: 0, streakAtual: 0,
-                        viradas: 0, torneiosVencidos: 0, iaMestreVencida: 0
+                        vitorias: 0, derrotas: 0, empates: 0, maiorStreak: 0, streakAtual: 0,
+                        viradas: 0, torneiosVencidos: 0, iaMestreVencida: 0, hotseatJogado: 0
                     }
                 };
             } catch (_) {
-                return { unlocked: {}, stats: { vitorias: 0, derrotas: 0, maiorStreak: 0, streakAtual: 0, viradas: 0, torneiosVencidos: 0, iaMestreVencida: 0 } };
+                return { unlocked: {}, stats: { vitorias: 0, derrotas: 0, empates: 0, maiorStreak: 0, streakAtual: 0, viradas: 0, torneiosVencidos: 0, iaMestreVencida: 0, hotseatJogado: 0 } };
             }
         }
         function salvarConquistas(d) { localStorage.setItem('brain_damas_conquistas', JSON.stringify(d)); }
@@ -1057,7 +1213,8 @@
                     timeout: [{ freq: 800, type: 'square', duration: 0.10, gain: 0.11 }, { freq: 600, type: 'square', duration: 0.10, gain: 0.11, delay: 0.10 }, { freq: 400, type: 'square', duration: 0.14, gain: 0.11, delay: 0.20 }, { freq: 200, type: 'square', duration: 0.24, gain: 0.12, delay: 0.34 }],
                     alert5s: [{ freq: 1600, type: 'square', duration: 0.20, gain: 0.24 }, { freq: 1400, type: 'square', duration: 0.22, gain: 0.24, delay: 0.22 }],
                     pause: [{ freq: 500, type: 'sine', duration: 0.10, gain: 0.10 }, { freq: 400, type: 'sine', duration: 0.14, gain: 0.10, delay: 0.10 }],
-                    unpause: [{ freq: 400, type: 'sine', duration: 0.10, gain: 0.10 }, { freq: 600, type: 'sine', duration: 0.14, gain: 0.10, delay: 0.10 }]
+                    unpause: [{ freq: 400, type: 'sine', duration: 0.10, gain: 0.10 }, { freq: 600, type: 'sine', duration: 0.14, gain: 0.10, delay: 0.10 }],
+                    empate: [{ freq: 523, type: 'sine', duration: 0.20, gain: 0.10 }, { freq: 392, type: 'sine', duration: 0.30, gain: 0.10, delay: 0.18 }]
                 };
                 if (sfxPack === 'suave') return {
                     click: { freq: 500, type: 'sine', duration: 0.06, gain: 0.05 },
@@ -1077,7 +1234,8 @@
                     timeout: [{ freq: 600, type: 'sine', duration: 0.16, gain: 0.08 }, { freq: 480, type: 'sine', duration: 0.16, gain: 0.08, delay: 0.16 }, { freq: 360, type: 'sine', duration: 0.20, gain: 0.08, delay: 0.32 }, { freq: 240, type: 'sine', duration: 0.28, gain: 0.09, delay: 0.52 }],
                     alert5s: [{ freq: 1000, type: 'sine', duration: 0.24, gain: 0.20 }, { freq: 800, type: 'sine', duration: 0.28, gain: 0.20, delay: 0.26 }],
                     pause: [{ freq: 400, type: 'sine', duration: 0.14, gain: 0.07 }, { freq: 320, type: 'sine', duration: 0.18, gain: 0.07, delay: 0.14 }],
-                    unpause: [{ freq: 320, type: 'sine', duration: 0.14, gain: 0.07 }, { freq: 480, type: 'sine', duration: 0.18, gain: 0.07, delay: 0.14 }]
+                    unpause: [{ freq: 320, type: 'sine', duration: 0.14, gain: 0.07 }, { freq: 480, type: 'sine', duration: 0.18, gain: 0.07, delay: 0.14 }],
+                    empate: [{ freq: 523, type: 'sine', duration: 0.22, gain: 0.08 }, { freq: 392, type: 'sine', duration: 0.32, gain: 0.08, delay: 0.20 }]
                 };
                 return {
                     click: { freq: 600, type: 'triangle', duration: 0.05, gain: 0.06 },
@@ -1097,7 +1255,8 @@
                     timeout: [{ freq: 400, type: 'triangle', duration: 0.14, gain: 0.10 }, { freq: 300, type: 'triangle', duration: 0.14, gain: 0.10, delay: 0.14 }, { freq: 220, type: 'triangle', duration: 0.18, gain: 0.10, delay: 0.28 }, { freq: 160, type: 'triangle', duration: 0.30, gain: 0.11, delay: 0.46 }],
                     alert5s: [{ freq: 880, type: 'triangle', duration: 0.22, gain: 0.22 }, { freq: 700, type: 'triangle', duration: 0.26, gain: 0.22, delay: 0.24 }],
                     pause: [{ freq: 600, type: 'triangle', duration: 0.12, gain: 0.09 }, { freq: 480, type: 'triangle', duration: 0.16, gain: 0.09, delay: 0.12 }],
-                    unpause: [{ freq: 480, type: 'triangle', duration: 0.12, gain: 0.09 }, { freq: 700, type: 'triangle', duration: 0.16, gain: 0.09, delay: 0.12 }]
+                    unpause: [{ freq: 480, type: 'triangle', duration: 0.12, gain: 0.09 }, { freq: 700, type: 'triangle', duration: 0.16, gain: 0.09, delay: 0.12 }],
+                    empate: [{ freq: 523, type: 'triangle', duration: 0.18, gain: 0.10 }, { freq: 392, type: 'triangle', duration: 0.28, gain: 0.10, delay: 0.16 }]
                 };
             }
             function play(cfg) { if (Array.isArray(cfg)) cfg.forEach(c => beep(c)); else beep(cfg); }
@@ -1113,7 +1272,8 @@
                 chat() { play(P().chat); }, achievement() { play(P().achievement); },
                 tick() { play(P().tick); }, timeout() { play(P().timeout); },
                 alert5s() { play(P().alert5s); },
-                pause() { play(P().pause); }, unpause() { play(P().unpause); }
+                pause() { play(P().pause); }, unpause() { play(P().unpause); },
+                empate() { play(P().empate); }
             };
         })();
 
@@ -1260,8 +1420,75 @@
             window.history.replaceState({}, '', url.pathname);
             pararMonitorConexao();
             pararTimer();
+            pararRelogio();
         }
         function gerarSenha() { return Math.floor(1000 + Math.random() * 9000).toString(); }
+
+        // ============================================================
+        // ============== NOTAÇÃO OFICIAL =============================
+        // ============================================================
+        function casaParaNotacao(r, c) {
+            // Converte (r, c) para notação oficial das damas brasileiras
+            // Colunas: a-h (da esquerda para a direita do ponto de vista das brancas)
+            // Linhas: 1-8 de baixo para cima (1 = base das brancas)
+            const col = String.fromCharCode(97 + c); // a-h
+            const lin = 8 - r; // 1-8
+            return col + lin;
+        }
+
+        function adicionarNotacao(cor, de, para, captura, isDama, caminhoCompleto) {
+            let texto = '';
+            const prefixo = isDama ? 'D' : '';
+            if (captura) {
+                texto = `${prefixo}${casaParaNotacao(de.r, de.c)}x${casaParaNotacao(para.r, para.c)}`;
+                if (caminhoCompleto && caminhoCompleto.length > 1) {
+                    texto += ` (${caminhoCompleto.length}x)`;
+                }
+            } else {
+                texto = `${prefixo}${casaParaNotacao(de.r, de.c)}-${casaParaNotacao(para.r, para.c)}`;
+            }
+            notacaoAtual.push({ cor, texto, numLance: Math.ceil(notacaoAtual.length / 2) + 1 });
+            renderizarNotacao();
+        }
+
+        function renderizarNotacao() {
+            const panel = document.getElementById('notacao-panel');
+            if (!panel) return;
+            if (notacaoAtual.length === 0) {
+                panel.innerHTML = '<span class="notacao-vazia">A partida ainda não começou…</span>';
+                return;
+            }
+            let html = '';
+            let num = 1;
+            for (let i = 0; i < notacaoAtual.length; i += 2) {
+                const brancas = notacaoAtual[i];
+                const pretas = notacaoAtual[i + 1];
+                html += `<span class="mov-num">${num}.</span> `;
+                if (brancas) {
+                    const cls = brancas.texto.includes('x') ? 'mov-captura' : '';
+                    html += `<span class="mov-branca ${cls}">${brancas.texto}</span> `;
+                }
+                if (pretas) {
+                    const cls = pretas.texto.includes('x') ? 'mov-captura' : '';
+                    html += `<span class="mov-preta ${cls}">${pretas.texto}</span>`;
+                }
+                html += '<br>';
+                num++;
+            }
+            panel.innerHTML = html;
+            panel.scrollTop = panel.scrollHeight;
+        }
+
+        function exportarNotacao() {
+            if (notacaoAtual.length === 0) return '';
+            let linhas = [];
+            for (let i = 0; i < notacaoAtual.length; i += 2) {
+                const b = notacaoAtual[i];
+                const p = notacaoAtual[i + 1];
+                linhas.push(`${Math.floor(i / 2) + 1}. ${b ? b.texto : ''} ${p ? p.texto : ''}`.trim());
+            }
+            return linhas.join('\n');
+        }
 
         // ============================================================
         // ============== INDICADOR DE CONEXÃO ========================
@@ -1301,7 +1528,7 @@
         function marcarPronto() {
             if (euPronto) return;
             euPronto = true;
-            if (!firebaseDisponivel || !idSalaAtual || !jogadorSessao?.chave || modoEspectador || modoIA) {
+            if (!firebaseDisponivel || !idSalaAtual || !jogadorSessao?.chave || modoEspectador || modoIA || modoHotSeat) {
                 adversarioPronto = true; ambosProntos = true;
                 document.getElementById('div-handshake')?.classList.add('hidden');
                 return;
@@ -1309,7 +1536,7 @@
             fns.update(fns.ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), { pronto: true }).catch(() => {});
         }
         function atualizarHandshake(dados, uids) {
-            if (modoEspectador || modoIA) {
+            if (modoEspectador || modoIA || modoHotSeat) {
                 adversarioPronto = true; euPronto = true; ambosProntos = true;
                 document.getElementById('div-handshake')?.classList.add('hidden');
                 return;
@@ -1340,7 +1567,7 @@
         }
 
         // ============================================================
-        // ============== TIMER =======================================
+        // ============== TIMER POR LANCE =============================
         // ============================================================
         function pararTimer() {
             if (timerIntervalId) { clearInterval(timerIntervalId); timerIntervalId = null; }
@@ -1354,7 +1581,9 @@
             if (tempoLimiteSegundos <= 0) return;
             if (jogoEncerrado || modoEspectador) return;
             if (emPausa) return;
-            if (turnoAtual !== minhaCor) return;
+            // No hot-seat, sempre inicia para o jogador atual
+            const minhaVez = modoHotSeat ? true : (turnoAtual === minhaCor);
+            if (!minhaVez) return;
             timerSegundosRestantes = tempoLimiteSegundos;
             timerAtivo = true;
             aviso5sDisparado = false;
@@ -1367,7 +1596,8 @@
             }
             atualizarBarraTimer();
             timerIntervalId = setInterval(() => {
-                if (jogoEncerrado || emPausa || turnoAtual !== minhaCor) { pararTimer(); return; }
+                if (jogoEncerrado || emPausa) { pararTimer(); return; }
+                if (!modoHotSeat && turnoAtual !== minhaCor) { pararTimer(); return; }
                 timerSegundosRestantes--;
                 if (timerSegundosRestantes <= 10 && timerSegundosRestantes > 5) SoundFX.tick();
                 if (timerSegundosRestantes === 5 && !aviso5sDisparado) {
@@ -1397,10 +1627,11 @@
         }
         function perderPorTempo() {
             if (jogoEncerrado || desistenciaProcessada) return;
-            if (turnoAtual !== minhaCor) return;
+            if (!modoHotSeat && turnoAtual !== minhaCor) return;
             toast('⏱️ Tempo esgotado! Você perdeu.', 'error');
-            const corAdversaria = minhaCor === 'white' ? 'red' : 'white';
-            if (modoIA) {
+            const corPerdedora = modoHotSeat ? turnoAtual : minhaCor;
+            const corAdversaria = corPerdedora === 'white' ? 'red' : 'white';
+            if (modoIA || modoHotSeat) {
                 jogoEncerrado = true;
                 tratarFimDeJogo(corAdversaria, 'timeout');
                 return;
@@ -1412,11 +1643,77 @@
         }
 
         // ============================================================
+        // ============== RELÓGIO ACUMULADO (FISCHER) =================
+        // ============================================================
+        function formatarTempo(ms) {
+            const totalSeg = Math.max(0, Math.floor(ms / 1000));
+            const m = Math.floor(totalSeg / 60);
+            const s = totalSeg % 60;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+        function iniciarRelogio() {
+            pararRelogio();
+            if (modoRelogio === 'none' || modoHotSeat) return;
+            if (jogoEncerrado || modoEspectador) return;
+            // Inicia contagem apenas se for a vez do jogador local
+            if (turnoAtual !== minhaCor) return;
+            const inicio = Date.now();
+            relogioIntervalId = setInterval(() => {
+                if (jogoEncerrado || emPausa) return;
+                if (turnoAtual !== minhaCor) return;
+                const decorrido = Date.now() - inicio;
+                const tempoRestante = turnoAtual === 'white' ? relogioBrancas - decorrido : relogioPretas - decorrido;
+                atualizarRelogioUI();
+                if (tempoRestante <= 0) {
+                    pararRelogio();
+                    SoundFX.timeout();
+                    toast('⏱️ Tempo do relógio esgotado!', 'error');
+                    const corAdversaria = minhaCor === 'white' ? 'red' : 'white';
+                    if (modoIA) {
+                        jogoEncerrado = true;
+                        tratarFimDeJogo(corAdversaria, 'timeout');
+                        return;
+                    }
+                    updateSeguro(`salas_damas/${idSalaAtual}`, {
+                        status: 'encerrado', vencedor: corAdversaria,
+                        motivoFim: 'timeout', perdedor: jogadorSessao.chave
+                    });
+                }
+            }, 200);
+        }
+        function pararRelogio() {
+            if (relogioIntervalId) { clearInterval(relogioIntervalId); relogioIntervalId = null; }
+        }
+        function atualizarRelogioUI() {
+            const elW = document.getElementById('clock-white');
+            const elR = document.getElementById('clock-red');
+            if (!elW || !elR) return;
+            const w = document.getElementById('clock-white-txt');
+            const r = document.getElementById('clock-red-txt');
+            if (w) w.textContent = formatarTempo(relogioBrancas);
+            if (r) r.textContent = formatarTempo(relogioPretas);
+            elW.classList.remove('active', 'danger');
+            elR.classList.remove('active', 'danger');
+            if (turnoAtual === 'white') {
+                elW.classList.add('active');
+                if (relogioBrancas < 30000) elW.classList.add('danger');
+            } else {
+                elR.classList.add('active');
+                if (relogioPretas < 30000) elR.classList.add('danger');
+            }
+        }
+        function aplicarIncremento(cor) {
+            if (modoRelogio === 'none') return;
+            if (cor === 'white') relogioBrancas += incrementoRelogio;
+            else relogioPretas += incrementoRelogio;
+        }
+
+        // ============================================================
         // ============== PAUSA =======================================
         // ============================================================
         function pedirPausa() {
             if (modoEspectador || jogoEncerrado || emPausa) return;
-            if (modoIA) { toast('🤖 Pausa indisponível contra IA.', 'info'); return; }
+            if (modoIA || modoHotSeat) { toast('Pausa indisponível neste modo.', 'info'); return; }
             SoundFX.click();
             pausaSolicitadaPorMim = true;
             updateSeguro(`salas_damas/${idSalaAtual}`, {
@@ -1428,6 +1725,7 @@
             if (emPausa) return;
             emPausa = true;
             if (timerIntervalId) { clearInterval(timerIntervalId); timerIntervalId = null; }
+            pararRelogio();
             timerAtivo = false;
             document.getElementById('board-wrapper-el')?.classList.add('paused');
             document.getElementById('badge-pausa')?.classList.remove('hidden');
@@ -1453,7 +1751,9 @@
             const barFill = document.getElementById('timer-bar-fill');
             if (barFill) barFill.classList.remove('paused');
             SoundFX.unpause();
-            if (!jogoEncerrado && turnoAtual === minhaCor) setTimeout(() => iniciarTimer(), 200);
+            if (!jogoEncerrado && turnoAtual === minhaCor) {
+                setTimeout(() => { iniciarTimer(); iniciarRelogio(); }, 200);
+            }
             toast('▶️ Partida retomada!', 'success');
         }
         function mostrarPedidoPausa(nome) {
@@ -1483,6 +1783,93 @@
                 updateSeguro(`salas_damas/${idSalaAtual}`, { pausaAtiva: null, pausaPedido: null });
                 retomarPausaLocal();
             } else pedirPausa();
+        }
+
+        // ============================================================
+        // ============== EMPATE ACORDADO =============================
+        // ============================================================
+        function podeOferecerEmpate() {
+            // Regra CBD: não pode oferecer empate nos primeiros 10 lances completos
+            return lancesTotais >= 10;
+        }
+        function pedirEmpate() {
+            if (modoEspectador || jogoEncerrado) return;
+            if (!podeOferecerEmpate()) {
+                toast('⏳ Não pode oferecer empate nos primeiros 10 lances.', 'warn');
+                SoundFX.error();
+                return;
+            }
+            SoundFX.click();
+            if (modoIA || modoHotSeat) {
+                // No modo IA/hot-seat, empate é imediato por acordo
+                abrirModal({
+                    icon: '🤝', title: 'Oferecer Empate?',
+                    message: modoIA ? 'A IA decide se aceita.' : 'O outro jogador decide.',
+                    actions: [
+                        { label: 'Cancelar', onClick: () => {} },
+                        { label: '🤝 Oferecer', onClick: () => {
+                            if (modoIA) {
+                                // IA aceita empate se estiver perdendo ou igual
+                                const avaliacao = avaliarPosicaoSimples();
+                                if (avaliacao >= 0) {
+                                    toast('🤖 IA recusou o empate.', 'info');
+                                } else {
+                                    jogoEncerrado = true;
+                                    tratarFimDeJogo('empate', 'empate');
+                                }
+                            } else {
+                                // Hot-seat: só confirma
+                                jogoEncerrado = true;
+                                tratarFimDeJogo('empate', 'empate');
+                            }
+                        } }
+                    ]
+                });
+                return;
+            }
+            empateOferecidoPorMim = true;
+            updateSeguro(`salas_damas/${idSalaAtual}`, {
+                empatePedido: { de: jogadorSessao.chave, nome: jogadorSessao.nome, em: Date.now() }
+            });
+            toast('🤝 Oferta de empate enviada...', 'info');
+        }
+        function avaliarPosicaoSimples() {
+            // Avaliação simples para a IA decidir empate
+            let score = 0;
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                const p = tabuleiro[r][c];
+                if (!p) continue;
+                const v = p.includes('king') ? 5 : 1;
+                if (p.startsWith('red')) score += v; else score -= v;
+            }
+            return score; // positivo = IA está ganhando
+        }
+        function mostrarPedidoEmpate(nome) {
+            const div = document.getElementById('div-empate-pendente');
+            if (!div) return;
+            div.classList.remove('hidden');
+            document.getElementById('empate-msg').textContent = nome || 'Adversário';
+            SoundFX.empate();
+        }
+        async function aceitarEmpate() {
+            SoundFX.click();
+            if (firebaseDisponivel) {
+                try {
+                    await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), {
+                        status: 'encerrado', vencedor: 'empate', motivoFim: 'empate',
+                        empatePedido: null
+                    });
+                } catch (e) {}
+            }
+            document.getElementById('div-empate-pendente')?.classList.add('hidden');
+        }
+        async function recusarEmpate() {
+            SoundFX.click();
+            if (firebaseDisponivel) {
+                try { await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { empatePedido: null }); } catch (e) {}
+            }
+            toast('Empate recusado.', 'info');
+            document.getElementById('div-empate-pendente')?.classList.add('hidden');
         }
 
         // ============================================================
@@ -1592,7 +1979,8 @@
                 id: 'P-' + Date.now().toString(36).toUpperCase(),
                 data: new Date().toISOString(),
                 resultado, oponente: oponente || 'Oponente',
-                sala: idSalaAtual, movimentos: historicoMovimentos.slice()
+                sala: idSalaAtual, movimentos: historicoMovimentos.slice(),
+                notacao: notacaoAtual.slice()
             });
             salvarHistorico();
         }
@@ -1973,14 +2361,12 @@
             document.getElementById('lobby-avatar').textContent = jogadorSessao.avatar;
             document.getElementById('display-nome').textContent = jogadorSessao.nome;
             document.getElementById('display-avatar').textContent = jogadorSessao.avatar;
-            ['btn-criar-sala', 'btn-criar-sala-senha', 'btn-criar-torneio3', 'btn-criar-torneio5', 'btn-entrar-sala', 'btn-jogar-ia'].forEach(id => {
-                const b = document.getElementById(id); if (b) b.disabled = false;
-            });
             if (!firebaseDisponivel) {
                 ['btn-criar-sala', 'btn-criar-sala-senha', 'btn-criar-torneio3', 'btn-criar-torneio5', 'btn-entrar-sala', 'btn-assistir-sala'].forEach(id => {
                     const b = document.getElementById(id); if (b) { b.disabled = true; b.title = 'Indisponível offline'; }
                 });
-                toast('📡 Firebase não detetado — só modo IA disponível.', 'info');
+                document.getElementById('menu-btn-online').style.opacity = '0.5';
+                document.getElementById('menu-btn-online').title = 'Firebase não disponível';
             }
         })();
 
@@ -2004,6 +2390,41 @@
         });
 
         // ============================================================
+        // ==================== MENU INICIAL ==========================
+        // ============================================================
+        document.getElementById('menu-btn-hotseat').addEventListener('click', () => {
+            SoundFX.click();
+            document.getElementById('menu-inicial').classList.add('hidden');
+            document.getElementById('painel-hotseat').classList.remove('hidden');
+        });
+        document.getElementById('menu-btn-ia').addEventListener('click', () => {
+            SoundFX.click();
+            document.getElementById('menu-inicial').classList.add('hidden');
+            document.getElementById('painel-ia').classList.remove('hidden');
+        });
+        document.getElementById('menu-btn-online').addEventListener('click', () => {
+            SoundFX.click();
+            if (!firebaseDisponivel) { toast('Firebase indisponível offline.', 'warn'); return; }
+            document.getElementById('menu-inicial').classList.add('hidden');
+            document.getElementById('painel-online').classList.remove('hidden');
+        });
+        document.getElementById('btn-voltar-menu-1').addEventListener('click', () => {
+            SoundFX.click();
+            document.getElementById('painel-ia').classList.add('hidden');
+            document.getElementById('menu-inicial').classList.remove('hidden');
+        });
+        document.getElementById('btn-voltar-menu-2').addEventListener('click', () => {
+            SoundFX.click();
+            document.getElementById('painel-hotseat').classList.add('hidden');
+            document.getElementById('menu-inicial').classList.remove('hidden');
+        });
+        document.getElementById('btn-voltar-menu-3').addEventListener('click', () => {
+            SoundFX.click();
+            document.getElementById('painel-online').classList.add('hidden');
+            document.getElementById('menu-inicial').classList.remove('hidden');
+        });
+
+        // ============================================================
         // ==================== SELECTOR DE TEMPO =====================
         // ============================================================
         function atualizarSeletorTempo() {
@@ -2017,7 +2438,27 @@
                 tempoLimiteSegundos = parseInt(btn.dataset.tempo);
                 localStorage.setItem('brain_damas_tempo', String(tempoLimiteSegundos));
                 atualizarSeletorTempo(); SoundFX.click();
-                toast(tempoLimiteSegundos === 0 ? '⏱️ Sem limite de tempo' : `⏱️ Tempo: ${tempoLimiteSegundos}s`, 'info');
+                toast(tempoLimiteSegundos === 0 ? '⏱️ Sem limite de tempo por lance' : `⏱️ ${tempoLimiteSegundos}s por lance`, 'info');
+            });
+        });
+
+        // ============================================================
+        // ==================== SELECTOR DE RELÓGIO ===================
+        // ============================================================
+        document.querySelectorAll('#clock-selector .clock-opt').forEach(btn => {
+            btn.addEventListener('click', () => {
+                SoundFX.click();
+                document.querySelectorAll('#clock-selector .clock-opt').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const val = btn.dataset.clock;
+                if (val === 'none') { modoRelogio = 'none'; toast('⏱️ Relógio desligado', 'info'); }
+                else {
+                    const [tipo, base, inc] = val.split('-');
+                    modoRelogio = tipo;
+                    tempoInicialRelogio = parseInt(base) * 1000;
+                    incrementoRelogio = parseInt(inc) * 1000;
+                    toast(`⏱️ ${btn.textContent.trim()}`, 'info');
+                }
             });
         });
 
@@ -2037,6 +2478,63 @@
         document.getElementById('btn-jogar-ia').addEventListener('click', () => jogarContraIA(nivelIASelecionado));
 
         // ============================================================
+        // ==================== HOT-SEAT ==============================
+        // ============================================================
+        document.getElementById('btn-iniciar-hotseat').addEventListener('click', () => {
+            const n1 = document.getElementById('hotseat-nome-1').value.trim() || 'Jogador 1';
+            const n2 = document.getElementById('hotseat-nome-2').value.trim() || 'Jogador 2';
+            iniciarHotSeat(n1, n2);
+        });
+
+        function iniciarHotSeat(nome1, nome2) {
+            SoundFX.click();
+            modoHotSeat = true;
+            modoIA = false;
+            modoEspectador = false;
+            modoTorneio = 0;
+            hotSeatNome1 = nome1;
+            hotSeatNome2 = nome2;
+            hotSeatJogadorAtual = 'white';
+            idSalaAtual = 'HS-' + Date.now().toString(36).toUpperCase();
+            minhaCor = 'white';
+            tabuleiro = criarTabuleiroInicial();
+            turnoAtual = 'white';
+            jogoEncerrado = false;
+            vencedorDeclarado = null;
+            desistenciaProcessada = false;
+            lancesDamasSemCaptura = 0;
+            lancesFinaisEspeciais = 0;
+            lancesTotais = 0;
+            posicoesRepetidas = {};
+            tipoFinalEspecial = null;
+            celulaSelecionada = null;
+            movimentosValidos = [];
+            emPausa = false;
+            capturaMultiplaAtiva = false;
+            capturaMultiplaPos = null;
+            iaPensando = false;
+            notacaoAtual = [];
+            historicoMovimentos = [{
+                tabuleiro: tabuleiroParaFirebase(tabuleiro),
+                turno: 'white', cor: 'white', de: '—', para: '—'
+            }];
+            ultimaJogadaDestino = null;
+            // Relógio
+            if (modoRelogio !== 'none') {
+                relogioBrancas = tempoInicialRelogio;
+                relogioPretas = tempoInicialRelogio;
+            }
+            salaConfirmada = true;
+            // conquista
+            const cc = carregarConquistas();
+            cc.stats.hotseatJogado = (cc.stats.hotseatJogado || 0) + 1;
+            salvarConquistas(cc);
+            desbloquearConquistas();
+            entrarInterfaceJogo();
+            toast(`👥 Hot-Seat iniciado: ${nome1} (⚪) vs ${nome2} (🔴)`, 'success');
+        }
+
+        // ============================================================
         // ==================== CRIAR SALA ============================
         // ============================================================
         async function criarSala({ comSenha = false, melhorDe = 0 } = {}) {
@@ -2044,7 +2542,7 @@
             SoundFX.click();
             try {
                 idSalaAtual = 'DAMAS-' + Date.now().toString(36).toUpperCase();
-                minhaCor = 'white'; modoEspectador = false; modoIA = false;
+                minhaCor = 'white'; modoEspectador = false; modoIA = false; modoHotSeat = false;
                 tabuleiro = criarTabuleiroInicial();
                 turnoAtual = 'white'; jogoEncerrado = false; vencedorDeclarado = null;
                 modoTorneio = melhorDe;
@@ -2052,11 +2550,18 @@
                 euPronto = false; adversarioPronto = false; ambosProntos = false;
                 capturaMultiplaAtiva = false; capturaMultiplaPos = null;
                 emPausa = false; pausaPendenteDe = null; pausaSolicitadaPorMim = false;
-                lancesDamasSemCaptura = 0; lancesFinaisEspeciais = 0; posicoesRepetidas = {}; tipoFinalEspecial = null;
+                lancesDamasSemCaptura = 0; lancesFinaisEspeciais = 0; lancesTotais = 0;
+                posicoesRepetidas = {}; tipoFinalEspecial = null;
+                notacaoAtual = [];
                 historicoMovimentos = [{
                     tabuleiro: tabuleiroParaFirebase(tabuleiro),
                     turno: 'white', cor: 'white', de: '—', para: '—'
                 }];
+                ultimaJogadaDestino = null;
+                if (modoRelogio !== 'none') {
+                    relogioBrancas = tempoInicialRelogio;
+                    relogioPretas = tempoInicialRelogio;
+                }
                 const dados = {
                     status: 'jogando', turno: 'white',
                     tabuleiro: tabuleiroParaFirebase(tabuleiro),
@@ -2105,26 +2610,37 @@
             document.getElementById('game-screen').classList.remove('hidden');
             document.getElementById('display-sala-tag').textContent = modoIA
                 ? `🤖 ${IA.NIVEIS[nivelIA].nome}`
-                : `Sala: ${idSalaAtual}`;
+                : (modoHotSeat ? `👥 Hot-Seat` : `Sala: ${idSalaAtual}`);
             const badge = document.getElementById('badge-espectador');
             const badgeIA = document.getElementById('badge-ia');
+            const badgeHS = document.getElementById('badge-hotseat');
             const desistirBtn = document.getElementById('btn-desistir');
             const pausaBtn = document.getElementById('btn-pausa');
+            const empateBtn = document.getElementById('btn-empate');
             const recBtn = document.getElementById('btn-rec');
             const chatBar = document.getElementById('chat-bar');
             const torneioBar = document.getElementById('torneio-bar');
+            const clockDisplay = document.getElementById('clock-display');
 
-            if (modoTorneio > 0 && !modoEspectador && !modoIA) {
+            if (modoTorneio > 0 && !modoEspectador && !modoIA && !modoHotSeat) {
                 torneioBar.classList.remove('hidden');
                 document.getElementById('torneio-melhor-de').textContent = modoTorneio;
                 document.getElementById('torneio-eu').textContent = torneioPlacar.eu;
                 document.getElementById('torneio-op').textContent = torneioPlacar.op;
             } else torneioBar.classList.add('hidden');
 
+            if (modoRelogio !== 'none' && !modoEspectador) {
+                clockDisplay.classList.remove('hidden');
+            } else clockDisplay.classList.add('hidden');
+
+            badge.classList.add('hidden');
+            badgeIA.classList.add('hidden');
+            badgeHS.classList.add('hidden');
+
             if (modoEspectador) {
                 badge.classList.remove('hidden');
-                badgeIA.classList.add('hidden');
                 desistirBtn.classList.add('hidden'); pausaBtn.classList.add('hidden'); recBtn.classList.add('hidden');
+                empateBtn.classList.add('hidden');
                 document.getElementById('info-minha-cor-wrap').style.display = 'none';
                 document.getElementById('display-avatar').textContent = '👁️';
                 document.getElementById('display-nome').textContent = 'Espectador';
@@ -2132,7 +2648,6 @@
                 document.getElementById('div-pos-jogo').classList.add('hidden');
                 chatBar.style.opacity = '0.5'; chatBar.style.pointerEvents = 'none';
             } else if (modoIA) {
-                badge.classList.add('hidden');
                 badgeIA.classList.remove('hidden');
                 document.getElementById('info-minha-cor-wrap').style.display = '';
                 document.getElementById('info-minha-cor').textContent = '⚪ Brancas';
@@ -2141,24 +2656,47 @@
                 document.getElementById('oponente-status').className = 'status-dot online';
                 document.getElementById('placar-nome-op').textContent = IA.NIVEIS[nivelIA].nome;
                 pausaBtn.classList.add('hidden');
+                empateBtn.classList.remove('hidden');
+                recBtn.classList.remove('hidden');
+                desistirBtn.textContent = '🏳️ Sair';
+                chatBar.style.opacity = '0.4'; chatBar.style.pointerEvents = 'none';
+                document.getElementById('div-whatsapp').classList.add('hidden');
+            } else if (modoHotSeat) {
+                badgeHS.classList.remove('hidden');
+                document.getElementById('info-minha-cor-wrap').style.display = '';
+                atualizarCorHotSeat();
+                document.getElementById('display-avatar').textContent = '👥';
+                document.getElementById('display-nome').textContent = 'Hot-Seat';
+                document.getElementById('oponente-status').className = 'status-dot online';
+                pausaBtn.classList.add('hidden');
+                empateBtn.classList.remove('hidden');
                 recBtn.classList.remove('hidden');
                 desistirBtn.textContent = '🏳️ Sair';
                 chatBar.style.opacity = '0.4'; chatBar.style.pointerEvents = 'none';
                 document.getElementById('div-whatsapp').classList.add('hidden');
             } else {
-                badge.classList.add('hidden');
-                badgeIA.classList.add('hidden');
                 document.getElementById('info-minha-cor-wrap').style.display = '';
                 document.getElementById('info-minha-cor').textContent = minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
                 desistirBtn.textContent = '🏳️ Desistir';
                 pausaBtn.classList.remove('hidden');
+                empateBtn.classList.remove('hidden');
                 recBtn.classList.remove('hidden');
                 chatBar.style.opacity = ''; chatBar.style.pointerEvents = '';
             }
             renderizarTabuleiro();
-            if (!modoEspectador && idSalaAtual && !modoIA) setTimeout(() => marcarPronto(), 400);
-            if (modoIA) setTimeout(() => { if (turnoAtual === 'white') iniciarTimer(); }, 600);
+            renderizarNotacao();
+            if (!modoEspectador && idSalaAtual && !modoIA && !modoHotSeat) setTimeout(() => marcarPronto(), 400);
+            if (modoIA) setTimeout(() => { if (turnoAtual === 'white') { iniciarTimer(); iniciarRelogio(); } }, 600);
+            if (modoHotSeat) setTimeout(() => { iniciarTimer(); iniciarRelogio(); }, 600);
             iniciarMonitorConexao();
+            atualizarRelogioUI();
+        }
+
+        function atualizarCorHotSeat() {
+            // No hot-seat, "minhaCor" reflete quem está no controle do aparelho
+            document.getElementById('info-minha-cor').textContent = hotSeatJogadorAtual === 'white'
+                ? `⚪ ${hotSeatNome1}`
+                : `🔴 ${hotSeatNome2}`;
         }
 
         // ============================================================
@@ -2189,7 +2727,8 @@
             const invertido = (minhaCor === 'red');
             const corDaVez = turnoAtual;
 
-            const capsObrig = (!jogoEncerrado && !modoEspectador && turnoAtual === minhaCor && !emPausa && !iaPensando)
+            const capsObrig = (!jogoEncerrado && !modoEspectador && !emPausa && !iaPensando &&
+                (modoHotSeat || turnoAtual === minhaCor))
                 ? capturasObrigatorias(corDaVez) : [];
             const pecasObrigadas = new Set(capsObrig.map(o => `${o.r},${o.c}`));
             const temObrigatoria = pecasObrigadas.size > 0;
@@ -2208,6 +2747,9 @@
                     if (temObrigatoria && pecasObrigadas.has(`${r},${c}`) && !celulaSelecionada) {
                         square.classList.add('capture-mandatory');
                     }
+                    if (ultimaJogadaDestino && ultimaJogadaDestino.r === r && ultimaJogadaDestino.c === c) {
+                        square.classList.add('ultimo-lance');
+                    }
                     const peca = tabuleiro[r]?.[c];
                     if (peca) {
                         const wrapper = document.createElement('div');
@@ -2219,14 +2761,18 @@
                         wrapper.appendChild(pieceEl);
                         square.appendChild(wrapper);
                     }
-                    if (isDark && !modoEspectador && !emPausa && !iaPensando) square.addEventListener('click', () => clicarCasa(r, c));
+                    if (isDark && !modoEspectador && !emPausa && !iaPensando &&
+                        (modoHotSeat || turnoAtual === minhaCor)) {
+                        square.addEventListener('click', () => clicarCasa(r, c));
+                    }
                     grid.appendChild(square);
                 }
             }
             renderizarReguas();
             const badgeObrig = document.getElementById('badge-obrigatoria');
             if (badgeObrig) {
-                if (!jogoEncerrado && !modoEspectador && turnoAtual === minhaCor && temObrigatoria) badgeObrig.classList.remove('hidden');
+                const minhaVez = modoHotSeat || turnoAtual === minhaCor;
+                if (!jogoEncerrado && !modoEspectador && minhaVez && temObrigatoria) badgeObrig.classList.remove('hidden');
                 else badgeObrig.classList.add('hidden');
             }
             const badgePausa = document.getElementById('badge-pausa');
@@ -2240,6 +2786,10 @@
                 else if (emPausa) turnoEl.textContent = '⏸️ Em pausa';
                 else if (iaPensando) turnoEl.textContent = '🤖 IA pensando…';
                 else if (modoEspectador) turnoEl.textContent = turnoAtual === 'white' ? '⚪ Brancas jogam' : '🔴 Vermelhas jogam';
+                else if (modoHotSeat) {
+                    turnoEl.textContent = turnoAtual === 'white'
+                        ? `⚪ ${hotSeatNome1}` : `🔴 ${hotSeatNome2}`;
+                }
                 else turnoEl.textContent = (turnoAtual === minhaCor ? 'Sua vez!' : 'Vez do oponente...');
             }
             if (jogoEncerrado) document.getElementById('div-pos-jogo')?.classList.remove('hidden');
@@ -2251,11 +2801,14 @@
         // ============================================================
         function clicarCasa(r, c) {
             if (modoEspectador || emPausa || iaPensando) return;
-            if (jogoEncerrado || turnoAtual !== minhaCor) return;
+            if (jogoEncerrado) return;
+            const minhaVez = modoHotSeat || turnoAtual === minhaCor;
+            if (!minhaVez) return;
 
+            const corDaVez = turnoAtual;
             const peca = tabuleiro[r][c];
-            if (peca && peca.startsWith(minhaCor)) {
-                const temObrigatoria = jogadorTemCapturaObrigatoria(minhaCor);
+            if (peca && peca.startsWith(corDaVez)) {
+                const temObrigatoria = jogadorTemCapturaObrigatoria(corDaVez);
                 const movs = calcularMovimentos(r, c);
                 if (temObrigatoria) {
                     const caps = movs.filter(m => m.captura);
@@ -2288,22 +2841,6 @@
         // ============================================================
         // ========== REGRAS BRASILEIRAS OFICIAIS (CBD) ===============
         // ============================================================
-        // Baseado na Confederação Brasileira de Damas (CBD):
-        // 1. Captura obrigatória pela MAIOR quantidade (Lei da Maioria)
-        // 2. Peão captura em 4 direções
-        // 3. Dama captura em cadeia; ao capturar, PODE PARAR EM QUALQUER
-        //    CASA LIVRE na diagonal (não obrigada a parar na casa seguinte)
-        // 4. ✅ PROMOÇÃO: se parar na coroação e houver captura possível
-        //    na mesma jogada, a DAM. CONTINUA capturando (Art. 20, § único)
-        // 5. Empate: 20 lances de damas sem captura/deslocamento
-        // 6. Empate: finais específicos após 5 lances
-        // 7. Empate: 3 damas vs 1 dama → 12 lances
-        // ============================================================
-
-        // Simula capturas de uma peça. Retorna TODOS os caminhos possíveis.
-        // ✅ CORREÇÃO: após capturar, a DAM. pode parar em QUALQUER casa
-        //    livre na MESMA DIAGONAL após a peça capturada (regra brasileira).
-        //    Se parar na coroação e ainda houver capturas, continua.
         function explorarCapturas(r, c, cor, tab, capturadasSet = new Set(), profundidade = 0) {
             if (profundidade > 20) return [];
             const peca = tab[r][c];
@@ -2313,8 +2850,6 @@
 
             const caps = [];
             if (isDama) {
-                // Dama: cada direção, primeira peça adversária, casa livre imediatamente após
-                // ✅ E TAMBÉM todas as casas livres seguintes na mesma diagonal (regra brasileira)
                 for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
                     let nr = r + dr, nc = c + dc;
                     while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tab[nr][nc]) { nr += dr; nc += dc; }
@@ -2322,16 +2857,13 @@
                     const alvo = tab[nr][nc];
                     if (!alvo || alvo.startsWith(cor)) continue;
                     if (capturadasSet.has(`${nr},${nc}`)) continue;
-                    // Casa imediatamente após a peça capturada
                     let tr = nr + dr, tc = nc + dc;
-                    // ✅ REGRA BRASILEIRA: pode parar em QUALQUER casa livre após a captura
                     while (tr >= 0 && tr < 8 && tc >= 0 && tc < 8 && !tab[tr][tc]) {
                         caps.push({ r: tr, c: tc, capturada: { r: nr, c: nc } });
                         tr += dr; tc += dc;
                     }
                 }
             } else {
-                // Peão: 4 direções, pouso imediatamente após (regra igual)
                 for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
                     const mr = r + dr, mc = c + dc;
                     const jr = r + 2 * dr, jc = c + 2 * dc;
@@ -2353,8 +2885,6 @@
                 novaTab[r][c] = null;
                 novaTab[cap.capturada.r][cap.capturada.c] = null;
 
-                // ✅ PROMOÇÃO: se o peão para na coroação, promove.
-                //    Se ainda houver capturas obrigatórias, CONTINUA (Art. 20, § único CBD).
                 const isPeao = !pecaAtual.includes('king');
                 const corDaPeca = pecaAtual.startsWith('white') ? 'white' : 'red';
                 const promoveuAgora =
@@ -2368,7 +2898,6 @@
                 const novasCapturadas = new Set(capturadasSet);
                 novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
 
-                // Continua a explorar (seja peão promovido ou dama)
                 const continuacoes = explorarCapturas(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
 
                 if (continuacoes.length === 0) {
@@ -2465,7 +2994,7 @@
         }
 
         // ============================================================
-        // ========== CONTADORES DE EMPATE (CBD) ======================
+        // ========== EMPATE (CBD) ====================================
         // ============================================================
         function contarPecas(cor) {
             let pedras = 0, damas = 0;
@@ -2482,27 +3011,45 @@
         function detectarFinalEspecial() {
             const b = contarPecas('white');
             const p = contarPecas('red');
-            const totalB = b.damas + b.pedras;
-            const totalP = p.damas + p.pedras;
-            if (totalB === 0 || totalP === 0) return null;
-            // Finais que empatam após 5 lances (regra brasileira)
+            if (b.damas + b.pedras === 0 || p.damas + p.pedras === 0) return null;
             if (b.damas === 2 && p.damas === 2 && b.pedras === 0 && p.pedras === 0) return '2v2damas';
             if (b.damas === 2 && p.damas === 1 && b.pedras === 0 && p.pedras === 0) return '2v1dama';
             if (b.damas === 1 && p.damas === 2 && b.pedras === 0 && p.pedras === 0) return '1v2dama';
-            if (b.damas === 2 && p.damas === 1 && p.pedras === 1 && b.pedras === 0) return '2v1dama1pedra';
-            if (b.damas === 1 && p.damas === 1 && b.pedras === 0 && p.pedras === 1) return '1v1dama1pedra';
             if (b.damas === 1 && p.damas === 1 && b.pedras === 0 && p.pedras === 0) return '1v1dama';
-            // 3 damas vs 1 dama → 12 lances
             if (b.damas === 3 && p.damas === 1 && b.pedras === 0 && p.pedras === 0) return '3v1dama';
             if (b.damas === 1 && p.damas === 3 && b.pedras === 0 && p.pedras === 0) return '1v3dama';
             return null;
         }
 
+        function verificarDamaPresaCanto() {
+            // Regra CBD: dama encurralada num canto com adversário tendo 2 damas → empate após 5 lances
+            const b = contarPecas('white');
+            const p = contarPecas('red');
+            if (b.damas === 1 && p.damas === 2 && b.pedras === 0 && p.pedras === 0) {
+                // Encontra a dama branca
+                for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                    const peca = tabuleiro[r][c];
+                    if (peca === 'white-king') {
+                        const canto = ((r === 0 || r === 7) && (c === 0 || c === 7));
+                        if (canto) return true;
+                    }
+                }
+            }
+            if (p.damas === 1 && b.damas === 2 && p.pedras === 0 && b.pedras === 0) {
+                for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                    const peca = tabuleiro[r][c];
+                    if (peca === 'red-king') {
+                        const canto = ((r === 0 || r === 7) && (c === 0 || c === 7));
+                        if (canto) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         function verificarEmpate() {
-            // Empate 1: 20 lances sucessivos de damas sem captura ou deslocamento de pedra
             if (lancesDamasSemCaptura >= 20) return { empate: true, motivo: '20 lances de damas sem captura' };
 
-            // Empate 2: finais específicos após 5 lances
             const final = detectarFinalEspecial();
             if (final) {
                 tipoFinalEspecial = final;
@@ -2515,9 +3062,17 @@
                 lancesFinaisEspeciais = 0;
             }
 
-            // Empate 3: repetição de posição 3x
+            if (verificarDamaPresaCanto()) {
+                if (lancesFinaisEspeciais >= 5) {
+                    return { empate: true, motivo: 'dama presa no canto' };
+                }
+            }
+
             const chave = JSON.stringify(tabuleiro) + '|' + turnoAtual;
             posicoesRepetidas[chave] = (posicoesRepetidas[chave] || 0) + 1;
+            if (posicoesRepetidas[chave] === 2) {
+                toast('⚠️ Repetição 2/3 — cuidado!', 'warn');
+            }
             if (posicoesRepetidas[chave] >= 3) {
                 return { empate: true, motivo: 'posição repetida 3 vezes' };
             }
@@ -2530,19 +3085,17 @@
             const pecaMovida = mov && mov.pecaOriginal;
             const eraDama = pecaMovida && pecaMovida.includes('king');
 
+            lancesTotais++;
+
             if (!capturou) {
-                if (eraDama) {
-                    lancesDamasSemCaptura++;
-                } else {
-                    lancesDamasSemCaptura = 0; // pedra moveu = reset
-                }
+                if (eraDama) lancesDamasSemCaptura++;
+                else lancesDamasSemCaptura = 0;
             } else {
                 lancesDamasSemCaptura = 0;
             }
 
-            // Finais especiais: conta lances
             const final = detectarFinalEspecial();
-            if (final) {
+            if (final || verificarDamaPresaCanto()) {
                 if (final !== tipoFinalEspecial) {
                     tipoFinalEspecial = final;
                     lancesFinaisEspeciais = 0;
@@ -2563,13 +3116,12 @@
 
             const pecaMovida = tabuleiro[deR][deC];
             const corPeca = pecaMovida.startsWith('white') ? 'white' : 'red';
-            let capturouAlgo = false;
+            const isDamaMovida = pecaMovida.includes('king');
             let promoveu = false;
 
             if (mov.caminhoCompleto && mov.caminhoCompleto.length > 0) {
                 let posAtual = { r: deR, c: deC };
                 let passosExecutados = 0;
-
                 for (const passo of mov.caminhoCompleto) {
                     const pecaAqui = tabuleiro[posAtual.r][posAtual.c];
                     tabuleiro[passo.r][passo.c] = pecaAqui;
@@ -2577,20 +3129,10 @@
                     tabuleiro[passo.capturada.r][passo.capturada.c] = null;
                     posAtual = { r: passo.r, c: passo.c };
                     passosExecutados++;
-                    capturouAlgo = true;
-
-                    // ✅ PROMOÇÃO: se parou na coroação
                     const isPeao = pecaAqui && !pecaAqui.includes('king');
-                    if (isPeao && pecaAqui === 'white' && posAtual.r === 0) {
-                        tabuleiro[posAtual.r][posAtual.c] = 'white-king';
-                        promoveu = true;
-                    }
-                    if (isPeao && pecaAqui === 'red' && posAtual.r === 7) {
-                        tabuleiro[posAtual.r][posAtual.c] = 'red-king';
-                        promoveu = true;
-                    }
+                    if (isPeao && pecaAqui === 'white' && posAtual.r === 0) { tabuleiro[posAtual.r][posAtual.c] = 'white-king'; promoveu = true; }
+                    if (isPeao && pecaAqui === 'red' && posAtual.r === 7) { tabuleiro[posAtual.r][posAtual.c] = 'red-king'; promoveu = true; }
                 }
-
                 SoundFX.capture();
                 if (promoveu) SoundFX.king();
                 toast(`⚡ Capturou ${passosExecutados} peça(s)!${promoveu ? ' 👑 Promovida!' : ''}`, 'success');
@@ -2603,6 +3145,8 @@
                 if (promoveu) SoundFX.king();
             }
 
+            ultimaJogadaDestino = { r: paraR, c: paraC };
+
             historicoMovimentos.push({
                 tabuleiro: tabuleiroParaFirebase(tabuleiro),
                 turno: turnoAtual,
@@ -2612,10 +3156,10 @@
                 captura: mov.captura ? `(${mov.captura.r},${mov.captura.c})` : null
             });
 
-            // Atualiza contadores de empate
+            adicionarNotacao(corPeca, { r: deR, c: deC }, { r: paraR, c: paraC }, !!mov.captura, isDamaMovida || promoveu, mov.caminhoCompleto);
+
             atualizarContadoresAposLance({ capturada: mov.captura, pecaOriginal: pecaMovida });
 
-            // Verifica empate
             const resEmpate = verificarEmpate();
             if (resEmpate.empate) {
                 toast(`🤝 Empate! (${resEmpate.motivo})`, 'info');
@@ -2625,12 +3169,22 @@
             }
 
             turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
+            if (modoHotSeat) {
+                hotSeatJogadorAtual = turnoAtual;
+                minhaCor = turnoAtual; // Para atualizar a UI do tabuleiro
+                atualizarCorHotSeat();
+            }
             celulaSelecionada = null;
             movimentosValidos = [];
             capturaMultiplaAtiva = false;
             capturaMultiplaPos = null;
             renderizarTabuleiro();
             pararTimer();
+            pararRelogio();
+
+            // Aplica incremento Fischer ao jogador que moveu
+            aplicarIncremento(corPeca);
+            atualizarRelogioUI();
 
             const vencedorPorTabuleiro = verificarFimDeJogo();
 
@@ -2641,6 +3195,16 @@
                     return;
                 }
                 if (turnoAtual !== minhaCor) setTimeout(() => fazerJogadaIA(), 350);
+                return;
+            }
+
+            if (modoHotSeat) {
+                if (vencedorPorTabuleiro) {
+                    jogoEncerrado = true;
+                    tratarFimDeJogo(vencedorPorTabuleiro, 'sem-movimentos');
+                    return;
+                }
+                setTimeout(() => { iniciarTimer(); iniciarRelogio(); }, 300);
                 return;
             }
 
@@ -2683,39 +3247,47 @@
             if (desistenciaProcessada) return;
             desistenciaProcessada = true;
             pararTimer();
-            const euVenci = (vencedor === minhaCor);
-            const empate = (vencedor === 'empate');
+            pararRelogio();
+
+            // No hot-seat, resultado é sempre "vitória" ou "derrota" do jogador atual
+            let euVenci, empate = (vencedor === 'empate');
+            if (modoHotSeat) {
+                euVenci = (vencedor === hotSeatJogadorAtual);
+            } else {
+                euVenci = (vencedor === minhaCor);
+            }
 
             if (empate) {
-                SoundFX.notify();
+                SoundFX.empate();
                 toast('🤝 Empate!', 'info');
-                adicionarAoHistorico('empate', nomeOponente || 'Oponente');
+                if (!modoHotSeat) adicionarAoHistorico('empate', nomeOponente || 'Oponente');
             } else if (euVenci) {
                 SoundFX.win(); registrarVitoria();
-                if (!modoIA) enviarVitoriaRanking();
+                if (!modoIA && !modoHotSeat) enviarVitoriaRanking();
                 toast('🏆 Você venceu!', 'success');
-                adicionarAoHistorico('vitoria', nomeOponente || 'Oponente');
+                if (!modoHotSeat) adicionarAoHistorico('vitoria', nomeOponente || 'Oponente');
             } else {
                 SoundFX.lose(); registrarDerrota();
-                if (!modoIA) enviarDerrotaRanking();
+                if (!modoIA && !modoHotSeat) enviarDerrotaRanking();
                 toast('😢 Você perdeu.', 'error');
-                adicionarAoHistorico('derrota', nomeOponente || 'Oponente');
+                if (!modoHotSeat) adicionarAoHistorico('derrota', nomeOponente || 'Oponente');
             }
 
             const cData = carregarConquistas();
-            if (euVenci) {
+            if (empate) cData.stats.empates = (cData.stats.empates || 0) + 1;
+            else if (euVenci) {
                 cData.stats.vitorias++;
                 cData.stats.streakAtual = (cData.stats.streakAtual || 0) + 1;
                 cData.stats.maiorStreak = Math.max(cData.stats.maiorStreak || 0, cData.stats.streakAtual);
                 if (modoIA && nivelIA === 5) cData.stats.iaMestreVencida = (cData.stats.iaMestreVencida || 0) + 1;
-            } else if (!empate) {
+            } else {
                 cData.stats.derrotas++;
                 cData.stats.streakAtual = 0;
             }
             salvarConquistas(cData);
             desbloquearConquistas();
 
-            if (modoTorneio > 0 && !empate && !modoIA) {
+            if (modoTorneio > 0 && !empate && !modoIA && !modoHotSeat) {
                 if (euVenci) torneioPlacar.eu++; else torneioPlacar.op++;
                 document.getElementById('torneio-eu').textContent = torneioPlacar.eu;
                 document.getElementById('torneio-op').textContent = torneioPlacar.op;
@@ -2763,27 +3335,27 @@
             else motivoTxt = (euVenci ? 'O adversário ficou sem movimentos.' : 'Você ficou sem movimentos.');
 
             setTimeout(() => {
+                const acoes = [];
                 if (modoIA) {
-                    abrirModal({
-                        icon: empate ? '🤝' : (euVenci ? '🏆' : '💔'),
-                        title: empate ? 'Empate!' : (euVenci ? 'Vitória contra a IA!' : 'A IA venceu'),
-                        message: motivoTxt + '\n\nDeseja jogar novamente?',
-                        actions: [
-                            { label: '🔄 Jogar Novamente', onClick: () => jogarContraIA(nivelIA) },
-                            { label: '🏠 Menu', onClick: () => { limparSessao(); if (isFullscreen()) sairTelaCheia(); window.location.href = window.location.pathname; } }
-                        ]
-                    });
+                    acoes.push({ label: '🔄 Jogar Novamente', onClick: () => jogarContraIA(nivelIA) });
+                } else if (modoHotSeat) {
+                    acoes.push({ label: '🔄 Nova Partida', onClick: () => iniciarHotSeat(hotSeatNome1, hotSeatNome2) });
                 } else {
-                    abrirModal({
-                        icon: empate ? '🤝' : (euVenci ? '🏆' : (motivo === 'timeout' ? '⏱️' : '💔')),
-                        title: empate ? 'Empate!' : (euVenci ? 'Vitória!' : (motivo === 'timeout' ? 'Tempo Esgotado' : 'Derrota')),
-                        message: motivoTxt + '\n\nDeseja jogar novamente?',
-                        actions: [
-                            { label: '🔄 Jogar Novamente', onClick: () => enviarPedidoRevanche() },
-                            { label: '🚪 Sair', onClick: () => { limparSessao(); if (isFullscreen()) sairTelaCheia(); window.location.href = window.location.pathname; } }
-                        ]
-                    });
+                    acoes.push({ label: '🔄 Jogar Novamente', onClick: () => enviarPedidoRevanche() });
                 }
+                acoes.push({ label: '🚪 Sair', onClick: () => { limparSessao(); if (isFullscreen()) sairTelaCheia(); window.location.href = window.location.pathname; } });
+
+                let tituloModal = 'Fim';
+                if (empate) tituloModal = modoHotSeat ? 'Empate!' : 'Empate!';
+                else if (euVenci) tituloModal = modoHotSeat ? `🏆 ${turnoAtual === 'white' ? hotSeatNome1 : hotSeatNome2} venceu!` : (modoIA ? 'Vitória contra a IA!' : 'Vitória!');
+                else tituloModal = modoIA ? 'A IA venceu' : (motivo === 'timeout' ? 'Tempo Esgotado' : 'Derrota');
+
+                abrirModal({
+                    icon: empate ? '🤝' : (euVenci ? '🏆' : (motivo === 'timeout' ? '⏱️' : '💔')),
+                    title: tituloModal,
+                    message: motivoTxt + '\n\nDeseja jogar novamente?',
+                    actions: acoes
+                });
             }, 600);
             document.getElementById('div-pos-jogo')?.classList.remove('hidden');
         }
@@ -2796,6 +3368,7 @@
         async function enviarPedidoRevanche() {
             SoundFX.click();
             if (modoIA) { jogarContraIA(nivelIA); return; }
+            if (modoHotSeat) { iniciarHotSeat(hotSeatNome1, hotSeatNome2); return; }
             if (!firebaseDisponivel) return;
             try {
                 await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), {
@@ -2832,7 +3405,7 @@
                     status: 'jogando', turno: 'white',
                     tabuleiro: tabuleiroParaFirebase(criarTabuleiroInicial()),
                     vencedor: null, motivoFim: null, desistente: null,
-                    pedidoRevanche: null, jogadores: novasCores,
+                    pedidoRevanche: null, empatePedido: null, jogadores: novasCores,
                     reiniciadaEm: fns.serverTimestamp ? fns.serverTimestamp() : Date.now(),
                     pausaAtiva: null, pausaPedido: null
                 };
@@ -2855,13 +3428,21 @@
             euPronto = false; adversarioPronto = false; ambosProntos = false;
             capturaMultiplaAtiva = false; capturaMultiplaPos = null;
             emPausa = false; pausaPendenteDe = null; pausaSolicitadaPorMim = false;
-            lancesDamasSemCaptura = 0; lancesFinaisEspeciais = 0; posicoesRepetidas = {}; tipoFinalEspecial = null;
+            empatePendenteDe = null; empateOferecidoPorMim = false;
+            lancesDamasSemCaptura = 0; lancesFinaisEspeciais = 0; lancesTotais = 0;
+            posicoesRepetidas = {}; tipoFinalEspecial = null;
+            notacaoAtual = [];
+            ultimaJogadaDestino = null;
             historicoMovimentos = [{
                 tabuleiro: tabuleiroParaFirebase(dados.tabuleiro),
                 turno: 'white', cor: 'white', de: '—', para: '—'
             }];
             tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
             turnoAtual = dados.turno || 'white';
+            if (modoRelogio !== 'none') {
+                relogioBrancas = tempoInicialRelogio;
+                relogioPretas = tempoInicialRelogio;
+            }
             const jogadores = dados.jogadores || {};
             if (jogadores[jogadorSessao.chave]?.cor) {
                 minhaCor = jogadores[jogadorSessao.chave].cor;
@@ -2877,6 +3458,8 @@
             document.getElementById('div-pos-jogo')?.classList.add('hidden');
             esconderPedidoRevanche();
             renderizarTabuleiro();
+            renderizarNotacao();
+            atualizarRelogioUI();
             SoundFX.notify();
             toast('🎮 Nova partida!', 'success');
             setTimeout(() => marcarPronto(), 400);
@@ -2884,10 +3467,10 @@
         function confirmarDesistencia() {
             if (modoEspectador) return;
             SoundFX.click();
-            if (modoIA) {
+            if (modoIA || modoHotSeat) {
                 abrirModal({
                     icon: '🏳️', title: 'Sair da partida?',
-                    message: 'O progresso contra a IA será perdido.',
+                    message: 'O progresso será perdido.',
                     actions: [
                         { label: 'Cancelar', onClick: () => {} },
                         { label: 'Sair', onClick: () => { limparSessao(); if (isFullscreen()) sairTelaCheia(); window.location.href = window.location.pathname; } }
@@ -2902,7 +3485,7 @@
                     { label: 'Cancelar', onClick: () => {} },
                     { label: 'Sim, desistir', onClick: async () => {
                         try {
-                            pararTimer();
+                            pararTimer(); pararRelogio();
                             const corAdversaria = minhaCor === 'white' ? 'red' : 'white';
                             await updateSeguro(`salas_damas/${idSalaAtual}`, {
                                 status: 'encerrado', vencedor: corAdversaria,
@@ -2928,7 +3511,6 @@
 
             function clonarTabuleiro(t) { return t.map(r => r.slice()); }
 
-            // ✅ Mesma regra brasileira: dama pode parar em qualquer casa após captura
             function explorarCapturasIA(r, c, cor, tab, capturadasSet = new Set(), profundidade = 0) {
                 if (profundidade > 20) return [];
                 const peca = tab[r][c];
@@ -2969,16 +3551,12 @@
                     novaTab[cap.r][cap.c] = pecaAtual;
                     novaTab[r][c] = null;
                     novaTab[cap.capturada.r][cap.capturada.c] = null;
-
                     const isPeao = !pecaAtual.includes('king');
                     const corDaPeca = pecaAtual.startsWith('white') ? 'white' : 'red';
                     const promoveuAgora =
                         (isPeao && corDaPeca === 'white' && cap.r === 0) ||
                         (isPeao && corDaPeca === 'red'   && cap.r === 7);
-                    if (promoveuAgora) {
-                        novaTab[cap.r][cap.c] = corDaPeca + '-king';
-                    }
-
+                    if (promoveuAgora) novaTab[cap.r][cap.c] = corDaPeca + '-king';
                     const novasCapturadas = new Set(capturadasSet);
                     novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
                     const continuacoes = explorarCapturasIA(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
@@ -3008,12 +3586,7 @@
                         for (const cam of cp.caminhos) {
                             if (cam.length !== maxCapt) continue;
                             const dest = cam[cam.length - 1];
-                            movs.push({
-                                de: { r: cp.r, c: cp.c },
-                                para: { r: dest.r, c: dest.c },
-                                caminho: cam,
-                                captura: true
-                            });
+                            movs.push({ de: { r: cp.r, c: cp.c }, para: { r: dest.r, c: dest.c }, caminho: cam, captura: true });
                         }
                     }
                     return movs;
@@ -3055,8 +3628,8 @@
                         novo[passo.capturada.r][passo.capturada.c] = null;
                         pos = { r: passo.r, c: passo.c };
                         const isPeao = pecaAqui && !pecaAqui.includes('king');
-                        if (isPeao && pecaAqui === 'white' && pos.r === 0) { novo[pos.r][pos.c] = 'white-king'; }
-                        if (isPeao && pecaAqui === 'red' && pos.r === 7) { novo[pos.r][pos.c] = 'red-king'; }
+                        if (isPeao && pecaAqui === 'white' && pos.r === 0) novo[pos.r][pos.c] = 'white-king';
+                        if (isPeao && pecaAqui === 'red' && pos.r === 7) novo[pos.r][pos.c] = 'red-king';
                     }
                 } else {
                     novo[mov.para.r][mov.para.c] = peca;
@@ -3101,9 +3674,7 @@
             function minimax(tab, profundidade, alpha, beta, corAtual, corIA, usaPosicao) {
                 if (profundidade === 0) return avaliar(tab, corIA, usaPosicao);
                 const movs = gerarMovimentos(tab, corAtual);
-                if (movs.length === 0) {
-                    return corAtual === corIA ? -1000 : 1000;
-                }
+                if (movs.length === 0) return corAtual === corIA ? -1000 : 1000;
                 const maximizando = (corAtual === corIA);
                 if (maximizando) {
                     let melhor = -Infinity;
@@ -3134,21 +3705,14 @@
                 const cfg = NIVEIS[nivel] || NIVEIS[3];
                 const movs = gerarMovimentos(tab, cor);
                 if (movs.length === 0) return null;
-
-                if (Math.random() < cfg.aleatoriedade) {
-                    return movs[Math.floor(Math.random() * movs.length)];
-                }
-
+                if (Math.random() < cfg.aleatoriedade) return movs[Math.floor(Math.random() * movs.length)];
                 let melhorMov = movs[0];
                 let melhorVal = -Infinity;
                 for (const mov of movs) {
                     const novoTab = aplicarMovimento(tab, mov);
                     const val = minimax(novoTab, cfg.profundidade - 1, -Infinity, Infinity,
                         cor === 'white' ? 'red' : 'white', cor, cfg.usaPosicao);
-                    if (val > melhorVal) {
-                        melhorVal = val;
-                        melhorMov = mov;
-                    }
+                    if (val > melhorVal) { melhorVal = val; melhorMov = mov; }
                 }
                 return melhorMov;
             }
@@ -3159,6 +3723,7 @@
         function jogarContraIA(nivel) {
             SoundFX.click();
             modoIA = true;
+            modoHotSeat = false;
             nivelIA = nivel;
             modoEspectador = false;
             modoTorneio = 0;
@@ -3169,17 +3734,21 @@
             jogoEncerrado = false;
             vencedorDeclarado = null;
             desistenciaProcessada = false;
-            lancesDamasSemCaptura = 0;
-            lancesFinaisEspeciais = 0;
-            posicoesRepetidas = {};
-            tipoFinalEspecial = null;
+            lancesDamasSemCaptura = 0; lancesFinaisEspeciais = 0; lancesTotais = 0;
+            posicoesRepetidas = {}; tipoFinalEspecial = null;
             celulaSelecionada = null;
             movimentosValidos = [];
             emPausa = false;
             capturaMultiplaAtiva = false;
             capturaMultiplaPos = null;
             iaPensando = false;
+            notacaoAtual = [];
             nomeOponente = IA.NIVEIS[nivel].nome;
+            ultimaJogadaDestino = null;
+            if (modoRelogio !== 'none') {
+                relogioBrancas = tempoInicialRelogio;
+                relogioPretas = tempoInicialRelogio;
+            }
             historicoMovimentos = [{
                 tabuleiro: tabuleiroParaFirebase(tabuleiro),
                 turno: 'white', cor: 'white', de: '—', para: '—'
@@ -3204,6 +3773,7 @@
                 return;
             }
             const pecaMovida = tabuleiro[mov.de.r][mov.de.c];
+            const isDamaMovida = pecaMovida.includes('king');
             let promoveuIA = false;
             if (mov.caminho && mov.caminho.length > 0) {
                 let pos = { r: mov.de.r, c: mov.de.c };
@@ -3214,23 +3784,18 @@
                     tabuleiro[passo.capturada.r][passo.capturada.c] = null;
                     pos = { r: passo.r, c: passo.c };
                     const isPeao = pecaAqui && !pecaAqui.includes('king');
-                    if (isPeao && pecaAqui === 'red' && pos.r === 7) {
-                        tabuleiro[pos.r][pos.c] = 'red-king';
-                        promoveuIA = true;
-                    }
+                    if (isPeao && pecaAqui === 'red' && pos.r === 7) { tabuleiro[pos.r][pos.c] = 'red-king'; promoveuIA = true; }
                 }
                 SoundFX.capture();
                 if (promoveuIA) SoundFX.king();
             } else {
                 tabuleiro[mov.para.r][mov.para.c] = pecaMovida;
                 tabuleiro[mov.de.r][mov.de.c] = null;
-                if (pecaMovida === 'red' && mov.para.r === 7) {
-                    tabuleiro[mov.para.r][mov.para.c] = 'red-king';
-                    promoveuIA = true;
-                }
+                if (pecaMovida === 'red' && mov.para.r === 7) { tabuleiro[mov.para.r][mov.para.c] = 'red-king'; promoveuIA = true; }
                 SoundFX.move();
                 if (promoveuIA) SoundFX.king();
             }
+            ultimaJogadaDestino = { r: mov.para.r, c: mov.para.c };
             historicoMovimentos.push({
                 tabuleiro: tabuleiroParaFirebase(tabuleiro),
                 turno: 'red', cor: 'red',
@@ -3238,9 +3803,8 @@
                 para: `(${mov.para.r},${mov.para.c})`,
                 captura: mov.captura ? 'sim' : null
             });
-
+            adicionarNotacao('red', { r: mov.de.r, c: mov.de.c }, { r: mov.para.r, c: mov.para.c }, !!mov.captura, isDamaMovida || promoveuIA, mov.caminho);
             atualizarContadoresAposLance({ capturada: mov.captura, pecaOriginal: pecaMovida });
-
             turnoAtual = 'white';
             iaPensando = false;
             renderizarTabuleiro();
@@ -3259,6 +3823,7 @@
                 tratarFimDeJogo(venc, 'sem-movimentos');
             } else {
                 iniciarTimer();
+                iniciarRelogio();
             }
         }
 
@@ -3300,6 +3865,16 @@
                 } else if (!pedidoPausa) {
                     pausaPendenteDe = null;
                     document.getElementById('div-pausa-pendente')?.classList.add('hidden');
+                }
+                const pedidoEmpate = dados.empatePedido;
+                if (pedidoEmpate && pedidoEmpate.de !== jogadorSessao.chave && !modoEspectador) {
+                    if (empatePendenteDe !== pedidoEmpate.de) {
+                        empatePendenteDe = pedidoEmpate.de;
+                        mostrarPedidoEmpate(pedidoEmpate.nome || 'Adversário');
+                    }
+                } else if (!pedidoEmpate) {
+                    empatePendenteDe = null;
+                    document.getElementById('div-empate-pendente')?.classList.add('hidden');
                 }
                 const jogadores = dados.jogadores || {};
                 const uids = Object.keys(jogadores);
@@ -3347,7 +3922,8 @@
                         if (turnoAtual === minhaCor) {
                             setTimeout(() => SoundFX.notify(), 150);
                             iniciarTimer();
-                        } else pararTimer();
+                            iniciarRelogio();
+                        } else { pararTimer(); pararRelogio(); }
                     }
                 }
                 renderizarTabuleiro();
@@ -3379,7 +3955,7 @@
             });
         }
         function enviarEmoji(emoji) {
-            if (!idSalaAtual || modoIA) return;
+            if (!idSalaAtual || modoIA || modoHotSeat) return;
             if (!firebaseDisponivel) return;
             SoundFX.click();
             const nome = modoEspectador ? 'Espectador' : (jogadorSessao?.nome || 'Jogador');
@@ -3388,7 +3964,7 @@
             mostrarBalao(emoji, modoEspectador ? '👁️ Espectador' : 'Você', false);
         }
         function enviarTexto(texto) {
-            if (!idSalaAtual || modoIA) return;
+            if (!idSalaAtual || modoIA || modoHotSeat) return;
             if (!firebaseDisponivel) return;
             const t = texto.trim().slice(0, 120);
             if (!t) return;
@@ -3411,20 +3987,20 @@
         }
         document.querySelectorAll('.emoji-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                if (modoEspectador || modoIA) return;
+                if (modoEspectador || modoIA || modoHotSeat) return;
                 enviarEmoji(btn.dataset.emoji || '👍');
             });
         });
         document.getElementById('chat-send').addEventListener('click', () => {
             const input = document.getElementById('chat-input');
-            if (modoEspectador || modoIA) return;
+            if (modoEspectador || modoIA || modoHotSeat) return;
             enviarTexto(input.value);
             input.value = '';
         });
         document.getElementById('chat-input').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                if (modoEspectador || modoIA) return;
+                if (modoEspectador || modoIA || modoHotSeat) return;
                 enviarTexto(e.target.value);
                 e.target.value = '';
             }
@@ -3520,18 +4096,38 @@
         });
 
         // ============================================================
+        // ==================== NOTAÇÃO — COPIAR ======================
+        // ============================================================
+        document.getElementById('btn-copiar-notacao').addEventListener('click', async () => {
+            const txt = exportarNotacao();
+            if (!txt) { toast('Sem lances para copiar.', 'warn'); return; }
+            try {
+                await navigator.clipboard.writeText(txt);
+                toast('📋 Notação copiada!', 'success');
+            } catch (e) {
+                // Fallback
+                const ta = document.createElement('textarea');
+                ta.value = txt;
+                document.body.appendChild(ta); ta.select();
+                try { document.execCommand('copy'); toast('📋 Notação copiada!', 'success'); }
+                catch (_) { toast('Erro ao copiar.', 'error'); }
+                ta.remove();
+            }
+        });
+
+        // ============================================================
         // ==================== BOTÕES FINAIS =========================
         // ============================================================
         document.getElementById('btn-sair').addEventListener('click', () => {
             SoundFX.click();
             abrirModal({
                 icon: '🚪', title: 'Sair?',
-                message: modoEspectador ? 'Você vai parar de assistir.' : (modoIA ? 'Você vai sair do modo IA.' : 'Você pode perder o progresso da partida atual.'),
+                message: modoEspectador ? 'Você vai parar de assistir.' : (modoIA ? 'Você vai sair do modo IA.' : (modoHotSeat ? 'Você vai sair do hot-seat.' : 'Você pode perder o progresso da partida atual.')),
                 actions: [
                     { label: 'Cancelar', onClick: () => {} },
                     { label: 'Sair', onClick: async () => {
                         try {
-                            if (idSalaAtual && jogadorSessao?.chave && !modoEspectador && !modoIA && firebaseDisponivel) {
+                            if (idSalaAtual && jogadorSessao?.chave && !modoEspectador && !modoIA && !modoHotSeat && firebaseDisponivel) {
                                 await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), { online: false });
                             }
                         } catch (_) {}
@@ -3545,6 +4141,9 @@
         document.getElementById('btn-google').addEventListener('click', loginGoogle);
         document.getElementById('btn-desistir').addEventListener('click', confirmarDesistencia);
         document.getElementById('btn-pausa').addEventListener('click', togglePausa);
+        document.getElementById('btn-empate').addEventListener('click', pedirEmpate);
+        document.getElementById('btn-aceitar-empate').addEventListener('click', aceitarEmpate);
+        document.getElementById('btn-recusar-empate').addEventListener('click', recusarEmpate);
         document.getElementById('btn-aceitar-pausa').addEventListener('click', aceitarPausa);
         document.getElementById('btn-recusar-pausa').addEventListener('click', recusarPausa);
         document.getElementById('btn-rec').addEventListener('click', toggleGravacaoCanvas);
@@ -3558,7 +4157,7 @@
         document.getElementById('btn-recusar-revanche').addEventListener('click', recusarRevanche);
         document.getElementById('btn-whatsapp').addEventListener('click', () => {
             SoundFX.click();
-            if (!idSalaAtual || modoIA) return;
+            if (!idSalaAtual || modoIA || modoHotSeat) return;
             const link = `${window.location.origin}${window.location.pathname}?sala=${encodeURIComponent(idSalaAtual)}`;
             const senhaTxt = senhaSalaAtual ? `\n🔒 Senha: *${senhaSalaAtual}*` : '';
             const msg = encodeURIComponent(`♟️ *Convite para Damas*\n\nDesafiado(a) por *${jogadorSessao?.nome || 'Alguém'}*!${senhaTxt}\n\n👉 Clique para entrar:\n${link}`);
@@ -3566,7 +4165,7 @@
         });
         document.getElementById('btn-whatsapp-assistir').addEventListener('click', () => {
             SoundFX.click();
-            if (!idSalaAtual || modoIA) return;
+            if (!idSalaAtual || modoIA || modoHotSeat) return;
             const link = `${window.location.origin}${window.location.pathname}?sala=${encodeURIComponent(idSalaAtual)}&modo=assistir`;
             const msg = encodeURIComponent(`👁️ *Assista à partida de Damas!*\n\nSala: *${idSalaAtual}*\n\n👉 Clique para assistir:\n${link}`);
             window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
@@ -3601,7 +4200,7 @@
         });
         window.addEventListener('beforeunload', () => {
             try {
-                if (firebaseDisponivel && idSalaAtual && jogadorSessao?.chave && !modoEspectador && !modoIA) {
+                if (firebaseDisponivel && idSalaAtual && jogadorSessao?.chave && !modoEspectador && !modoIA && !modoHotSeat) {
                     fns.update(fns.ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), { online: false });
                 }
             } catch (_) {}
