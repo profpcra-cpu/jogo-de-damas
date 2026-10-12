@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1020">
-    <title>Brain Damas - Duelo Multiplayer + IA (v3.0 - Regras Brasileiras)</title>
+    <title>Brain Damas - Duelo Multiplayer + IA (v3.1 - Regras Brasileiras)</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -263,14 +263,6 @@
         .chat-input-row input { flex: 1; padding: 8px 12px; font-size: 13px; }
         .chat-input-row button { width: auto; padding: 8px 14px; font-size: 13px; }
 
-        .senha-badge {
-            display: inline-flex; align-items: center; gap: 4px;
-            background: linear-gradient(135deg, #7c3aed, #a855f7);
-            color: #fff; font-size: 10px; font-weight: 800;
-            padding: 2px 6px; border-radius: 999px; letter-spacing: 0.5px;
-            margin-left: 6px;
-        }
-
         .rec-badge {
             display: inline-flex; align-items: center; gap: 4px;
             background: linear-gradient(135deg, #dc2626, #991b1b);
@@ -307,7 +299,6 @@
         .historico-data { font-size: 10.5px; color: var(--text-muted); }
         .historico-btn { width: auto; padding: 5px 10px; font-size: 11px; }
 
-        /* === TORNEIO === */
         .torneio-bar {
             display: flex; justify-content: center; align-items: center; gap: 12px;
             background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.1));
@@ -585,7 +576,6 @@
 
             <!-- TAB: JOGO -->
             <div id="tab-jogo">
-                <!-- NOVO: Modo IA -->
                 <div class="lobby-box">
                     <h3>🤖 Jogar contra o Computador</h3>
                     <p>Escolha o nível de dificuldade. As regras brasileiras oficiais são aplicadas automaticamente.</p>
@@ -873,7 +863,7 @@
     <div class="toast-container" id="toast-container"></div>
 
     <script type="module">
-        // Firebase (opcional): se não existir o ficheiro, o jogo funciona offline (só IA/hot-seat)
+        // Firebase (opcional)
         let db = null, auth = null;
         let fns = {};
         try {
@@ -918,56 +908,45 @@
         let nomeOponente = 'Oponente';
         let ultimoChatTs = 0;
 
-        // Torneio
         let modoTorneio = 0;
         let torneioPlacar = { eu: 0, op: 0 };
         let torneioRodadaAtual = 1;
 
-        // Histórico
         let historicoMovimentos = [];
         let historicoPartidas = [];
 
-        // Handshake / conexão
         let euPronto = false;
         let adversarioPronto = false;
         let ambosProntos = false;
         let ultimaRespostaFirebase = 0;
         let connectionCheckInterval = null;
 
-        // Timer
         let tempoLimiteSegundos = 40;
         let timerIntervalId = null;
         let timerSegundosRestantes = 40;
         let timerAtivo = false;
         let aviso5sDisparado = false;
 
-        // Captura múltipla (estado transitório durante execução)
         let capturaMultiplaAtiva = false;
         let capturaMultiplaPos = null;
 
-        // Empate (regras brasileiras)
         let lancesSemCaptura = 0;
         let lancesDamas = 0;
 
-        // Pausa
         let emPausa = false;
         let pausaPendenteDe = null;
         let pausaSolicitadaPorMim = false;
 
-        // Senha
         let senhaSalaAtual = null;
 
-        // Gravação
         let canvasRecorder = null;
         let canvasStream = null;
         let recordedChunks = [];
         let gravandoCanvas = false;
         let gravandoIntervalId = null;
 
-        // SFX
         let sfxPack = 'classic';
 
-        // IA
         let modoIA = false;
         let nivelIA = 3;
         let iaPensando = false;
@@ -1624,10 +1603,11 @@
                 const d = new Date(p.data);
                 const dataFmt = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
                 const cls = p.resultado === 'vitoria' ? 'vitoria' : 'derrota';
-                const emoji = p.resultado === 'vitoria' ? '🏆' : '💔';
+                const emoji = p.resultado === 'vitoria' ? '🏆' : (p.resultado === 'empate' ? '🤝' : '💔');
+                const label = p.resultado === 'vitoria' ? 'Vitória' : (p.resultado === 'empate' ? 'Empate' : 'Derrota');
                 return `<div class="historico-item ${cls}">
                     <div class="historico-info">
-                        <strong>${emoji} ${p.resultado === 'vitoria' ? 'Vitória' : 'Derrota'}</strong>
+                        <strong>${emoji} ${label}</strong>
                         <span class="historico-data">vs ${p.oponente} · ${dataFmt} · ${p.movimentos.length} jogadas</span>
                     </div>
                     <button class="historico-btn btn-secundario" data-idx="${i}">▶️ Replay</button>
@@ -2307,7 +2287,7 @@
         // 1. Captura obrigatória pela MAIOR quantidade
         // 2. Peão captura em qualquer direção diagonal
         // 3. Dama captura em qualquer direção, quantas peças quiser
-        // 4. Promoção apenas ao PARAR na última fileira
+        // 4. ✅ PROMOÇÃO ENCERRA A JOGADA (regra brasileira)
         // 5. Empate após 40 lances sem captura (ou só damas)
         // ============================================================
 
@@ -2355,8 +2335,20 @@
                 novaTab[r][c] = null;
                 novaTab[cap.capturada.r][cap.capturada.c] = null;
 
-                if (pecaAtual === 'white' && cap.r === 0) novaTab[cap.r][cap.c] = 'white-king';
-                if (pecaAtual === 'red' && cap.r === 7) novaTab[cap.r][cap.c] = 'red-king';
+                // ✅ REGRA BRASILEIRA: peão que atinge a última fileira
+                //    durante uma captura PROMOVE e a jogada TERMINA.
+                //    NÃO continua a capturar na mesma jogada (isso seria regra internacional).
+                const isPeao = !pecaAtual.includes('king');
+                const corDaPeca = pecaAtual.startsWith('white') ? 'white' : 'red';
+                const promoveuAgora =
+                    (isPeao && corDaPeca === 'white' && cap.r === 0) ||
+                    (isPeao && corDaPeca === 'red'   && cap.r === 7);
+
+                if (promoveuAgora) {
+                    novaTab[cap.r][cap.c] = corDaPeca + '-king';
+                    caminhos.push([cap]);
+                    continue; // ⛔ Não recursa mais
+                }
 
                 const novasCapturadas = new Set(capturadasSet);
                 novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
@@ -2369,7 +2361,6 @@
             return caminhos;
         }
 
-        // Retorna o máximo de capturas possível de uma peça e os caminhos ótimos
         function todosCaminhosCaptura(r, c, cor) {
             const caminhos = explorarCapturas(r, c, cor, tabuleiro);
             if (caminhos.length === 0) return { max: 0, caminhos: [] };
@@ -2478,16 +2469,38 @@
 
             if (mov.caminhoCompleto && mov.caminhoCompleto.length > 0) {
                 let posAtual = { r: deR, c: deC };
+                let promoveu = false;
+                let passosExecutados = 0;
+
                 for (const passo of mov.caminhoCompleto) {
-                    tabuleiro[passo.r][passo.c] = tabuleiro[posAtual.r][posAtual.c];
+                    const pecaAqui = tabuleiro[posAtual.r][posAtual.c];
+                    tabuleiro[passo.r][passo.c] = pecaAqui;
                     tabuleiro[posAtual.r][posAtual.c] = null;
                     tabuleiro[passo.capturada.r][passo.capturada.c] = null;
                     posAtual = { r: passo.r, c: passo.c };
+                    passosExecutados++;
+
+                    // ✅ REGRA BRASILEIRA: se o peão promove aqui, ENCERRA a cadeia
+                    const isPeao = pecaAqui && !pecaAqui.includes('king');
+                    if (isPeao && pecaAqui === 'white' && posAtual.r === 0) {
+                        tabuleiro[posAtual.r][posAtual.c] = 'white-king';
+                        promoveu = true;
+                        break; // ⛔ Interrompe — resto do caminhoCompleto é ignorado
+                    }
+                    if (isPeao && pecaAqui === 'red' && posAtual.r === 7) {
+                        tabuleiro[posAtual.r][posAtual.c] = 'red-king';
+                        promoveu = true;
+                        break;
+                    }
                 }
-                if (tabuleiro[posAtual.r][posAtual.c] === 'white' && posAtual.r === 0) tabuleiro[posAtual.r][posAtual.c] = 'white-king';
-                if (tabuleiro[posAtual.r][posAtual.c] === 'red' && posAtual.r === 7) tabuleiro[posAtual.r][posAtual.c] = 'red-king';
+
                 SoundFX.capture();
-                toast(`⚡ Capturou ${mov.caminhoCompleto.length} peça(s)!`, 'success');
+                if (promoveu) {
+                    SoundFX.king();
+                    toast(`👑 Promoção! Cadeia encerrada com ${passosExecutados} captura(s). Próxima jogada poderá continuar.`, 'success');
+                } else {
+                    toast(`⚡ Capturou ${passosExecutados} peça(s)!`, 'success');
+                }
                 lancesSemCaptura = 0;
             } else {
                 tabuleiro[paraR][paraC] = pecaMovida;
@@ -2818,6 +2831,7 @@
 
             function clonarTabuleiro(t) { return t.map(r => r.slice()); }
 
+            // ✅ Mesma correção de regra: promoção encerra a cadeia
             function explorarCapturasIA(r, c, cor, tab, capturadasSet = new Set(), profundidade = 0) {
                 if (profundidade > 20) return [];
                 const peca = tab[r][c];
@@ -2857,8 +2871,20 @@
                     novaTab[cap.r][cap.c] = pecaAtual;
                     novaTab[r][c] = null;
                     novaTab[cap.capturada.r][cap.capturada.c] = null;
-                    if (pecaAtual === 'white' && cap.r === 0) novaTab[cap.r][cap.c] = 'white-king';
-                    if (pecaAtual === 'red' && cap.r === 7) novaTab[cap.r][cap.c] = 'red-king';
+
+                    // ✅ Regra brasileira: promoção encerra a jogada
+                    const isPeao = !pecaAtual.includes('king');
+                    const corDaPeca = pecaAtual.startsWith('white') ? 'white' : 'red';
+                    const promoveuAgora =
+                        (isPeao && corDaPeca === 'white' && cap.r === 0) ||
+                        (isPeao && corDaPeca === 'red'   && cap.r === 7);
+
+                    if (promoveuAgora) {
+                        novaTab[cap.r][cap.c] = corDaPeca + '-king';
+                        caminhos.push([cap]);
+                        continue; // ⛔ Não recursa
+                    }
+
                     const novasCapturadas = new Set(capturadasSet);
                     novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
                     const continuacoes = explorarCapturasIA(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
@@ -2928,14 +2954,17 @@
                 const peca = novo[mov.de.r][mov.de.c];
                 if (mov.caminho && mov.caminho.length > 0) {
                     let pos = { r: mov.de.r, c: mov.de.c };
+                    let promoveu = false;
                     for (const passo of mov.caminho) {
-                        novo[passo.r][passo.c] = novo[pos.r][pos.c];
+                        const pecaAqui = novo[pos.r][pos.c];
+                        novo[passo.r][passo.c] = pecaAqui;
                         novo[pos.r][pos.c] = null;
                         novo[passo.capturada.r][passo.capturada.c] = null;
                         pos = { r: passo.r, c: passo.c };
+                        const isPeao = pecaAqui && !pecaAqui.includes('king');
+                        if (isPeao && pecaAqui === 'white' && pos.r === 0) { novo[pos.r][pos.c] = 'white-king'; promoveu = true; break; }
+                        if (isPeao && pecaAqui === 'red' && pos.r === 7) { novo[pos.r][pos.c] = 'red-king'; promoveu = true; break; }
                     }
-                    if (novo[pos.r][pos.c] === 'white' && pos.r === 0) novo[pos.r][pos.c] = 'white-king';
-                    if (novo[pos.r][pos.c] === 'red' && pos.r === 7) novo[pos.r][pos.c] = 'red-king';
                 } else {
                     novo[mov.para.r][mov.para.c] = peca;
                     novo[mov.de.r][mov.de.c] = null;
@@ -3082,14 +3111,23 @@
             const pecaMovida = tabuleiro[mov.de.r][mov.de.c];
             if (mov.caminho && mov.caminho.length > 0) {
                 let pos = { r: mov.de.r, c: mov.de.c };
+                let promoveuIA = false;
                 for (const passo of mov.caminho) {
-                    tabuleiro[passo.r][passo.c] = tabuleiro[pos.r][pos.c];
+                    const pecaAqui = tabuleiro[pos.r][pos.c];
+                    tabuleiro[passo.r][passo.c] = pecaAqui;
                     tabuleiro[pos.r][pos.c] = null;
                     tabuleiro[passo.capturada.r][passo.capturada.c] = null;
                     pos = { r: passo.r, c: passo.c };
+                    // ✅ Regra brasileira: promoção encerra a cadeia
+                    const isPeao = pecaAqui && !pecaAqui.includes('king');
+                    if (isPeao && pecaAqui === 'red' && pos.r === 7) {
+                        tabuleiro[pos.r][pos.c] = 'red-king';
+                        promoveuIA = true;
+                        break;
+                    }
                 }
-                if (tabuleiro[pos.r][pos.c] === 'red' && pos.r === 7) tabuleiro[pos.r][pos.c] = 'red-king';
                 SoundFX.capture();
+                if (promoveuIA) SoundFX.king();
                 lancesSemCaptura = 0;
             } else {
                 tabuleiro[mov.para.r][mov.para.c] = pecaMovida;
