@@ -975,10 +975,12 @@
          SCRIPT PRINCIPAL — Continua na próxima mensagem
          ============================================================ -->
 
-        <script type="module">
+            <script type="module">
         // ============================================================
-        // FIREBASE
+        // Brain Damas v7.1 — Motor completo com correção de imobilização
         // ============================================================
+
+        // === FIREBASE ===
         let db = null, auth = null;
         let fns = {};
         try {
@@ -999,9 +1001,7 @@
         }
         const firebaseDisponivel = !!db;
 
-        // ============================================================
-        // ESTADO GLOBAL
-        // ============================================================
+        // === ESTADO GLOBAL ===
         let jogadorSessao = null;
         let apelido = '';
         let idSalaAtual = null;
@@ -1036,15 +1036,13 @@
         let adversarioPronto = false;
         let ambosProntos = false;
 
-        // === TIMER SINCRONIZADO (v7.0) ===
-        let offsetServidor = 0;        // Diferença entre relógio local e servidor
-        let turnoInicioServidor = 0;   // Timestamp do início do turno (serverTimestamp)
+        let offsetServidor = 0;
+        let turnoInicioServidor = 0;
         let timerIntervalId = null;
         let timerSegundosRestantes = 0;
         let aviso5sDisparado = false;
         let tempoLimiteSegundos = 0;
 
-        // === RELÓGIO ACUMULADO ===
         let modoRelogio = 'none';
         let tempoInicialRelogio = 0;
         let incrementoRelogio = 0;
@@ -1052,14 +1050,12 @@
         let relogioPretas = 0;
         let relogioIntervalId = null;
 
-        // === CONTADORES DE EMPATE ===
         let lancesDamasSemCaptura = 0;
         let lancesFinaisEspeciais = 0;
         let posicoesRepetidas = {};
         let tipoFinalEspecial = null;
         let lancesTotais = 0;
 
-        // === EMPATE / PAUSA ===
         let empatePendenteDe = null;
         let empateOferecidoPorMim = false;
         let emPausa = false;
@@ -1068,7 +1064,6 @@
 
         let senhaSalaAtual = null;
 
-        // === GRAVAÇÃO ===
         let canvasRecorder = null;
         let canvasStream = null;
         let recordedChunks = [];
@@ -1077,7 +1072,6 @@
 
         let sfxPack = 'classic';
 
-        // === MODOS ===
         let modoIA = false;
         let modoHotSeat = false;
         let nivelIA = 3;
@@ -1089,14 +1083,13 @@
         let ultimaJogadaDestino = null;
         let modoA11y = false;
 
-        // === v7.0: MONITOR DE SALA E HEARTBEAT ===
         let salaCheckInterval = null;
         let heartbeatInterval = null;
         let monitorAdversarioInterval = null;
+        let ultimaRespostaFirebase = 0;
+        let connectionCheckInterval = null;
 
-        // ============================================================
-        // CONQUISTAS
-        // ============================================================
+        // === CONQUISTAS ===
         const CONQUISTAS = [
             { id: 'primeira_vitoria', emoji: '🥇', nome: 'Primeira Vitória', desc: 'Ganhe sua primeira partida', check: (s) => s.vitorias >= 1 },
             { id: 'veterano', emoji: '🎖️', nome: 'Veterano', desc: 'Ganhe 5 partidas', check: (s) => s.vitorias >= 5 },
@@ -1148,9 +1141,7 @@
             document.getElementById('ach-resumo').textContent = `${desb} / ${CONQUISTAS.length} desbloqueadas`;
         }
 
-        // ============================================================
-        // SOM
-        // ============================================================
+        // === SOM ===
         const SoundFX = (() => {
             let ctx = null, ativo = true;
             function init() {
@@ -1213,9 +1204,7 @@
             try { navigator.vibrate(padrao); } catch (_) {}
         }
 
-        // ============================================================
-        // MÚSICA
-        // ============================================================
+        // === MÚSICA ===
         const MusicaFundo = (() => {
             let ctx = null, masterGain = null, timerId = null, tocando = false, ativa = false;
             const acordes = [[220.00, 261.63, 329.63], [174.61, 220.00, 261.63], [130.81, 164.81, 196.00], [196.00, 246.94, 293.66]];
@@ -1271,9 +1260,7 @@
             };
         })();
 
-        // ============================================================
-        // UTILITÁRIOS
-        // ============================================================
+        // === UTILITÁRIOS ===
         function toast(mensagem, tipo = 'info') {
             const container = document.getElementById('toast-container');
             const el = document.createElement('div');
@@ -1337,37 +1324,21 @@
             const url = new URL(window.location.href);
             url.searchParams.delete('sala'); url.searchParams.delete('modo');
             window.history.replaceState({}, '', url.pathname);
-            pararMonitorConexao();
-            pararTimer();
-            pararRelogio();
-            pararHeartbeat();
-            pararMonitorSala();
-            pararMonitorAdversario();
+            pararMonitorConexao(); pararTimer(); pararRelogio();
+            pararHeartbeat(); pararMonitorSala(); pararMonitorAdversario();
         }
         function gerarSenha() { return Math.floor(1000 + Math.random() * 9000).toString(); }
 
-        // ============================================================
-        // v7.0: OFFSET SERVIDOR (relógio único)
-        // ============================================================
         async function calcularOffsetServidor() {
             if (!firebaseDisponivel) { offsetServidor = 0; return; }
             try {
-                const t1 = Date.now();
                 const snap = await fns.get(fns.ref(db, '.info/serverTimeOffset'));
-                const t2 = Date.now();
-                // O valor retornado já é o offset calculado pelo Firebase
                 offsetServidor = snap.val() || 0;
-                console.log('[v7.0] Offset servidor:', offsetServidor, 'ms');
-            } catch (e) {
-                console.warn('[v7.0] Não foi possível obter offset servidor');
-                offsetServidor = 0;
-            }
+            } catch (e) { offsetServidor = 0; }
         }
         function agoraServidor() { return Date.now() + offsetServidor; }
 
-        // ============================================================
-        // NOTAÇÃO
-        // ============================================================
+        // === NOTAÇÃO ===
         function casaParaNotacao(r, c) { return String.fromCharCode(97 + c) + (8 - r); }
         function adicionarNotacao(cor, de, para, captura, isDama, caminhoCompleto) {
             let texto = '';
@@ -1388,8 +1359,7 @@
                 panel.innerHTML = '<span class="notacao-vazia">A partida ainda não começou…</span>';
                 return;
             }
-            let html = '';
-            let num = 1;
+            let html = ''; let num = 1;
             for (let i = 0; i < notacaoAtual.length; i += 2) {
                 const brancas = notacaoAtual[i];
                 const pretas = notacaoAtual[i + 1];
@@ -1402,8 +1372,7 @@
                     const cls = pretas.texto.includes('x') ? 'mov-captura' : '';
                     html += `<span class="mov-preta ${cls}">${pretas.texto}</span>`;
                 }
-                html += '<br>';
-                num++;
+                html += '<br>'; num++;
             }
             panel.innerHTML = html;
             panel.scrollTop = panel.scrollHeight;
@@ -1412,18 +1381,13 @@
             if (notacaoAtual.length === 0) return '';
             let linhas = [];
             for (let i = 0; i < notacaoAtual.length; i += 2) {
-                const b = notacaoAtual[i];
-                const p = notacaoAtual[i + 1];
+                const b = notacaoAtual[i]; const p = notacaoAtual[i + 1];
                 linhas.push(`${Math.floor(i / 2) + 1}. ${b ? b.texto : ''} ${p ? p.texto : ''}`.trim());
             }
             return linhas.join('\n');
         }
 
-        // ============================================================
-        // v7.0: MONITOR DE CONEXÃO
-        // ============================================================
-        let ultimaRespostaFirebase = 0;
-        let connectionCheckInterval = null;
+        // === MONITOR DE CONEXÃO ===
         function marcarFirebaseVivo() {
             ultimaRespostaFirebase = Date.now();
             const statusEl = document.getElementById('connection-status');
@@ -1453,9 +1417,7 @@
             document.getElementById('connection-status')?.classList.add('hidden');
         }
 
-        // ============================================================
-        // v7.0: HEARTBEAT (sinal de vida a cada 5s)
-        // ============================================================
+        // === HEARTBEAT ===
         function iniciarHeartbeat() {
             pararHeartbeat();
             if (!firebaseDisponivel || !idSalaAtual || !jogadorSessao?.chave) return;
@@ -1472,9 +1434,7 @@
             if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
         }
 
-        // ============================================================
-        // v7.0: MONITOR DO ADVERSÁRIO (deteção de desconexão)
-        // ============================================================
+        // === MONITOR DO ADVERSÁRIO ===
         function iniciarMonitorAdversario() {
             pararMonitorAdversario();
             if (!firebaseDisponivel || !idSalaAtual) return;
@@ -1489,11 +1449,8 @@
                     const ping = jogadores[uidOponente]?.ultimoPing || 0;
                     const agora = agoraServidor();
                     const avisoEl = document.getElementById('aviso-desconexao');
-                    if (ping > 0 && (agora - ping) > 15000) {
-                        avisoEl?.classList.remove('hidden');
-                    } else {
-                        avisoEl?.classList.add('hidden');
-                    }
+                    if (ping > 0 && (agora - ping) > 15000) avisoEl?.classList.remove('hidden');
+                    else avisoEl?.classList.add('hidden');
                 } catch (_) {}
             }, 5000);
         }
@@ -1502,9 +1459,7 @@
             document.getElementById('aviso-desconexao')?.classList.add('hidden');
         }
 
-        // ============================================================
-        // v7.0: SALAS EFÉMERAS (auto-apagar após 30 min inativas)
-        // ============================================================
+        // === SALAS EFÉMERAS ===
         const TEMPO_INATIVIDADE_SALA_MS = 30 * 60 * 1000;
         function marcarAtividadeSala() {
             if (!firebaseDisponivel || !idSalaAtual) return;
@@ -1526,8 +1481,7 @@
                     const snap = await fns.get(fns.ref(db, `salas_damas/${idSalaAtual}/ultimaAtividade`));
                     if (snap.exists()) {
                         const ultima = snap.val();
-                        const agora = agoraServidor();
-                        if (agora - ultima > TEMPO_INATIVIDADE_SALA_MS) {
+                        if (agoraServidor() - ultima > TEMPO_INATIVIDADE_SALA_MS) {
                             await fns.remove(fns.ref(db, 'salas_damas/' + idSalaAtual));
                         }
                     }
@@ -1535,9 +1489,7 @@
             }, 2 * 60 * 1000);
         }
 
-        // ============================================================
-        // HANDSHAKE
-        // ============================================================
+        // === HANDSHAKE ===
         function marcarPronto() {
             if (euPronto) return;
             euPronto = true;
@@ -1572,26 +1524,77 @@
         async function updateSeguro(path, dados) {
             if (!firebaseDisponivel) return { ok: false };
             try { await fns.update(fns.ref(db, path), dados); return { ok: true }; }
-            catch (err) {
-                console.error('[Firebase] Erro:', path, err);
-                return { ok: false, err };
-            }
+            catch (err) { return { ok: false, err }; }
         }
 
         // ============================================================
-        // v7.0: TIMER SINCRONIZADO
+        // v7.1: FUNÇÃO CENTRAL DE VERIFICAÇÃO DE IMOBILIZAÇÃO
+        // ============================================================
+        /**
+         * Verifica se o jogador da cor indicada tem algum movimento legal.
+         * Retorna true se PELO MENOS UM movimento existir.
+         */
+        function jogadorTemAlgumMovimento(cor) {
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const p = tabuleiro[r][c];
+                    if (p && p.startsWith(cor)) {
+                        if (calcularMovimentos(r, c).length > 0) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Verifica fim de jogo por imobilização.
+         * Retorna a cor vencedora ou null.
+         */
+        function verificarImobilizacao() {
+            // Se o jogador atual não tem peças → adversário vence
+            let temWhite = false, temRed = false;
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                const p = tabuleiro[r][c]; if (!p) continue;
+                if (p.startsWith('white')) temWhite = true;
+                if (p.startsWith('red')) temRed = true;
+            }
+            if (!temWhite) return 'red';
+            if (!temRed) return 'white';
+
+            // Se o jogador da vez não tem movimentos → adversário vence
+            const corDaVez = turnoAtual;
+            if (!jogadorTemAlgumMovimento(corDaVez)) {
+                return corDaVez === 'white' ? 'red' : 'white';
+            }
+            return null;
+        }
+
+        // ============================================================
+        // TIMER
         // ============================================================
         function pararTimer() {
             if (timerIntervalId) { clearInterval(timerIntervalId); timerIntervalId = null; }
             document.getElementById('timer-bar-wrap')?.classList.add('hidden');
             document.getElementById('timer-display')?.classList.add('hidden');
         }
+
         function iniciarTimer() {
             pararTimer();
             if (tempoLimiteSegundos <= 0) return;
             if (jogoEncerrado || modoEspectador || emPausa) return;
             const minhaVez = modoHotSeat ? true : (turnoAtual === minhaCor);
             if (!minhaVez) return;
+
+            // ⚡ v7.1: verificação preventiva — se eu não tenho movimentos, perco
+            if (!desistenciaProcessada) {
+                const minhaCorLocal = modoHotSeat ? turnoAtual : minhaCor;
+                if (!jogadorTemAlgumMovimento(minhaCorLocal)) {
+                    jogoEncerrado = true;
+                    const vencedor = minhaCorLocal === 'white' ? 'red' : 'white';
+                    tratarFimDeJogo(vencedor, 'sem-movimentos');
+                    return;
+                }
+            }
 
             const barWrap = document.getElementById('timer-bar-wrap');
             const display = document.getElementById('timer-display');
@@ -1603,7 +1606,6 @@
                 if (jogoEncerrado || emPausa) { pararTimer(); return; }
                 if (!modoHotSeat && turnoAtual !== minhaCor) { pararTimer(); return; }
 
-                // v7.0: calcula com base no timestamp do servidor
                 const agora = agoraServidor();
                 const decorrido = agora - turnoInicioServidor;
                 timerSegundosRestantes = Math.max(0, tempoLimiteSegundos - Math.floor(decorrido / 1000));
@@ -1639,9 +1641,7 @@
             else if (timerSegundosRestantes <= 20) barFill.classList.add('warn');
         }
 
-        // ============================================================
-        // v7.0: PERDER POR TEMPO (com transação atómica)
-        // ============================================================
+        // === PERDER POR TEMPO (transação atómica) ===
         async function perderPorTempoV7() {
             if (jogoEncerrado || desistenciaProcessada) return;
             if (!modoHotSeat && turnoAtual !== minhaCor) return;
@@ -1649,46 +1649,32 @@
             const corPerdedora = modoHotSeat ? turnoAtual : minhaCor;
             const corAdversaria = corPerdedora === 'white' ? 'red' : 'white';
 
-            // IA e Hot-Seat: resultado local direto
             if (modoIA || modoHotSeat) {
                 jogoEncerrado = true;
                 tratarFimDeJogo(corAdversaria, 'timeout');
                 return;
             }
 
-            // Online: TRANSACTION atómica
             try {
                 const resultado = await fns.runTransaction(fns.ref(db, `salas_damas/${idSalaAtual}`), (atual) => {
                     if (!atual) return null;
-                    if (atual.status === 'encerrado') return; // já fechado, aborta
-                    if (atual.turno !== corPerdedora) return; // turno mudou, aborta
-                    // Aplica o encerramento por timeout
+                    if (atual.status === 'encerrado') return;
+                    if (atual.turno !== corPerdedora) return;
                     return {
                         ...atual,
-                        status: 'encerrado',
-                        vencedor: corAdversaria,
-                        motivoFim: 'timeout',
-                        perdedor: corPerdedora,
+                        status: 'encerrado', vencedor: corAdversaria,
+                        motivoFim: 'timeout', perdedor: corPerdedora,
                         versao: (atual.versao || 0) + 1,
                         ultimaAtividade: Date.now()
                     };
                 });
-
-                if (!resultado.committed) {
-                    // Outro cliente já fechou → apenas aceita o resultado remoto
-                    console.log('[v7.0] Timeout já processado por outro cliente');
-                    return;
-                }
-                console.log('[v7.0] Timeout processado com sucesso');
+                if (!resultado.committed) console.log('[v7.1] Timeout já processado por outro cliente');
             } catch (e) {
-                console.error('[v7.0] Erro na transação de timeout:', e);
-                toast('⚠️ Erro ao processar timeout.', 'error');
+                console.error('[v7.1] Erro na transação de timeout:', e);
             }
         }
 
-        // ============================================================
-        // RELÓGIO ACUMULADO
-        // ============================================================
+        // === RELÓGIO ===
         function formatarTempo(ms) {
             const totalSeg = Math.max(0, Math.floor(ms / 1000));
             const m = Math.floor(totalSeg / 60);
@@ -1742,9 +1728,7 @@
             else relogioPretas += incrementoRelogio;
         }
 
-        // ============================================================
-        // PAUSA
-        // ============================================================
+        // === PAUSA ===
         function pedirPausa() {
             if (modoEspectador || jogoEncerrado || emPausa) return;
             if (modoIA || modoHotSeat) { toast('Pausa indisponível.', 'info'); return; }
@@ -1806,9 +1790,7 @@
             } else pedirPausa();
         }
 
-        // ============================================================
-        // EMPATE
-        // ============================================================
+        // === EMPATE ===
         function podeOferecerEmpate() { return lancesTotais >= 10; }
         function pedirEmpate() {
             if (modoEspectador || jogoEncerrado) return;
@@ -1877,9 +1859,7 @@
             document.getElementById('div-empate-pendente')?.classList.add('hidden');
         }
 
-        // ============================================================
-        // GRAVAÇÃO (canvas)
-        // ============================================================
+        // === GRAVAÇÃO ===
         function desenharTabuleiroNoCanvas(ctx, canvas, tab) {
             const size = canvas.width; const cell = size / 8;
             ctx.fillStyle = '#4a2f1e'; ctx.fillRect(0, 0, size, size);
@@ -1945,9 +1925,7 @@
             } catch (e) { toast('Erro ao gravar.', 'error'); gravandoCanvas = false; }
         }
 
-        // ============================================================
-        // HISTÓRICO + REPLAY
-        // ============================================================
+        // === HISTÓRICO ===
         function carregarHistorico() {
             try { historicoPartidas = JSON.parse(localStorage.getItem('brain_damas_historico') || '[]'); }
             catch (_) { historicoPartidas = []; }
@@ -2046,9 +2024,7 @@
             }, 850);
         }
 
-        // ============================================================
-        // PLACAR LOCAL
-        // ============================================================
+        // === PLACAR ===
         function carregarPlacarLocal() {
             try {
                 const raw = JSON.parse(localStorage.getItem('brain_damas_placar') || '{}');
@@ -2066,18 +2042,14 @@
             if (vop) vop.textContent = placarSessao.derrotas;
         }
 
-        // ============================================================
-        // RANKING (desativado por privacidade)
-        // ============================================================
+        // === RANKING (desativado) ===
         async function carregarRanking() {
             const container = document.getElementById('ranking-list');
             if (!container) return;
             container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">Ranking desativado por privacidade.</div>';
         }
 
-        // ============================================================
-        // AGENDA
-        // ============================================================
+        // === AGENDA ===
         function carregarAgenda() {
             let agenda = [];
             try { agenda = JSON.parse(localStorage.getItem('brain_damas_agenda') || '[]'); } catch (_) {}
@@ -2131,9 +2103,7 @@
             toast(`📅 "${titulo}" agendado!`, 'success');
         });
 
-        // ============================================================
-        // AUTENTICAÇÃO
-        // ============================================================
+        // === AUTENTICAÇÃO ===
         async function garantirAutenticacao() {
             if (!firebaseDisponivel || !auth) return 'local_' + Math.random().toString(36).slice(2, 12);
             if (auth.currentUser) return auth.currentUser.uid;
@@ -2141,9 +2111,7 @@
             catch (e) { return 'local_' + Math.random().toString(36).slice(2, 12); }
         }
 
-        // ============================================================
-        // ENTRADA VIA LINK
-        // ============================================================
+        // === ENTRADA VIA LINK ===
         async function processarEntradaViaLink() {
             const params = new URLSearchParams(window.location.search);
             const codigoSala = params.get('sala');
@@ -2243,9 +2211,7 @@
             } catch (e) { toast('Erro ao entrar.', 'error'); }
         }
 
-        // ============================================================
-        // INICIALIZAÇÃO
-        // ============================================================
+        // === INICIALIZAÇÃO ===
         (async function() {
             carregarPlacarLocal(); carregarConquistas(); atualizarGridConquistas();
             carregarHistorico(); renderizarHistorico();
@@ -2262,7 +2228,6 @@
             if (tempoSalvo !== null) tempoLimiteSegundos = parseInt(tempoSalvo);
             atualizarSeletorTempo();
 
-            // v7.0: calcula offset do servidor UMA vez no arranque
             await calcularOffsetServidor();
 
             if (!apelido) {
@@ -2298,9 +2263,7 @@
             toast(ativo ? '🔍 Acessibilidade ON' : '🔍 Acessibilidade OFF', 'info');
         }
 
-        // ============================================================
-        // TABS
-        // ============================================================
+        // === TABS ===
         document.querySelectorAll('#lobby-tabs .tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 SoundFX.click();
@@ -2317,9 +2280,7 @@
             });
         });
 
-        // ============================================================
-        // MENU INICIAL
-        // ============================================================
+        // === MENU INICIAL ===
         document.getElementById('menu-btn-hotseat').addEventListener('click', () => {
             SoundFX.click();
             document.getElementById('menu-inicial').classList.add('hidden');
@@ -2340,9 +2301,7 @@
         document.getElementById('btn-voltar-menu-2').addEventListener('click', () => { SoundFX.click(); document.getElementById('painel-hotseat').classList.add('hidden'); document.getElementById('menu-inicial').classList.remove('hidden'); });
         document.getElementById('btn-voltar-menu-3').addEventListener('click', () => { SoundFX.click(); document.getElementById('painel-online').classList.add('hidden'); document.getElementById('menu-inicial').classList.remove('hidden'); });
 
-        // ============================================================
-        // SELETORES
-        // ============================================================
+        // === SELETORES ===
         function atualizarSeletorTempo() {
             document.querySelectorAll('#tempo-selector .tempo-opt').forEach(btn => {
                 const t = parseInt(btn.dataset.tempo);
@@ -2385,9 +2344,7 @@
         });
         document.getElementById('btn-jogar-ia').addEventListener('click', () => jogarContraIA(nivelIASelecionado));
 
-        // ============================================================
-        // HOT-SEAT
-        // ============================================================
+        // === HOT-SEAT ===
         document.getElementById('btn-iniciar-hotseat').addEventListener('click', () => {
             const n1 = document.getElementById('hotseat-nome-1').value.trim() || 'Jogador 1';
             const n2 = document.getElementById('hotseat-nome-2').value.trim() || 'Jogador 2';
@@ -2402,8 +2359,7 @@
             idSalaAtual = 'HS-' + Date.now().toString(36).toUpperCase();
             minhaCor = 'white';
             tabuleiro = criarTabuleiroInicial();
-            turnoAtual = 'white';
-            turnoInicioServidor = Date.now();
+            turnoAtual = 'white'; turnoInicioServidor = Date.now();
             jogoEncerrado = false; vencedorDeclarado = null; desistenciaProcessada = false;
             lancesDamasSemCaptura = 0; lancesFinaisEspeciais = 0; lancesTotais = 0;
             posicoesRepetidas = {}; tipoFinalEspecial = null;
@@ -2420,9 +2376,7 @@
             toast(`👥 ${nome1} vs ${nome2}`, 'success');
         }
 
-        // ============================================================
-        // CRIAR SALA
-        // ============================================================
+        // === CRIAR SALA ===
         async function criarSala({ comSenha = false, melhorDe = 0 } = {}) {
             if (!firebaseDisponivel) { toast('Firebase indisponível.', 'error'); return; }
             SoundFX.click();
@@ -2494,9 +2448,7 @@
             window.location.href = `${window.location.pathname}?sala=${codigo}&modo=assistir`;
         });
 
-        // ============================================================
-        // ENTRAR INTERFACE
-        // ============================================================
+        // === ENTRAR INTERFACE ===
         function entrarInterfaceJogo() {
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
@@ -2580,9 +2532,7 @@
                 ? `⚪ ${hotSeatNome1}` : `🔴 ${hotSeatNome2}`;
         }
 
-        // ============================================================
-        // RENDERIZAÇÃO
-        // ============================================================
+        // === RENDERIZAÇÃO ===
         function renderizarReguas() {
             const invertido = (minhaCor === 'red');
             const colunas = ['a','b','c','d','e','f','g','h'];
@@ -2665,9 +2615,7 @@
             document.getElementById('div-pos-jogo')?.classList.toggle('hidden', !jogoEncerrado);
         }
 
-        // ============================================================
-        // INTERAÇÃO
-        // ============================================================
+        // === INTERAÇÃO ===
         function clicarCasa(r, c) {
             if (modoEspectador || emPausa || iaPensando) return;
             if (jogoEncerrado) return;
@@ -2702,9 +2650,7 @@
             renderizarTabuleiro();
         }
 
-        // ============================================================
-        // REGRAS CBD
-        // ============================================================
+        // === REGRAS CBD ===
         function explorarCapturas(r, c, cor, tab, capturadasSet = new Set(), profundidade = 0) {
             if (profundidade > 20) return [];
             const peca = tab[r][c]; if (!peca) return [];
@@ -2739,14 +2685,12 @@
             for (const cap of caps) {
                 const novaTab = tab.map(row => row.slice());
                 const pecaAtual = novaTab[r][c];
-                const capturadaOriginal = novaTab[cap.capturada.r][cap.capturada.c];
-                novaTab[cap.r][cap.c] = pecaAtual;
-                novaTab[r][c] = null;
-                novaTab[cap.capturada.r][cap.capturada.c] = null;
+                novaTab[cap.r][cap.c] = pecaAtual; novaTab[r][c] = null; novaTab[cap.capturada.r][cap.capturada.c] = null;
                 const isPeao = !pecaAtual.includes('king');
                 const corDaPeca = pecaAtual.startsWith('white') ? 'white' : 'red';
-                const promoveuAgora = (isPeao && corDaPeca === 'white' && cap.r === 0) || (isPeao && corDaPeca === 'red' && cap.r === 7);
-                if (promoveuAgora) novaTab[cap.r][cap.c] = corDaPeca + '-king';
+                if ((isPeao && corDaPeca === 'white' && cap.r === 0) || (isPeao && corDaPeca === 'red' && cap.r === 7)) {
+                    novaTab[cap.r][cap.c] = corDaPeca + '-king';
+                }
                 const novasCapturadas = new Set(capturadasSet);
                 novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
                 const continuacoes = explorarCapturas(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
@@ -2816,9 +2760,7 @@
             return movs;
         }
 
-        // ============================================================
-        // EMPATE
-        // ============================================================
+        // === EMPATE ===
         function contarPecas(cor) {
             let pedras = 0, damas = 0;
             for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
@@ -2882,7 +2824,7 @@
         }
 
         // ============================================================
-        // v7.0: EXECUTAR MOVIMENTO (com runTransaction)
+        // v7.1: EXECUTAR MOVIMENTO com verificação correta de imobilização
         // ============================================================
         async function executarMovimento(deR, deC, paraR, paraC) {
             const mov = movimentosValidos.find(m => m.r === paraR && m.c === paraC);
@@ -2892,7 +2834,6 @@
             const isDamaMovida = pecaMovida.includes('king');
             let promoveu = false;
 
-            // Aplica movimento localmente (otimista)
             if (mov.caminhoCompleto && mov.caminhoCompleto.length > 0) {
                 let posAtual = { r: deR, c: deC };
                 let passos = 0;
@@ -2929,6 +2870,7 @@
             adicionarNotacao(corPeca, { r: deR, c: deC }, { r: paraR, c: paraC }, !!mov.captura, isDamaMovida || promoveu, mov.caminhoCompleto);
             atualizarContadoresAposLance({ capturada: mov.captura, pecaOriginal: pecaMovida });
 
+            // Verifica empate primeiro
             const resEmpate = verificarEmpate();
             if (resEmpate.empate) {
                 toast(`🤝 Empate! (${resEmpate.motivo})`, 'info');
@@ -2937,7 +2879,10 @@
                 return;
             }
 
+            // Muda turno
             turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
+            turnoInicioServidor = Date.now();
+
             if (modoHotSeat) {
                 hotSeatJogadorAtual = turnoAtual;
                 minhaCor = turnoAtual;
@@ -2949,28 +2894,36 @@
             aplicarIncremento(corPeca);
             atualizarRelogioUI();
 
-            const vencedorPorTabuleiro = verificarFimDeJogo();
+            // ⚡ v7.1: Verifica fim de jogo (imobilização) APÓS mudar turno
+            const vencedorPorImobilizacao = verificarImobilizacao();
 
-            // IA local
+            // Modo IA
             if (modoIA) {
-                if (vencedorPorTabuleiro) { jogoEncerrado = true; tratarFimDeJogo(vencedorPorTabuleiro, 'sem-movimentos'); return; }
+                if (vencedorPorImobilizacao) {
+                    jogoEncerrado = true;
+                    tratarFimDeJogo(vencedorPorImobilizacao, 'sem-movimentos');
+                    return;
+                }
                 if (turnoAtual !== minhaCor) setTimeout(() => fazerJogadaIA(), 350);
                 return;
             }
-            // Hot-seat local
+            // Modo Hot-Seat
             if (modoHotSeat) {
-                if (vencedorPorTabuleiro) { jogoEncerrado = true; tratarFimDeJogo(vencedorPorTabuleiro, 'sem-movimentos'); return; }
-                turnoInicioServidor = Date.now();
+                if (vencedorPorImobilizacao) {
+                    jogoEncerrado = true;
+                    tratarFimDeJogo(vencedorPorImobilizacao, 'sem-movimentos');
+                    return;
+                }
                 setTimeout(() => { iniciarTimer(); iniciarRelogio(); }, 300);
                 return;
             }
 
-            // ONLINE v7.0: transação atómica
+            // Modo Online: transação atómica
             try {
                 const resultado = await fns.runTransaction(fns.ref(db, `salas_damas/${idSalaAtual}`), (atual) => {
                     if (!atual) return null;
-                    if (atual.status === 'encerrado') return; // já fechado
-                    if (atual.turno !== corPeca) return; // turno mudou, aborta
+                    if (atual.status === 'encerrado') return;
+                    if (atual.turno !== corPeca) return;
                     const novoTurno = corPeca === 'white' ? 'red' : 'white';
                     return {
                         ...atual,
@@ -2985,17 +2938,16 @@
                             ts: Date.now(),
                             jogador: jogadorSessao.chave
                         },
-                        status: vencedorPorTabuleiro ? 'encerrado' : 'jogando',
-                        vencedor: vencedorPorTabuleiro || atual.vencedor || null,
-                        motivoFim: vencedorPorTabuleiro ? 'sem-movimentos' : atual.motivoFim || null,
+                        status: vencedorPorImobilizacao ? 'encerrado' : 'jogando',
+                        vencedor: vencedorPorImobilizacao || atual.vencedor || null,
+                        motivoFim: vencedorPorImobilizacao ? 'sem-movimentos' : atual.motivoFim || null,
                         ultimaAtividade: Date.now()
                     };
                 });
 
                 if (!resultado.committed) {
-                    console.warn('[v7.0] Lance rejeitado pela transação — ressincronizando');
+                    console.warn('[v7.1] Lance rejeitado — ressincronizando');
                     toast('⚠️ Lance rejeitado, a ressincronizar...', 'warn');
-                    // Recarrega estado remoto
                     const snap = await fns.get(fns.ref(db, `salas_damas/${idSalaAtual}`));
                     if (snap.exists()) {
                         const d = snap.val();
@@ -3009,7 +2961,7 @@
                     marcarAtividadeSala();
                 }
             } catch (e) {
-                console.error('[v7.0] Erro na transação:', e);
+                console.error('[v7.1] Erro na transação:', e);
                 toast('⚠️ Erro ao enviar lance.', 'error');
             }
         }
@@ -3029,39 +2981,22 @@
                         ultimaAtividade: Date.now()
                     };
                 });
-                if (!resultado.committed) console.log('[v7.0] Partida já encerrada por outro cliente');
+                if (!resultado.committed) console.log('[v7.1] Partida já encerrada por outro cliente');
             } catch (e) {
-                console.error('[v7.0] Erro ao encerrar:', e);
+                console.error('[v7.1] Erro ao encerrar:', e);
             }
         }
 
-        function verificarFimDeJogo() {
-            let temWhite = false, temRed = false;
-            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-                const p = tabuleiro[r][c]; if (!p) continue;
-                if (p.startsWith('white')) temWhite = true;
-                if (p.startsWith('red')) temRed = true;
-            }
-            if (!temWhite) return 'red';
-            if (!temRed) return 'white';
-            const corDaVez = turnoAtual;
-            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-                const p = tabuleiro[r][c];
-                if (p && p.startsWith(corDaVez)) { if (calcularMovimentos(r, c).length > 0) return null; }
-            }
-            return corDaVez === 'white' ? 'red' : 'white';
-        }
-
-        // ============================================================
-        // FIM DE JOGO
-        // ============================================================
+        // === FIM DE JOGO ===
         function tratarFimDeJogo(vencedor, motivo) {
             if (desistenciaProcessada) return;
             desistenciaProcessada = true;
             pararTimer(); pararRelogio();
+
             let euVenci, empate = (vencedor === 'empate');
             if (modoHotSeat) euVenci = (vencedor === hotSeatJogadorAtual);
             else euVenci = (vencedor === minhaCor);
+
             if (empate) {
                 SoundFX.empate(); vibrar([50, 50, 50]);
                 toast('🤝 Empate!', 'info');
@@ -3077,6 +3012,7 @@
                 toast('😢 Você perdeu.', 'error');
                 if (!modoHotSeat) adicionarAoHistorico('derrota', nomeOponente || 'Oponente');
             }
+
             const cData = carregarConquistas();
             if (empate) cData.stats.empates = (cData.stats.empates || 0) + 1;
             else if (euVenci) {
@@ -3117,9 +3053,7 @@
         function registrarVitoria() { placarSessao.vitorias++; salvarPlacarLocal(); atualizarPlacarUI(); }
         function registrarDerrota() { placarSessao.derrotas++; salvarPlacarLocal(); atualizarPlacarUI(); }
 
-        // ============================================================
-        // REVANCHE
-        // ============================================================
+        // === REVANCHE ===
         async function enviarPedidoRevanche() {
             SoundFX.click();
             if (modoIA) { jogarContraIA(nivelIA); return; }
@@ -3226,9 +3160,7 @@
             });
         }
 
-        // ============================================================
-        // IA
-        // ============================================================
+        // === IA ===
         const IA = (() => {
             const NIVEIS = {
                 1: { nome: '🐣 Iniciante', profundidade: 1, aleatoriedade: 0.60, usaPosicao: false },
@@ -3474,6 +3406,7 @@
             turnoInicioServidor = Date.now();
             iaPensando = false;
             renderizarTabuleiro();
+
             const resEmpate = verificarEmpate();
             if (resEmpate.empate) {
                 jogoEncerrado = true;
@@ -3481,14 +3414,19 @@
                 tratarFimDeJogo('empate', 'empate');
                 return;
             }
-            const venc = verificarFimDeJogo();
-            if (venc) { jogoEncerrado = true; tratarFimDeJogo(venc, 'sem-movimentos'); }
-            else { iniciarTimer(); iniciarRelogio(); }
+
+            // ⚡ v7.1: após IA jogar, verifica imobilização de ambos os lados
+            const vencedorImob = verificarImobilizacao();
+            if (vencedorImob) {
+                jogoEncerrado = true;
+                tratarFimDeJogo(vencedorImob, 'sem-movimentos');
+                return;
+            }
+
+            iniciarTimer(); iniciarRelogio();
         }
 
-        // ============================================================
-        // ESCUTA FIREBASE (com deteção de dessincronização)
-        // ============================================================
+        // === ESCUTA FIREBASE ===
         function escutarFirebase() {
             if (!firebaseDisponivel) return;
             if (unsubscribeFirebase) unsubscribeFirebase();
@@ -3504,11 +3442,8 @@
                 const turnoAnterior = turnoAtual;
                 const statusAnteriorEncerrado = jogoEncerrado;
 
-                // v7.0: deteção de versão
                 const versaoRemota = dados.versao || 0;
-                if (versaoRemota > versaoLocalSala) {
-                    versaoLocalSala = versaoRemota;
-                }
+                if (versaoRemota > versaoLocalSala) versaoLocalSala = versaoRemota;
 
                 tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
                 turnoAtual = dados.turno || 'white';
@@ -3598,8 +3533,20 @@
                     }
                 }
 
+                // ⚡ v7.1: quando o turno muda, verificar imobilização ANTES de arrancar timer
                 if (turnoAnterior !== turnoAtual) {
                     celulaSelecionada = null; movimentosValidos = [];
+
+                    if (!jogoEncerrado && !desistenciaProcessada && !modoEspectador) {
+                        const vencedorImob = verificarImobilizacao();
+                        if (vencedorImob) {
+                            jogoEncerrado = true;
+                            renderizarTabuleiro();
+                            tratarFimDeJogo(vencedorImob, 'sem-movimentos');
+                            return;
+                        }
+                    }
+
                     if (!jogoEncerrado && !modoEspectador && !emPausa) {
                         if (turnoAtual === minhaCor) {
                             setTimeout(() => SoundFX.notify(), 150);
@@ -3611,9 +3558,7 @@
             });
         }
 
-        // ============================================================
-        // CHAT
-        // ============================================================
+        // === CHAT ===
         function escutarChat() {
             if (!firebaseDisponivel) return;
             if (unsubscribeChat) unsubscribeChat();
@@ -3686,9 +3631,7 @@
             }
         });
 
-        // ============================================================
-        // TELA CHEIA
-        // ============================================================
+        // === TELA CHEIA ===
         function isFullscreen() { return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement); }
         async function entrarTelaCheia() {
             const el = document.documentElement;
@@ -3719,9 +3662,7 @@
         document.getElementById('btn-fullscreen-game').addEventListener('click', alternarTelaCheia);
         document.getElementById('fs-exit').addEventListener('click', () => { SoundFX.click(); sairTelaCheia(); });
 
-        // ============================================================
-        // SOM / MÚSICA / A11Y
-        // ============================================================
+        // === SOM / MÚSICA / A11Y ===
         const btnSom = document.getElementById('btn-som');
         const somPreferido = localStorage.getItem('brain_damas_som');
         if (somPreferido === 'off') { SoundFX.toggle(); btnSom.textContent = '🔇'; }
@@ -3744,9 +3685,7 @@
         document.getElementById('btn-a11y').addEventListener('click', () => { SoundFX.click(); aplicarA11y(!modoA11y); });
         document.getElementById('btn-alterar-apelido').addEventListener('click', () => { SoundFX.click(); abrirPromptApelido({ primeiraVez: false, atual: apelido }); });
 
-        // ============================================================
-        // TEMA / SFX
-        // ============================================================
+        // === TEMA / SFX ===
         function atualizarSeletorTema() {
             const atual = document.documentElement.getAttribute('data-theme') || 'dark';
             document.querySelectorAll('#theme-selector .theme-opt').forEach(btn => {
@@ -3778,9 +3717,7 @@
             });
         });
 
-        // ============================================================
-        // NOTAÇÃO — COPIAR
-        // ============================================================
+        // === COPIAR NOTAÇÃO ===
         document.getElementById('btn-copiar-notacao').addEventListener('click', async () => {
             const txt = exportarNotacao();
             if (!txt) { toast('Sem lances.', 'warn'); return; }
@@ -3793,9 +3730,7 @@
             }
         });
 
-        // ============================================================
-        // NAVEGAÇÃO
-        // ============================================================
+        // === NAVEGAÇÃO ===
         function irParaInicio() {
             SoundFX.click();
             if (firebaseDisponivel && idSalaAtual && jogadorSessao?.chave && !modoEspectador && !modoIA && !modoHotSeat) {
@@ -3804,7 +3739,6 @@
             limparSessao();
             setTimeout(() => { window.location.href = window.location.pathname; }, 100);
         }
-
         document.getElementById('btn-sair').addEventListener('click', () => {
             SoundFX.click();
             if (!idSalaAtual && !modoIA && !modoHotSeat && !modoEspectador) return;
@@ -3823,9 +3757,7 @@
             irParaInicio();
         });
 
-        // ============================================================
-        // BOTÕES FINAIS
-        // ============================================================
+        // === BOTÕES FINAIS ===
         document.getElementById('btn-desistir').addEventListener('click', confirmarDesistencia);
         document.getElementById('btn-pausa').addEventListener('click', togglePausa);
         document.getElementById('btn-empate').addEventListener('click', pedirEmpate);
@@ -3891,7 +3823,6 @@
             window.addEventListener(evt, () => SoundFX.click(), { once: true });
         });
 
-        // Cleanup ao fechar
         window.addEventListener('beforeunload', () => {
             try {
                 if (firebaseDisponivel && idSalaAtual && jogadorSessao?.chave && !modoEspectador && !modoIA && !modoHotSeat) {
@@ -3901,8 +3832,7 @@
             pararTimer(); pararRelogio(); pararHeartbeat(); pararMonitorSala(); pararMonitorAdversario(); pararMonitorConexao();
         });
 
-        console.log('[Brain Damas v7.0] Carregado com arquitetura à prova de latência');
-        console.log('[v7.0] Correções: serverTimestamp, runTransaction, heartbeat, deteção dessinc');
+        console.log('[Brain Damas v7.1] Carregado — correção de imobilização aplicada');
     </script>
-</body>
+       </body>
 </html>
