@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="pt" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0b1020">
+    <title>Brain Damas - Duelo Multiplayer</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #0b1020;
+            --bg-gradient-1: #1e1b4b;
+            --bg-gradient-2: #0b1020;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(148, 163, 184, 0.15);
+            --card-glow: rgba(99, 102, 241, 0.25);
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-subtle: #64748b;
+            --border-color: rgba(148, 163, 184, 0.18);
+            --border-strong: rgba(148, 163, 184, 0.35);
+            --input-bg: rgba(15, 23, 42, 0.7);
+            --btn-primary: #6366f1;
+            --btn-primary-hover: #818cf8;
+            --btn-accent: #8b5cf6;
+            --btn-whatsapp: #22c55e;
+            --c-green: #4ade80;
+            --c-blue: #38bdf8;
+            --c-amber: #f59e0b;
+            --c-red: #ef4444;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --shadow-card: 0 20px 60px -20px rgba(0, 0, 0, 0.65);
+            --shadow-btn: 0 6px 20px -6px rgba(99, 102, 241, 0.55);
+            --t-fast: 0.15s ease;
+            --t-base: 0.25s ease;
+            --t-slow: 0.4s ease;
+            --board-frame-1: #4a2f1e;
+            --board-frame-2: #2a1810;
+            --board-light: #e8d4a8;
+            --board-light-2: #dcc398;
+            --board-dark: #8b5a2b;
+            --board-dark-2: #7a4a20;
+            --board-coord: rgba(232, 212, 168, 0.9);
+            --board-coord-edge: #fbbf24;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #eef2ff;
+            --bg-gradient-1: #e0e7ff;
+            --bg-gradient-2: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.88);
+            --card-border: rgba(15, 23, 42, 0.08);
+            --card-glow: rgba(99, 102, 241, 0.15);
+            --text-color: #0f172a;
+            --text-muted: #475569;
+            --text-subtle: #64748b;
+            --border-color: rgba(15, 23, 42, 0.1);
+            --border-strong: rgba(15, 23, 42, 0.25);
+            --input-bg: rgba(255, 255, 255, 0.95);
+            --shadow-card: 0 20px 60px -20px rgba(30, 41, 59, 0.28);
+            --board-frame-1: #5a3a22;
+            --board-frame-2: #3a2418;
+            --board-light: #f0e0c0;
+            --board-light-2: #e6d0a8;
+            --board-dark: #a06a3a;
+            --board-dark-2: #8b5a2b;
+            --board-coord: rgba(240, 224, 192, 0.95);
+            --board-coord-edge: #fbbf24;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { height: 100%; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle at 20% 0%, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 55%);
+            background-attachment: fixed;
+            color: var(--text-color);
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            min-height: 100dvh;
+            transition: background-color var(--t-slow), color var(--t-base);
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body::before, body::after {
+            content: "";
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(130px);
+            opacity: 0.3;
+            z-index: -1;
+            pointer-events: none;
+        }
+        body::before { width: 420px; height: 420px; background: #6366f1; top: -140px; left: -120px; }
+        body::after { width: 460px; height: 460px; background: #8b5cf6; bottom: -180px; right: -140px; }
+
+        .container {
+            position: relative;
+            background: var(--card-bg);
+            backdrop-filter: blur(18px) saturate(160%);
+            -webkit-backdrop-filter: blur(18px) saturate(160%);
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card), 0 0 0 1px var(--card-border) inset;
+            width: 100%;
+            max-width: 520px;
+            text-align: center;
+            border: 1px solid var(--card-border);
+            animation: cardIn 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+            transition: max-width var(--t-base), padding var(--t-base);
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* === MODO TELA CHEIA === */
+        body.is-fullscreen { padding: 0; }
+        body.is-fullscreen .container {
+            max-width: 100vw;
+            width: 100vw;
+            border-radius: 0;
+            padding: 10px;
+            animation: none;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        body.is-fullscreen #lobby-screen { max-width: 520px; margin: 0 auto; width: 100%; }
+        body.is-fullscreen #game-screen {
+            max-width: min(100vw, calc(100dvh - 20px));
+            margin: 0 auto;
+            width: 100%;
+        }
+        body.is-fullscreen #btn-fullscreen { display: none; }
+
+        .fs-exit-btn {
+            position: fixed;
+            top: 12px; right: 12px; z-index: 5000; display: none;
+            width: 40px; height: 40px; padding: 0; border-radius: 50%;
+            background: rgba(15, 23, 42, 0.9) !important;
+            border: 1px solid rgba(148, 163, 184, 0.3) !important;
+            color: #f8fafc !important; font-size: 18px; cursor: pointer;
+            align-items: center; justify-content: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+        body.is-fullscreen .fs-exit-btn { display: flex; }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; flex-wrap: wrap; }
+        .btn-small {
+            width: auto; margin: 0; padding: 8px 14px; border-radius: 999px;
+            font-size: 13px; font-weight: 600; background: var(--input-bg);
+            border: 1px solid var(--border-color); color: var(--text-muted);
+            cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+        }
+        .btn-small:hover { color: var(--text-color); border-color: var(--border-strong); background: var(--card-bg); }
+
+        .lobby-box {
+            background: var(--input-bg); border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; text-align: left;
+        }
+        .lobby-box h3 { margin-top: 0; font-size: 15px; color: var(--c-blue); display: flex; align-items: center; gap: 6px; }
+        .lobby-box p { font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4; }
+
+        .user-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 10px; background: var(--input-bg); padding: 8px 12px;
+            border-radius: var(--radius-md); border: 1px solid var(--border-color);
+        }
+        .user-info-left { display: flex; align-items: center; gap: 8px; }
+        .user-avatar-display {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; font-size: 16px; border-radius: 50%;
+            background: linear-gradient(135deg, rgba(99,102,241,0.25), rgba(139,92,246,0.2));
+            border: 1px solid rgba(99, 102, 241, 0.4);
+        }
+        #display-nome { font-size: 13.5px; font-weight: 700; }
+
+        .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 6px; background: var(--text-subtle); }
+        .status-dot.online { background: var(--c-green); box-shadow: 0 0 8px var(--c-green); }
+        .status-dot.offline { background: var(--c-red); }
+
+        .match-info-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--input-bg); padding: 8px 12px; border-radius: var(--radius-md);
+            margin-bottom: 10px; font-size: 12px; border: 1px solid var(--border-color); font-weight: 600; gap: 8px;
+            flex-wrap: wrap;
+        }
+        #turno-status { color: var(--c-amber); }
+
+        .board-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: min(100%, calc(100dvh - 280px));
+            aspect-ratio: 1 / 1;
+            padding: 22px;
+            background: linear-gradient(145deg, var(--board-frame-1) 0%, var(--board-frame-2) 100%);
+            border-radius: 12px; box-shadow: 0 14px 40px -12px rgba(0, 0, 0, 0.75);
+            margin: 0 auto 12px; user-select: none;
+        }
+
+        /* === REGRAS / COORDENADAS DO TABULEIRO === */
+        .board-ruler {
+            position: absolute; font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; font-weight: 700; color: var(--board-coord);
+            pointer-events: none; z-index: 2;
+        }
+        .board-ruler-top { top: 0; left: 22px; right: 22px; height: 22px; display: grid; grid-template-columns: repeat(8, 1fr); align-items: center; }
+        .board-ruler-bottom { bottom: 0; left: 22px; right: 22px; height: 22px; display: grid; grid-template-columns: repeat(8, 1fr); align-items: center; }
+        .board-ruler-left { top: 22px; bottom: 22px; left: 0; width: 22px; display: grid; grid-template-rows: repeat(8, 1fr); align-items: center; }
+        .board-ruler-right { top: 22px; bottom: 22px; right: 0; width: 22px; display: grid; grid-template-rows: repeat(8, 1fr); align-items: center; }
+        .board-ruler .coord {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; height: 100%;
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9);
+            letter-spacing: 0.5px;
+        }
+        .board-ruler .coord.edge { font-weight: 800; color: var(--board-coord-edge); }
+
+        .checkers-grid {
+            display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr);
+            width: 100%; height: 100%; border-radius: 4px; overflow: hidden;
+            box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.55);
+        }
+
+        .square { display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
+        .square.light { background-color: var(--board-light); }
+        .square.dark { background-color: var(--board-dark); }
+        .square.selected { box-shadow: inset 0 0 0 3px rgba(99, 102, 241, 0.95) !important; }
+        .square.highlight { box-shadow: inset 0 0 0 3px rgba(74, 222, 128, 0.95) !important; }
+        .square.capture-target { box-shadow: inset 0 0 0 3px rgba(239, 68, 68, 0.95) !important; }
+
+        .piece {
+            width: 80%; height: 80%; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; position: relative;
+        }
+        .piece.white { background: radial-gradient(circle at 32% 28%, #ffffff 0%, #cdb896 75%, #a08768 100%); border: 1px solid #7a6350; }
+        .piece.red { background: radial-gradient(circle at 32% 28%, #dc2626 0%, #6b0f0f 80%, #450808 100%); border: 1px solid #2d0606; }
+        .piece.king::after { content: "♛"; font-size: 17px; position: absolute; color: #fbbf24; font-weight: 900; }
+
+        .piece-wrapper { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+        .piece-wrapper.movel { animation: pulse-movel 1.5s infinite; }
+        @keyframes pulse-movel { 0% { transform: scale(1); } 50% { transform: scale(1.055); } 100% { transform: scale(1); } }
+
+        .instructions { font-size: 12px; color: var(--text-muted); margin: 4px 0 10px; min-height: 18px; }
+
+        button, input {
+            width: 100%; padding: 10px 12px; border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); font-size: 13.5px; font-family: inherit; font-weight: 600;
+            background: var(--input-bg); color: var(--text-color); cursor: pointer;
+        }
+        button { border: none; color: #fff; background: linear-gradient(135deg, var(--btn-primary), var(--btn-accent)); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-whatsapp { background: linear-gradient(135deg, #16a34a, #22c55e); display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; }
+
+        .hidden { display: none !important; }
+
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); display: flex; align-items: center; justify-content: center;
+            z-index: 1000; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 24px; max-width: 380px; width: 100%; text-align: center; }
+        .modal-actions { display: flex; gap: 8px; margin-top: 15px; }
+        .modal-actions button { flex: 1; }
+
+        .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1100; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+        .toast { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid var(--c-blue); padding: 10px 16px; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; color: var(--text-color); }
+        .toast.success { border-left-color: var(--c-green); }
+        .toast.error { border-left-color: var(--c-red); }
+
+        /* === RESPONSIVO: OCUPAÇÃO MÁXIMA NO CELULAR === */
+        @media (max-width: 600px) {
+            body { padding: 6px; align-items: flex-start; }
+            .container { padding: 12px; max-width: 100vw; border-radius: 16px; }
+            .board-wrapper { max-width: 100%; padding: 20px; border-radius: 10px; }
+            .board-ruler { font-size: 10px; }
+            .board-ruler-top, .board-ruler-bottom { left: 20px; right: 20px; height: 20px; }
+            .board-ruler-left, .board-ruler-right { top: 20px; bottom: 20px; width: 20px; }
+            .top-bar { margin-bottom: 8px; }
+            .user-header { padding: 6px 10px; margin-bottom: 8px; }
+            .match-info-bar { padding: 6px 10px; font-size: 11.5px; margin-bottom: 8px; }
+            .instructions { font-size: 11.5px; margin: 4px 0 8px; }
+            .piece.king::after { font-size: 14px; }
+        }
+
+        @media (max-width: 380px) {
+            .board-ruler { font-size: 9px; }
+            .board-ruler-top, .board-ruler-bottom { left: 18px; right: 18px; height: 18px; }
+            .board-ruler-left, .board-ruler-right { top: 18px; bottom: 18px; width: 18px; }
+            .board-wrapper { padding: 18px; }
+        }
+
+        @media (max-height: 500px) and (orientation: landscape) {
+            body { padding: 4px; }
+            .container { padding: 8px; max-width: 100vw; }
+            .board-wrapper { max-width: min(100%, calc(100dvh - 120px)); }
+            .user-header, .match-info-bar { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="fs-exit-btn" id="fs-exit" type="button">✕</button>
+
+    <div class="container" id="main-container">
+        <div class="top-bar">
+            <button id="btn-sair" class="btn-small" type="button">🚪 Sair</button>
+            <div style="display:flex; gap:6px;">
+                <button id="btn-google" class="btn-small" type="button">🌐 Google</button>
+                <button id="btn-som" class="btn-small" type="button" title="Ativar/Desativar som">🔊</button>
+                <button id="btn-fullscreen" class="btn-small" type="button">⛶</button>
+                <button id="theme-toggle" class="btn-small" type="button">🌙</button>
+            </div>
+        </div>
+
+        <!-- LOBBY -->
+        <div id="lobby-screen">
+            <div class="user-header" style="justify-content: center;">
+                <div class="user-info-left">
+                    <span id="lobby-avatar" class="user-avatar-display">⏳</span>
+                    <strong id="lobby-nome">A carregar…</strong>
+                </div>
+            </div>
+
+            <div class="lobby-box">
+                <h3>♟️ Jogo de Damas Multiplayer</h3>
+                <p>Jogue uma partida clássica de Damas 8x8 em tempo real. Crie a sua sala e envie o link pelo WhatsApp!</p>
+                <button id="btn-criar-sala" type="button" disabled>🚀 Criar Sala de Damas</button>
+            </div>
+
+            <div class="lobby-box" style="margin-bottom: 0;">
+                <h3>🔗 Entrar com Código</h3>
+                <div style="display: flex; gap: 6px;">
+                    <input type="text" id="input-codigo-sala" placeholder="Ex: DAMAS-7812" style="font-family: monospace;">
+                    <button id="btn-entrar-sala" type="button" style="width: 120px;" disabled>Entrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA DO JOGO -->
+        <div id="game-screen" class="hidden">
+            <div class="user-header">
+                <div class="user-info-left">
+                    <span id="display-avatar" class="user-avatar-display">😀</span>
+                    <strong id="display-nome"></strong>
+                    <span id="oponente-status" class="status-dot"></span>
+                </div>
+                <span id="display-sala-tag" style="font-size: 11px; color: var(--c-blue);">Sala</span>
+            </div>
+
+            <div class="match-info-bar">
+                <span>Sua Peça: <strong id="info-minha-cor" style="color: var(--c-blue);">--</strong></span>
+                <span id="turno-status">Aguardando...</span>
+                <div style="display:flex; gap:6px;">
+                    <button id="btn-desistir" class="btn-small" type="button" style="padding: 4px 10px; font-size: 11px;">🏳️ Desistir</button>
+                    <button id="btn-fullscreen-game" class="btn-small" type="button" style="padding: 4px 10px; font-size: 11px;">⛶</button>
+                </div>
+            </div>
+
+            <p class="instructions" id="info-instrucao">Toque em sua peça e depois na casa de destino válida.</p>
+
+            <div class="board-wrapper">
+                <div class="board-ruler board-ruler-top" id="labels-top"></div>
+                <div class="board-ruler board-ruler-bottom" id="labels-bottom"></div>
+                <div class="board-ruler board-ruler-left" id="labels-left"></div>
+                <div class="board-ruler board-ruler-right" id="labels-right"></div>
+                <div class="checkers-grid" id="checkers-board"></div>
+            </div>
+
+            <!-- Barra pós-jogo -->
+            <div id="div-pos-jogo" class="hidden" style="display:flex; gap:8px; margin-top:8px;">
+                <button id="btn-jogar-novamente" type="button" style="flex:1; background: linear-gradient(135deg, #16a34a, #22c55e);">🔄 Jogar Novamente</button>
+                <button id="btn-sair-pos-jogo" type="button" style="flex:1;">🚪 Sair</button>
+            </div>
+
+            <!-- Pedido de revanche pendente -->
+            <div id="div-revanche-pendente" class="hidden" style="margin-top:8px; padding:10px 12px; background: var(--input-bg); border:1px solid var(--border-color); border-radius: var(--radius-md); font-size:13px; text-align:center;">
+                <span id="revanche-msg">Aguardando resposta...</span>
+                <div id="revanche-actions" style="display:none; gap:8px; margin-top:8px;">
+                    <button id="btn-aceitar-revanche" type="button" style="flex:1; background: linear-gradient(135deg, #16a34a, #22c55e); padding:8px 12px; font-size:13px;">✅ Aceitar</button>
+                    <button id="btn-recusar-revanche" type="button" style="flex:1; padding:8px 12px; font-size:13px;">❌ Recusar</button>
+                </div>
+            </div>
+
+            <div id="div-whatsapp" class="hidden">
+                <button id="btn-whatsapp" class="btn-whatsapp" type="button">💬 Convidar Colega pelo WhatsApp</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-card">
+            <div style="font-size: 40px; margin-bottom: 10px;" id="modal-icon">ℹ️</div>
+            <h2 id="modal-title" style="margin: 0 0 10px; font-size: 18px;">Título</h2>
+            <p id="modal-message" style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 15px; white-space: pre-line;"></p>
+            <div class="modal-actions" id="modal-actions"></div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <script type="module">
+        import { db, auth } from "./firebase-config.js";
+        import {
+            ref, get, set, update, onValue, runTransaction, onDisconnect, serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import {
+            signInAnonymously,
+            onAuthStateChanged,
+            GoogleAuthProvider,
+            signInWithPopup
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        let jogadorSessao = null;
+        let idSalaAtual = null;
+        let minhaCor = null;
+        let tabuleiro = [];
+        let celulaSelecionada = null;
+        let movimentosValidos = [];
+        let turnoAtual = 'white';
+        let jogoEncerrado = false;
+        let unsubscribeFirebase = null;
+        let oponenteConectado = false;
+        let capturaMultiplaEmAndamento = false;
+        let salaConfirmada = false;
+
+        // Estados pós-jogo
+        let vencedorDeclarado = null;
+        let pedidoRevancheDe = null;
+        let revancheAceita = false;
+        let desistenciaProcessada = false;
+
+        // ============================================================
+        // ============== SISTEMA DE SOM (Web Audio API) ==============
+        // ============================================================
+        const SoundFX = (() => {
+            let ctx = null;
+            let ativo = true;
+
+            function init() {
+                if (!ctx) {
+                    try {
+                        ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) { ativo = false; }
+                }
+                if (ctx && ctx.state === 'suspended') ctx.resume().catch(() => {});
+            }
+
+            function beep({ freq = 440, type = 'sine', duration = 0.12, gain = 0.15, sweepTo = null, delay = 0 }) {
+                if (!ativo) return;
+                init();
+                if (!ctx) return;
+                const now = ctx.currentTime + delay;
+                const osc = ctx.createOscillator();
+                const g = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, now);
+                if (sweepTo) osc.frequency.exponentialRampToValueAtTime(sweepTo, now + duration);
+                g.gain.setValueAtTime(0.0001, now);
+                g.gain.exponentialRampToValueAtTime(gain, now + 0.01);
+                g.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+                osc.connect(g); g.connect(ctx.destination);
+                osc.start(now); osc.stop(now + duration + 0.02);
+            }
+
+            return {
+                get ativo() { return ativo; },
+                toggle() { ativo = !ativo; if (ativo) { init(); this.click(); } return ativo; },
+                click() { beep({ freq: 600, type: 'triangle', duration: 0.05, gain: 0.06 }); },
+                select() { beep({ freq: 880, type: 'sine', duration: 0.08, gain: 0.08 }); },
+                move() {
+                    beep({ freq: 320, type: 'triangle', duration: 0.08, gain: 0.10 });
+                    beep({ freq: 480, type: 'sine', duration: 0.10, gain: 0.08, delay: 0.05 });
+                },
+                capture() {
+                    beep({ freq: 220, type: 'sawtooth', duration: 0.10, gain: 0.10 });
+                    beep({ freq: 160, type: 'square', duration: 0.14, gain: 0.08, delay: 0.08 });
+                },
+                king() {
+                    beep({ freq: 523, type: 'sine', duration: 0.10, gain: 0.10 });
+                    beep({ freq: 659, type: 'sine', duration: 0.10, gain: 0.10, delay: 0.10 });
+                    beep({ freq: 784, type: 'sine', duration: 0.16, gain: 0.12, delay: 0.20 });
+                },
+                win() {
+                    const notas = [523, 659, 784, 1046];
+                    notas.forEach((f, i) => beep({ freq: f, type: 'sine', duration: 0.18, gain: 0.12, delay: i * 0.13 }));
+                },
+                lose() {
+                    const notas = [440, 392, 330, 262];
+                    notas.forEach((f, i) => beep({ freq: f, type: 'triangle', duration: 0.20, gain: 0.11, delay: i * 0.15 }));
+                },
+                notify() {
+                    beep({ freq: 740, type: 'sine', duration: 0.09, gain: 0.09 });
+                    beep({ freq: 880, type: 'sine', duration: 0.11, gain: 0.09, delay: 0.09 });
+                },
+                error() {
+                    beep({ freq: 200, type: 'square', duration: 0.16, gain: 0.10 });
+                }
+            };
+        })();
+
+        function toast(mensagem, tipo = 'info') {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = `toast ${tipo}`;
+            el.textContent = mensagem;
+            container.appendChild(el);
+            if (tipo === 'success' || tipo === 'error') SoundFX.notify();
+            setTimeout(() => el.remove(), 3500);
+        }
+
+        function abrirModal({ icon = 'ℹ️', title, message, actions = [] }) {
+            document.getElementById('modal-icon').textContent = icon;
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            const container = document.getElementById('modal-actions');
+            container.innerHTML = '';
+            actions.forEach(acao => {
+                const btn = document.createElement('button');
+                btn.textContent = acao.label;
+                btn.onclick = () => {
+                    SoundFX.click();
+                    document.getElementById('modal-overlay').classList.remove('active');
+                    acao.onClick();
+                };
+                container.appendChild(btn);
+            });
+            document.getElementById('modal-overlay').classList.add('active');
+            SoundFX.notify();
+        }
+
+        function criarTabuleiroInicial() {
+            const t = Array.from({ length: 8 }, () => Array(8).fill(null));
+            for (let r = 0; r < 3; r++) for (let c = 0; c < 8; c++) if ((r + c) % 2 === 1) t[r][c] = 'red';
+            for (let r = 5; r < 8; r++) for (let c = 0; c < 8; c++) if ((r + c) % 2 === 1) t[r][c] = 'white';
+            return t;
+        }
+
+        function tabuleiroParaFirebase(t) { return t.map(row => row.slice()); }
+        function firebaseParaTabuleiro(raw) {
+            if (!raw) return criarTabuleiroInicial();
+            const t = [];
+            for (let r = 0; r < 8; r++) {
+                const linhaRaw = raw[r] || raw[String(r)] || {};
+                const linha = [];
+                for (let c = 0; c < 8; c++) linha.push(linhaRaw[c] ?? linhaRaw[String(c)] ?? null);
+                t.push(linha);
+            }
+            return t;
+        }
+
+        function salvarSessao() {
+            if (idSalaAtual && minhaCor) localStorage.setItem('brain_damas_sessao', JSON.stringify({ sala: idSalaAtual }));
+        }
+        function limparSessao() {
+            localStorage.removeItem('brain_damas_sessao');
+            const url = new URL(window.location.href);
+            url.searchParams.delete('sala');
+            window.history.replaceState({}, '', url.pathname);
+        }
+
+        // --- AUTENTICAÇÃO INSTANTÂNEA ---
+        async function garantirAutenticacao() {
+            if (auth.currentUser) return auth.currentUser.uid;
+            try {
+                const cred = await signInAnonymously(auth);
+                return cred.user.uid;
+            } catch (e) {
+                return 'local_' + Math.random().toString(36).slice(2, 12);
+            }
+        }
+
+        // --- ENTRADA AUTOMÁTICA VIA LINK ---
+        async function processarEntradaViaLink() {
+            const params = new URLSearchParams(window.location.search);
+            const codigoSala = params.get('sala');
+            if (!codigoSala) return false;
+
+            toast('⏳ A entrar automaticamente na sala...', 'info');
+            const uid = await garantirAutenticacao();
+            const nomeUser = auth.currentUser?.displayName || ('Jogador ' + Math.floor(Math.random() * 9000 + 1000));
+            jogadorSessao = { chave: uid, nome: nomeUser, avatar: '😀', isAnonimo: true };
+
+            let dados = null;
+            for (let i = 1; i <= 15; i++) {
+                try {
+                    const snap = await get(ref(db, 'salas_damas/' + codigoSala));
+                    if (snap.exists()) { dados = snap.val(); break; }
+                } catch (e) {}
+                await new Promise(r => setTimeout(r, 400));
+            }
+
+            if (!dados) {
+                abrirModal({
+                    icon: '🚫', title: 'Sala não encontrada',
+                    message: 'O link expirou ou a sala foi encerrada.',
+                    actions: [{ label: 'Voltar ao Início', onClick: () => { limparSessao(); window.location.href = window.location.pathname; } }]
+                });
+                return true;
+            }
+
+            const jogadores = dados.jogadores || {};
+            if (jogadores[uid]) {
+                idSalaAtual = codigoSala;
+                minhaCor = jogadores[uid].cor;
+                tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
+                turnoAtual = dados.turno || 'white';
+                jogoEncerrado = dados.status === 'encerrado';
+                vencedorDeclarado = dados.vencedor || null;
+                salaConfirmada = true;
+                salvarSessao();
+                entrarInterfaceJogo();
+                escutarFirebase();
+                toast('✅ Reconectado com sucesso!', 'success');
+                return true;
+            }
+
+            if (Object.keys(jogadores).length >= 2) {
+                abrirModal({
+                    icon: '👥', title: 'Sala Cheia',
+                    message: 'Esta sala já tem dois jogadores a participar.',
+                    actions: [{ label: 'Voltar ao Início', onClick: () => { limparSessao(); window.location.href = window.location.pathname; } }]
+                });
+                return true;
+            }
+
+            const coresExistentes = Object.values(jogadores).map(j => j.cor);
+            const corEscolhida = coresExistentes.includes('white') ? 'red' : 'white';
+
+            try {
+                await set(ref(db, `salas_damas/${codigoSala}/jogadores/${uid}`), {
+                    nome: nomeUser, cor: corEscolhida, online: true
+                });
+
+                idSalaAtual = codigoSala;
+                minhaCor = corEscolhida;
+                tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
+                turnoAtual = dados.turno || 'white';
+                jogoEncerrado = false;
+                salaConfirmada = true;
+                salvarSessao();
+                entrarInterfaceJogo();
+                escutarFirebase();
+                toast(`🎉 Entrou na partida como ${minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas'}!`, 'success');
+                return true;
+            } catch (e) {
+                toast('Erro ao entrar automaticamente na sala.', 'error');
+                return false;
+            }
+        }
+
+        // Inicialização Principal
+        (async function() {
+            const entrouPeloLink = await processarEntradaViaLink();
+            if (entrouPeloLink) return;
+
+            const uid = await garantirAutenticacao();
+            const prefs = JSON.parse(localStorage.getItem('brain_damas_prefs') || '{"nome":"Jogador ' + Math.floor(Math.random()*9000+1000) + '","avatar":"😀"}');
+            jogadorSessao = { chave: uid, nome: prefs.nome, avatar: prefs.avatar, isAnonimo: true };
+
+            document.getElementById('lobby-nome').textContent = jogadorSessao.nome;
+            document.getElementById('lobby-avatar').textContent = jogadorSessao.avatar;
+            document.getElementById('display-nome').textContent = jogadorSessao.nome;
+            document.getElementById('display-avatar').textContent = jogadorSessao.avatar;
+            document.getElementById('btn-criar-sala').disabled = false;
+            document.getElementById('btn-entrar-sala').disabled = false;
+        })();
+
+        // === CRIAR SALA ===
+        document.getElementById('btn-criar-sala').addEventListener('click', async () => {
+            SoundFX.click();
+            try {
+                idSalaAtual = 'DAMAS-' + Date.now().toString(36).toUpperCase();
+                minhaCor = 'white';
+                tabuleiro = criarTabuleiroInicial();
+                turnoAtual = 'white';
+                jogoEncerrado = false;
+                vencedorDeclarado = null;
+
+                await set(ref(db, 'salas_damas/' + idSalaAtual), {
+                    status: 'jogando',
+                    turno: 'white',
+                    tabuleiro: tabuleiroParaFirebase(tabuleiro),
+                    criador: jogadorSessao.chave,
+                    criadaEm: serverTimestamp(),
+                    jogadores: {
+                        [jogadorSessao.chave]: { nome: jogadorSessao.nome, cor: 'white', online: true }
+                    }
+                });
+
+                salaConfirmada = true;
+                salvarSessao();
+                entrarInterfaceJogo();
+                document.getElementById('div-whatsapp').classList.remove('hidden');
+                escutarFirebase();
+                toast('Sala criada com sucesso!', 'success');
+            } catch (e) {
+                toast('Erro ao criar sala.', 'error');
+            }
+        });
+
+        // === ENTRAR POR CÓDIGO ===
+        document.getElementById('btn-entrar-sala').addEventListener('click', async () => {
+            const codigo = document.getElementById('input-codigo-sala').value.trim().toUpperCase();
+            if (!codigo) { toast('Digite o código da sala.', 'warn'); SoundFX.error(); return; }
+            SoundFX.click();
+            window.location.href = `${window.location.pathname}?sala=${codigo}`;
+        });
+
+        function entrarInterfaceJogo() {
+            document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('display-sala-tag').textContent = `Sala: ${idSalaAtual}`;
+            document.getElementById('info-minha-cor').textContent = minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
+            renderizarTabuleiro();
+        }
+
+        document.getElementById('btn-whatsapp').addEventListener('click', () => {
+            SoundFX.click();
+            const link = `${window.location.origin}${window.location.pathname}?sala=${encodeURIComponent(idSalaAtual)}`;
+            const msg = encodeURIComponent(`♟️ *Convite para Damas*\n\nDesafiado(a) por *${jogadorSessao.nome}*!\n\n👉 Clique para entrar direto:\n${link}`);
+            window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
+        });
+
+        // ============================================================
+        // =============== RENDERIZAÇÃO DAS REGRAS ====================
+        // ============================================================
+        function renderizarReguas() {
+            const invertido = (minhaCor === 'red');
+            const colunas = ['a','b','c','d','e','f','g','h'];
+            const linhas = ['8','7','6','5','4','3','2','1'];
+
+            const topo    = invertido ? linhas.slice().reverse() : linhas.slice();
+            const base    = invertido ? linhas.slice()           : linhas.slice().reverse();
+            const esquerda = invertido ? colunas.slice().reverse() : colunas.slice();
+            const direita  = invertido ? colunas.slice()           : colunas.slice().reverse();
+
+            const buildCols = (arr) => arr.map((v, i) => {
+                const edge = (i === 0 || i === arr.length - 1) ? ' edge' : '';
+                return `<div class="coord${edge}">${v}</div>`;
+            }).join('');
+
+            const buildRows = (arr) => arr.map((v, i) => {
+                const edge = (i === 0 || i === arr.length - 1) ? ' edge' : '';
+                return `<div class="coord${edge}">${v}</div>`;
+            }).join('');
+
+            const lt = document.getElementById('labels-top');
+            const lb = document.getElementById('labels-bottom');
+            const ll = document.getElementById('labels-left');
+            const lr = document.getElementById('labels-right');
+
+            if (lt) lt.innerHTML = buildCols(topo);
+            if (lb) lb.innerHTML = buildCols(base);
+            if (ll) ll.innerHTML = buildRows(esquerda);
+            if (lr) lr.innerHTML = buildRows(direita);
+        }
+
+        function renderizarTabuleiro() {
+            const grid = document.getElementById('checkers-board');
+            if (!grid) return;
+            grid.innerHTML = '';
+            const invertido = (minhaCor === 'red');
+
+            for (let vr = 0; vr < 8; vr++) {
+                for (let vc = 0; vc < 8; vc++) {
+                    const r = invertido ? (7 - vr) : vr;
+                    const c = invertido ? (7 - vc) : vc;
+                    const square = document.createElement('div');
+                    const isDark = (r + c) % 2 === 1;
+                    square.className = `square ${isDark ? 'dark' : 'light'}`;
+
+                    if (celulaSelecionada?.r === r && celulaSelecionada?.c === c) square.classList.add('selected');
+                    const mov = movimentosValidos.find(m => m.r === r && m.c === c);
+                    if (mov) square.classList.add(mov.captura ? 'capture-target' : 'highlight');
+
+                    const peca = tabuleiro[r]?.[c];
+                    if (peca) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'piece-wrapper';
+                        const pieceEl = document.createElement('div');
+                        const corClasse = peca.startsWith('white') ? 'white' : 'red';
+                        const isDama = peca.includes('king') ? ' king' : '';
+                        pieceEl.className = `piece ${corClasse}${isDama}`;
+                        wrapper.appendChild(pieceEl);
+                        square.appendChild(wrapper);
+                    }
+
+                    if (isDark) square.addEventListener('click', () => clicarCasa(r, c));
+                    grid.appendChild(square);
+                }
+            }
+
+            renderizarReguas();
+
+            document.getElementById('turno-status').textContent = jogoEncerrado ? '🏁 Fim' : (turnoAtual === minhaCor ? 'Sua vez!' : 'Vez do oponente...');
+
+            // Mostra/esconde barra pós-jogo
+            if (jogoEncerrado) {
+                document.getElementById('div-pos-jogo')?.classList.remove('hidden');
+            } else {
+                document.getElementById('div-pos-jogo')?.classList.add('hidden');
+            }
+        }
+
+        function clicarCasa(r, c) {
+            if (jogoEncerrado || turnoAtual !== minhaCor) return;
+            const peca = tabuleiro[r][c];
+
+            if (capturaMultiplaEmAndamento) {
+                if (movimentosValidos.some(m => m.r === r && m.c === c)) executarMovimento(celulaSelecionada.r, celulaSelecionada.c, r, c);
+                return;
+            }
+
+            if (peca && peca.startsWith(minhaCor)) {
+                SoundFX.select();
+                celulaSelecionada = { r, c };
+                movimentosValidos = calcularMovimentos(r, c);
+                renderizarTabuleiro();
+                return;
+            }
+
+            if (celulaSelecionada && movimentosValidos.some(m => m.r === r && m.c === c)) {
+                executarMovimento(celulaSelecionada.r, celulaSelecionada.c, r, c);
+                return;
+            }
+
+            SoundFX.click();
+            celulaSelecionada = null;
+            movimentosValidos = [];
+            renderizarTabuleiro();
+        }
+
+        function calcularMovimentos(r, c) {
+            const peca = tabuleiro[r][c];
+            if (!peca) return [];
+            const isDama = peca.includes('king');
+            const cor = peca.startsWith('white') ? 'white' : 'red';
+            const movimentos = [];
+
+            if (isDama) {
+                for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
+                    let nr = r + dr, nc = c + dc, capturada = null;
+                    while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+                        const alvo = tabuleiro[nr][nc];
+                        if (!alvo) {
+                            if (!capturada) movimentos.push({ r: nr, c: nc });
+                            else { movimentos.push({ r: nr, c: nc, captura: capturada }); break; }
+                        } else if (alvo.startsWith(cor)) break;
+                        else {
+                            if (capturada) break;
+                            capturada = { r: nr, c: nc };
+                        }
+                        nr += dr; nc += dc;
+                    }
+                }
+            } else {
+                const direcoesFrente = cor === 'white' ? [-1] : [+1];
+                for (const dr of direcoesFrente) for (const dc of [-1, +1]) {
+                    const nr = r + dr, nc = c + dc;
+                    if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tabuleiro[nr][nc]) movimentos.push({ r: nr, c: nc });
+                }
+                for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
+                    const mr = r + dr, mc = c + dc;
+                    const jr = r + 2 * dr, jc = c + 2 * dc;
+                    if (jr >= 0 && jr < 8 && jc >= 0 && jc < 8) {
+                        const meio = tabuleiro[mr][mc];
+                        if (meio && !meio.startsWith(cor) && !tabuleiro[jr][jc]) movimentos.push({ r: jr, c: jc, captura: { r: mr, c: mc } });
+                    }
+                }
+            }
+            const capturas = movimentos.filter(m => m.captura);
+            return capturas.length > 0 ? capturas : movimentos;
+        }
+
+        async function executarMovimento(deR, deC, paraR, paraC) {
+            const mov = movimentosValidos.find(m => m.r === paraR && m.c === paraC);
+            if (!mov) return;
+
+            const pecaMovida = tabuleiro[deR][deC];
+            tabuleiro[paraR][paraC] = pecaMovida;
+            tabuleiro[deR][deC] = null;
+
+            if (mov.captura) {
+                tabuleiro[mov.captura.r][mov.captura.c] = null;
+                SoundFX.capture();
+            } else {
+                SoundFX.move();
+            }
+
+            let promoveu = false;
+            if (pecaMovida === 'white' && paraR === 0) { tabuleiro[paraR][paraC] = 'white-king'; promoveu = true; }
+            if (pecaMovida === 'red' && paraR === 7) { tabuleiro[paraR][paraC] = 'red-king'; promoveu = true; }
+            if (promoveu) {
+                setTimeout(() => SoundFX.king(), 120);
+                toast('♛ Dama promovida!', 'success');
+            }
+
+            turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
+            celulaSelecionada = null;
+            movimentosValidos = [];
+            renderizarTabuleiro();
+
+            // Verifica fim de jogo por peças/movimentos
+            const vencedorPorTabuleiro = verificarFimDeJogo();
+
+            const payload = {
+                tabuleiro: tabuleiroParaFirebase(tabuleiro),
+                turno: turnoAtual,
+                status: vencedorPorTabuleiro ? 'encerrado' : 'jogando'
+            };
+            if (vencedorPorTabuleiro) {
+                payload.vencedor = vencedorPorTabuleiro;
+                payload.motivoFim = 'sem-movimentos';
+            }
+            await update(ref(db, `salas_damas/${idSalaAtual}`), payload);
+        }
+
+        // Retorna 'white' | 'red' | null se o jogo terminou por falta de peças/movimentos
+        function verificarFimDeJogo() {
+            let temWhite = false, temRed = false;
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                const p = tabuleiro[r][c];
+                if (!p) continue;
+                if (p.startsWith('white')) temWhite = true;
+                if (p.startsWith('red')) temRed = true;
+            }
+            if (!temWhite) return 'red';
+            if (!temRed) return 'white';
+
+            const corDaVez = turnoAtual;
+            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                const p = tabuleiro[r][c];
+                if (p && p.startsWith(corDaVez)) {
+                    if (calcularMovimentos(r, c).length > 0) return null;
+                }
+            }
+            return corDaVez === 'white' ? 'red' : 'white';
+        }
+
+        // ============================================================
+        // ============== FIM DE JOGO / REVANCHE / DESISTÊNCIA ========
+        // ============================================================
+        function tratarFimDeJogo(vencedor, motivo) {
+            const euVenci = (vencedor === minhaCor);
+
+            if (euVenci) {
+                SoundFX.win();
+                toast('🏆 Você venceu a partida!', 'success');
+            } else {
+                SoundFX.lose();
+                toast('😢 Você perdeu a partida.', 'error');
+            }
+
+            const motivoTxt = motivo === 'desistencia'
+                ? (euVenci ? 'O adversário desistiu.' : 'Você desistiu da partida.')
+                : (euVenci ? 'O adversário ficou sem movimentos.' : 'Você ficou sem movimentos.');
+
+            setTimeout(() => {
+                abrirModal({
+                    icon: euVenci ? '🏆' : '💔',
+                    title: euVenci ? 'Vitória!' : 'Derrota',
+                    message: motivoTxt + '\n\nDeseja jogar novamente?',
+                    actions: [
+                        { label: '🔄 Jogar Novamente', onClick: () => enviarPedidoRevanche() },
+                        {
+                            label: '🚪 Sair',
+                            onClick: () => {
+                                limparSessao();
+                                if (isFullscreen()) sairTelaCheia();
+                                window.location.href = window.location.pathname;
+                            }
+                        }
+                    ]
+                });
+            }, 600);
+
+            document.getElementById('div-pos-jogo')?.classList.remove('hidden');
+        }
+
+        async function enviarPedidoRevanche() {
+            SoundFX.click();
+            try {
+                await update(ref(db, `salas_damas/${idSalaAtual}`), {
+                    pedidoRevanche: {
+                        de: jogadorSessao.chave,
+                        nome: jogadorSessao.nome,
+                        em: Date.now()
+                    }
+                });
+                toast('⏳ Pedido de revanche enviado...', 'info');
+            } catch (e) {
+                toast('Erro ao enviar pedido.', 'error');
+            }
+        }
+
+        function mostrarPedidoRevanche(nomeOponente) {
+            const div = document.getElementById('div-revanche-pendente');
+            if (!div) return;
+            div.classList.remove('hidden');
+            document.getElementById('revanche-msg').textContent = `🔄 ${nomeOponente} quer jogar novamente!`;
+            document.getElementById('revanche-actions').style.display = 'flex';
+        }
+
+        function esconderPedidoRevanche() {
+            const div = document.getElementById('div-revanche-pendente');
+            if (!div) return;
+            div.classList.add('hidden');
+            const acts = document.getElementById('revanche-actions');
+            if (acts) acts.style.display = 'none';
+        }
+
+        async function aceitarRevanche() {
+            SoundFX.click();
+            try {
+                const jogadoresSnap = await get(ref(db, `salas_damas/${idSalaAtual}/jogadores`));
+                const jogadores = jogadoresSnap.val() || {};
+                const novasCores = {};
+                Object.entries(jogadores).forEach(([uid, j]) => {
+                    novasCores[uid] = { ...j, cor: j.cor === 'white' ? 'red' : 'white' };
+                });
+
+                await update(ref(db, `salas_damas/${idSalaAtual}`), {
+                    status: 'jogando',
+                    turno: 'white',
+                    tabuleiro: tabuleiroParaFirebase(criarTabuleiroInicial()),
+                    vencedor: null,
+                    motivoFim: null,
+                    desistente: null,
+                    pedidoRevanche: null,
+                    jogadores: novasCores,
+                    reiniciadaEm: serverTimestamp()
+                });
+                toast('🎮 Nova partida iniciada!', 'success');
+            } catch (e) {
+                toast('Erro ao aceitar revanche.', 'error');
+            }
+        }
+
+        async function recusarRevanche() {
+            SoundFX.click();
+            try {
+                await update(ref(db, `salas_damas/${idSalaAtual}`), { pedidoRevanche: null });
+                toast('Revanche recusada.', 'info');
+            } catch (e) {}
+        }
+
+        function resetarParaNovaPartida(dados) {
+            desistenciaProcessada = false;
+            pedidoRevancheDe = null;
+            revancheAceita = false;
+            celulaSelecionada = null;
+            movimentosValidos = [];
+            jogoEncerrado = false;
+            vencedorDeclarado = null;
+            tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
+            turnoAtual = dados.turno || 'white';
+
+            // Atualiza minha cor (pode ter sido trocada)
+            const jogadores = dados.jogadores || {};
+            if (jogadores[jogadorSessao.chave]?.cor) {
+                minhaCor = jogadores[jogadorSessao.chave].cor;
+                document.getElementById('info-minha-cor').textContent = minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
+            }
+
+            document.getElementById('div-pos-jogo')?.classList.add('hidden');
+            esconderPedidoRevanche();
+            renderizarTabuleiro();
+            SoundFX.notify();
+            toast('🎮 Nova partida iniciada!', 'success');
+        }
+
+        function confirmarDesistencia() {
+            SoundFX.click();
+            abrirModal({
+                icon: '🏳️',
+                title: 'Desistir da partida?',
+                message: 'Se você desistir, seu adversário será declarado vencedor.',
+                actions: [
+                    { label: 'Cancelar', onClick: () => {} },
+                    {
+                        label: 'Sim, desistir',
+                        onClick: async () => {
+                            try {
+                                const corAdversaria = minhaCor === 'white' ? 'red' : 'white';
+                                await update(ref(db, `salas_damas/${idSalaAtual}`), {
+                                    status: 'encerrado',
+                                    vencedor: corAdversaria,
+                                    motivoFim: 'desistencia',
+                                    desistente: jogadorSessao.chave
+                                });
+                            } catch (e) {
+                                toast('Erro ao desistir.', 'error');
+                            }
+                        }
+                    }
+                ]
+            });
+        }
+
+        // ============================================================
+        // ============== ESCUTA FIREBASE (com revanche) ==============
+        // ============================================================
+        function escutarFirebase() {
+            if (unsubscribeFirebase) unsubscribeFirebase();
+            unsubscribeFirebase = onValue(ref(db, 'salas_damas/' + idSalaAtual), (snapshot) => {
+                if (!snapshot.exists()) return;
+                const dados = snapshot.val();
+                const turnoAnterior = turnoAtual;
+                const statusAnteriorEncerrado = jogoEncerrado;
+
+                tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
+                turnoAtual = dados.turno || 'white';
+                jogoEncerrado = dados.status === 'encerrado';
+                vencedorDeclarado = dados.vencedor || null;
+
+                // Detecta desistência
+                if (jogoEncerrado && dados.motivoFim === 'desistencia' && !desistenciaProcessada) {
+                    desistenciaProcessada = true;
+                    tratarFimDeJogo(vencedorDeclarado, 'desistencia');
+                }
+
+                // Detecta fim por tabuleiro
+                if (jogoEncerrado && dados.motivoFim === 'sem-movimentos' && !desistenciaProcessada) {
+                    desistenciaProcessada = true;
+                    tratarFimDeJogo(vencedorDeclarado, 'sem-movimentos');
+                }
+
+                // Detecta pedido de revanche
+                const pedido = dados.pedidoRevanche || null;
+                if (pedido && pedido.de !== jogadorSessao.chave) {
+                    if (pedidoRevancheDe !== pedido.de) {
+                        pedidoRevancheDe = pedido.de;
+                        SoundFX.notify();
+                        mostrarPedidoRevanche(pedido.nome || 'Oponente');
+                    }
+                } else if (!pedido) {
+                    pedidoRevancheDe = null;
+                    esconderPedidoRevanche();
+                }
+
+                // Detecta reinício (revanche aceita)
+                if (dados.status === 'jogando' && statusAnteriorEncerrado) {
+                    resetarParaNovaPartida(dados);
+                }
+
+                // Atualiza minha cor caso tenha sido trocada
+                const jogadores = dados.jogadores || {};
+                if (jogadores[jogadorSessao.chave]?.cor) {
+                    const novaCor = jogadores[jogadorSessao.chave].cor;
+                    if (novaCor !== minhaCor) {
+                        minhaCor = novaCor;
+                        document.getElementById('info-minha-cor').textContent = minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
+                    }
+                }
+
+                // Som quando a vez passa para o jogador
+                if (turnoAnterior !== turnoAtual && turnoAtual === minhaCor && !jogoEncerrado) {
+                    setTimeout(() => SoundFX.notify(), 150);
+                }
+
+                renderizarTabuleiro();
+            });
+        }
+
+        // ============================================================
+        // ============== TELA CHEIA ==================================
+        // ============================================================
+        function isFullscreen() {
+            return !!(document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement);
+        }
+
+        async function entrarTelaCheia() {
+            const el = document.documentElement;
+            try {
+                if (el.requestFullscreen) await el.requestFullscreen({ navigationUI: 'hide' });
+                else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+                else if (el.msRequestFullscreen) el.msRequestFullscreen();
+                else { document.body.classList.add('is-fullscreen'); toast('Modo imersivo ativado (iOS).', 'info'); return; }
+                document.body.classList.add('is-fullscreen');
+                SoundFX.click();
+            } catch (e) {
+                document.body.classList.add('is-fullscreen');
+            }
+        }
+
+        async function sairTelaCheia() {
+            try {
+                if (document.exitFullscreen) await document.exitFullscreen();
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                else if (document.msExitFullscreen) document.msExitFullscreen();
+            } catch (_) {}
+            document.body.classList.remove('is-fullscreen');
+        }
+
+        function alternarTelaCheia() {
+            if (isFullscreen() || document.body.classList.contains('is-fullscreen')) sairTelaCheia();
+            else entrarTelaCheia();
+        }
+
+        ['fullscreenchange', 'webkitfullscreenchange', 'msfullscreenchange'].forEach(evt => {
+            document.addEventListener(evt, () => {
+                if (isFullscreen()) document.body.classList.add('is-fullscreen');
+                else if (!document.body.classList.contains('is-fullscreen')) document.body.classList.remove('is-fullscreen');
+            });
+        });
+
+        document.getElementById('btn-fullscreen').addEventListener('click', alternarTelaCheia);
+        document.getElementById('btn-fullscreen-game').addEventListener('click', alternarTelaCheia);
+        document.getElementById('fs-exit').addEventListener('click', () => { SoundFX.click(); sairTelaCheia(); });
+
+        // ============================================================
+        // ============== SOM E TEMA ==================================
+        // ============================================================
+        const btnSom = document.getElementById('btn-som');
+        const somPreferido = localStorage.getItem('brain_damas_som');
+        if (somPreferido === 'off') {
+            SoundFX.toggle();
+            btnSom.textContent = '🔇';
+        }
+        btnSom.addEventListener('click', () => {
+            const ativo = SoundFX.toggle();
+            btnSom.textContent = ativo ? '🔊' : '🔇';
+            localStorage.setItem('brain_damas_som', ativo ? 'on' : 'off');
+        });
+
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            SoundFX.click();
+            const html = document.documentElement;
+            const atual = html.getAttribute('data-theme');
+            const novo = atual === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', novo);
+            themeToggle.textContent = novo === 'dark' ? '🌙' : '☀️';
+            localStorage.setItem('brain_damas_tema', novo);
+        });
+
+        const temaSalvo = localStorage.getItem('brain_damas_tema');
+        if (temaSalvo) {
+            document.documentElement.setAttribute('data-theme', temaSalvo);
+            themeToggle.textContent = temaSalvo === 'dark' ? '🌙' : '☀️';
+        }
+
+        // ============================================================
+        // ============== SAIR / DESISTIR / REVANCHE ==================
+        // ============================================================
+        document.getElementById('btn-sair').addEventListener('click', () => {
+            SoundFX.click();
+            abrirModal({
+                icon: '🚪',
+                title: 'Sair da partida?',
+                message: 'Você pode perder o progresso da partida atual.',
+                actions: [
+                    { label: 'Cancelar', onClick: () => {} },
+                    {
+                        label: 'Sair',
+                        onClick: async () => {
+                            try {
+                                if (idSalaAtual && jogadorSessao?.chave) {
+                                    await update(ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}`), { online: false });
+                                }
+                            } catch (_) {}
+                            limparSessao();
+                            if (isFullscreen()) await sairTelaCheia();
+                            window.location.href = window.location.pathname;
+                        }
+                    }
+                ]
+            });
+        });
+
+        document.getElementById('btn-desistir').addEventListener('click', confirmarDesistencia);
+
+        document.getElementById('btn-jogar-novamente').addEventListener('click', enviarPedidoRevanche);
+
+        document.getElementById('btn-sair-pos-jogo').addEventListener('click', () => {
+            SoundFX.click();
+            limparSessao();
+            if (isFullscreen()) sairTelaCheia();
+            window.location.href = window.location.pathname;
+        });
+
+        document.getElementById('btn-aceitar-revanche').addEventListener('click', aceitarRevanche);
+        document.getElementById('btn-recusar-revanche').addEventListener('click', recusarRevanche);
+
+        // Desbloqueia áudio no primeiro toque
+        ['pointerdown', 'touchstart', 'keydown'].forEach(evt => {
+            window.addEventListener(evt, () => SoundFX.click(), { once: true });
+        });
+    </script>
+</body>
+</html>
