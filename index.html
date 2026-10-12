@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1020">
-    <title>Brain Damas - Duelo Multiplayer + IA (v3.1 - Regras Brasileiras)</title>
+    <title>Brain Damas - Regras Brasileiras Oficiais (v4.0)</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -295,6 +295,7 @@
         }
         .historico-item.vitoria { border-left: 4px solid var(--c-green); }
         .historico-item.derrota { border-left: 4px solid var(--c-red); }
+        .historico-item.empate { border-left: 4px solid var(--c-amber); }
         .historico-info { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; flex: 1; }
         .historico-data { font-size: 10.5px; color: var(--text-muted); }
         .historico-btn { width: auto; padding: 5px 10px; font-size: 11px; }
@@ -578,7 +579,7 @@
             <div id="tab-jogo">
                 <div class="lobby-box">
                     <h3>🤖 Jogar contra o Computador</h3>
-                    <p>Escolha o nível de dificuldade. As regras brasileiras oficiais são aplicadas automaticamente.</p>
+                    <p>Escolha o nível de dificuldade. Regras brasileiras oficiais (CBD) aplicadas integralmente.</p>
                     <div class="tipo-selector" id="ia-selector">
                         <button class="tipo-opt ia-opt" data-nivel="1" type="button">🐣 Iniciante</button>
                         <button class="tipo-opt ia-opt" data-nivel="2" type="button">🐤 Fácil</button>
@@ -591,7 +592,7 @@
 
                 <div class="lobby-box">
                     <h3>♟️ Multiplayer Online</h3>
-                    <p><strong>Regras brasileiras</strong>: captura obrigatória pela maior quantidade; dama captura em cadeia; empate após 40 lances.</p>
+                    <p><strong>Regras brasileiras oficiais</strong>: captura obrigatória pela maior quantidade; dama captura em cadeia; empate após 20 lances.</p>
                     <button id="btn-criar-sala" type="button" disabled>🚀 Criar Sala</button>
                     <button id="btn-criar-sala-senha" type="button" class="btn-secundario" style="margin-top:6px;" disabled>🔒 Criar Sala com Senha</button>
                     <div style="display:flex; gap:6px; margin-top:6px;">
@@ -930,8 +931,11 @@
         let capturaMultiplaAtiva = false;
         let capturaMultiplaPos = null;
 
-        let lancesSemCaptura = 0;
-        let lancesDamas = 0;
+        // === CONTADORES DE EMPATE (regras brasileiras oficiais) ===
+        let lancesDamasSemCaptura = 0;  // 20 lances sucessivos de damas sem captura/deslocamento
+        let lancesFinaisEspeciais = 0;   // 5 lances para finais específicos
+        let posicoesRepetidas = {};      // para repetição 3x
+        let tipoFinalEspecial = null;   // '2v2', '2v1', '1v1+pedra', etc.
 
         let emPausa = false;
         let pausaPendenteDe = null;
@@ -1602,7 +1606,7 @@
             list.innerHTML = historicoPartidas.map((p, i) => {
                 const d = new Date(p.data);
                 const dataFmt = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
-                const cls = p.resultado === 'vitoria' ? 'vitoria' : 'derrota';
+                const cls = p.resultado === 'vitoria' ? 'vitoria' : (p.resultado === 'empate' ? 'empate' : 'derrota');
                 const emoji = p.resultado === 'vitoria' ? '🏆' : (p.resultado === 'empate' ? '🤝' : '💔');
                 const label = p.resultado === 'vitoria' ? 'Vitória' : (p.resultado === 'empate' ? 'Empate' : 'Derrota');
                 return `<div class="historico-item ${cls}">
@@ -2048,7 +2052,7 @@
                 euPronto = false; adversarioPronto = false; ambosProntos = false;
                 capturaMultiplaAtiva = false; capturaMultiplaPos = null;
                 emPausa = false; pausaPendenteDe = null; pausaSolicitadaPorMim = false;
-                lancesSemCaptura = 0; lancesDamas = 0;
+                lancesDamasSemCaptura = 0; lancesFinaisEspeciais = 0; posicoesRepetidas = {}; tipoFinalEspecial = null;
                 historicoMovimentos = [{
                     tabuleiro: tabuleiroParaFirebase(tabuleiro),
                     turno: 'white', cor: 'white', de: '—', para: '—'
@@ -2282,16 +2286,24 @@
         }
 
         // ============================================================
-        // ========== REGRAS BRASILEIRAS OFICIAIS =====================
+        // ========== REGRAS BRASILEIRAS OFICIAIS (CBD) ===============
         // ============================================================
-        // 1. Captura obrigatória pela MAIOR quantidade
-        // 2. Peão captura em qualquer direção diagonal
-        // 3. Dama captura em qualquer direção, quantas peças quiser
-        // 4. ✅ PROMOÇÃO ENCERRA A JOGADA (regra brasileira)
-        // 5. Empate após 40 lances sem captura (ou só damas)
+        // Baseado na Confederação Brasileira de Damas (CBD):
+        // 1. Captura obrigatória pela MAIOR quantidade (Lei da Maioria)
+        // 2. Peão captura em 4 direções
+        // 3. Dama captura em cadeia; ao capturar, PODE PARAR EM QUALQUER
+        //    CASA LIVRE na diagonal (não obrigada a parar na casa seguinte)
+        // 4. ✅ PROMOÇÃO: se parar na coroação e houver captura possível
+        //    na mesma jogada, a DAM. CONTINUA capturando (Art. 20, § único)
+        // 5. Empate: 20 lances de damas sem captura/deslocamento
+        // 6. Empate: finais específicos após 5 lances
+        // 7. Empate: 3 damas vs 1 dama → 12 lances
         // ============================================================
 
-        // Simula todas as capturas possíveis de uma peça (recursivamente)
+        // Simula capturas de uma peça. Retorna TODOS os caminhos possíveis.
+        // ✅ CORREÇÃO: após capturar, a DAM. pode parar em QUALQUER casa
+        //    livre na MESMA DIAGONAL após a peça capturada (regra brasileira).
+        //    Se parar na coroação e ainda houver capturas, continua.
         function explorarCapturas(r, c, cor, tab, capturadasSet = new Set(), profundidade = 0) {
             if (profundidade > 20) return [];
             const peca = tab[r][c];
@@ -2301,6 +2313,8 @@
 
             const caps = [];
             if (isDama) {
+                // Dama: cada direção, primeira peça adversária, casa livre imediatamente após
+                // ✅ E TAMBÉM todas as casas livres seguintes na mesma diagonal (regra brasileira)
                 for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
                     let nr = r + dr, nc = c + dc;
                     while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tab[nr][nc]) { nr += dr; nc += dc; }
@@ -2308,12 +2322,16 @@
                     const alvo = tab[nr][nc];
                     if (!alvo || alvo.startsWith(cor)) continue;
                     if (capturadasSet.has(`${nr},${nc}`)) continue;
-                    const tr = nr + dr, tc = nc + dc;
-                    if (tr >= 0 && tr < 8 && tc >= 0 && tc < 8 && !tab[tr][tc]) {
+                    // Casa imediatamente após a peça capturada
+                    let tr = nr + dr, tc = nc + dc;
+                    // ✅ REGRA BRASILEIRA: pode parar em QUALQUER casa livre após a captura
+                    while (tr >= 0 && tr < 8 && tc >= 0 && tc < 8 && !tab[tr][tc]) {
                         caps.push({ r: tr, c: tc, capturada: { r: nr, c: nc } });
+                        tr += dr; tc += dc;
                     }
                 }
             } else {
+                // Peão: 4 direções, pouso imediatamente após (regra igual)
                 for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
                     const mr = r + dr, mc = c + dc;
                     const jr = r + 2 * dr, jc = c + 2 * dc;
@@ -2335,9 +2353,8 @@
                 novaTab[r][c] = null;
                 novaTab[cap.capturada.r][cap.capturada.c] = null;
 
-                // ✅ REGRA BRASILEIRA: peão que atinge a última fileira
-                //    durante uma captura PROMOVE e a jogada TERMINA.
-                //    NÃO continua a capturar na mesma jogada (isso seria regra internacional).
+                // ✅ PROMOÇÃO: se o peão para na coroação, promove.
+                //    Se ainda houver capturas obrigatórias, CONTINUA (Art. 20, § único CBD).
                 const isPeao = !pecaAtual.includes('king');
                 const corDaPeca = pecaAtual.startsWith('white') ? 'white' : 'red';
                 const promoveuAgora =
@@ -2346,17 +2363,21 @@
 
                 if (promoveuAgora) {
                     novaTab[cap.r][cap.c] = corDaPeca + '-king';
-                    caminhos.push([cap]);
-                    continue; // ⛔ Não recursa mais
                 }
 
                 const novasCapturadas = new Set(capturadasSet);
                 novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
 
+                // Continua a explorar (seja peão promovido ou dama)
                 const continuacoes = explorarCapturas(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
 
-                if (continuacoes.length === 0) caminhos.push([cap]);
-                else for (const cont of continuacoes) caminhos.push([cap, ...cont]);
+                if (continuacoes.length === 0) {
+                    caminhos.push([cap]);
+                } else {
+                    for (const cont of continuacoes) {
+                        caminhos.push([cap, ...cont]);
+                    }
+                }
             }
             return caminhos;
         }
@@ -2444,17 +2465,93 @@
         }
 
         // ============================================================
-        // ========== EMPATE ==========================================
+        // ========== CONTADORES DE EMPATE (CBD) ======================
         // ============================================================
-        function verificarEmpate() {
-            if (lancesSemCaptura >= 40) return true;
-            let soDamas = true;
+        function contarPecas(cor) {
+            let pedras = 0, damas = 0;
             for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
                 const p = tabuleiro[r][c];
-                if (p && !p.includes('king')) soDamas = false;
+                if (p && p.startsWith(cor)) {
+                    if (p.includes('king')) damas++;
+                    else pedras++;
+                }
             }
-            if (soDamas && lancesDamas >= 40) return true;
-            return false;
+            return { pedras, damas };
+        }
+
+        function detectarFinalEspecial() {
+            const b = contarPecas('white');
+            const p = contarPecas('red');
+            const totalB = b.damas + b.pedras;
+            const totalP = p.damas + p.pedras;
+            if (totalB === 0 || totalP === 0) return null;
+            // Finais que empatam após 5 lances (regra brasileira)
+            if (b.damas === 2 && p.damas === 2 && b.pedras === 0 && p.pedras === 0) return '2v2damas';
+            if (b.damas === 2 && p.damas === 1 && b.pedras === 0 && p.pedras === 0) return '2v1dama';
+            if (b.damas === 1 && p.damas === 2 && b.pedras === 0 && p.pedras === 0) return '1v2dama';
+            if (b.damas === 2 && p.damas === 1 && p.pedras === 1 && b.pedras === 0) return '2v1dama1pedra';
+            if (b.damas === 1 && p.damas === 1 && b.pedras === 0 && p.pedras === 1) return '1v1dama1pedra';
+            if (b.damas === 1 && p.damas === 1 && b.pedras === 0 && p.pedras === 0) return '1v1dama';
+            // 3 damas vs 1 dama → 12 lances
+            if (b.damas === 3 && p.damas === 1 && b.pedras === 0 && p.pedras === 0) return '3v1dama';
+            if (b.damas === 1 && p.damas === 3 && b.pedras === 0 && p.pedras === 0) return '1v3dama';
+            return null;
+        }
+
+        function verificarEmpate() {
+            // Empate 1: 20 lances sucessivos de damas sem captura ou deslocamento de pedra
+            if (lancesDamasSemCaptura >= 20) return { empate: true, motivo: '20 lances de damas sem captura' };
+
+            // Empate 2: finais específicos após 5 lances
+            const final = detectarFinalEspecial();
+            if (final) {
+                tipoFinalEspecial = final;
+                const limite = (final === '3v1dama' || final === '1v3dama') ? 12 : 5;
+                if (lancesFinaisEspeciais >= limite) {
+                    return { empate: true, motivo: `Final ${final} após ${limite} lances` };
+                }
+            } else {
+                tipoFinalEspecial = null;
+                lancesFinaisEspeciais = 0;
+            }
+
+            // Empate 3: repetição de posição 3x
+            const chave = JSON.stringify(tabuleiro) + '|' + turnoAtual;
+            posicoesRepetidas[chave] = (posicoesRepetidas[chave] || 0) + 1;
+            if (posicoesRepetidas[chave] >= 3) {
+                return { empate: true, motivo: 'posição repetida 3 vezes' };
+            }
+
+            return { empate: false };
+        }
+
+        function atualizarContadoresAposLance(mov) {
+            const capturou = !!(mov && mov.capturada);
+            const pecaMovida = mov && mov.pecaOriginal;
+            const eraDama = pecaMovida && pecaMovida.includes('king');
+
+            if (!capturou) {
+                if (eraDama) {
+                    lancesDamasSemCaptura++;
+                } else {
+                    lancesDamasSemCaptura = 0; // pedra moveu = reset
+                }
+            } else {
+                lancesDamasSemCaptura = 0;
+            }
+
+            // Finais especiais: conta lances
+            const final = detectarFinalEspecial();
+            if (final) {
+                if (final !== tipoFinalEspecial) {
+                    tipoFinalEspecial = final;
+                    lancesFinaisEspeciais = 0;
+                }
+                lancesFinaisEspeciais++;
+            } else {
+                tipoFinalEspecial = null;
+                lancesFinaisEspeciais = 0;
+            }
         }
 
         // ============================================================
@@ -2466,10 +2563,11 @@
 
             const pecaMovida = tabuleiro[deR][deC];
             const corPeca = pecaMovida.startsWith('white') ? 'white' : 'red';
+            let capturouAlgo = false;
+            let promoveu = false;
 
             if (mov.caminhoCompleto && mov.caminhoCompleto.length > 0) {
                 let posAtual = { r: deR, c: deC };
-                let promoveu = false;
                 let passosExecutados = 0;
 
                 for (const passo of mov.caminhoCompleto) {
@@ -2479,36 +2577,30 @@
                     tabuleiro[passo.capturada.r][passo.capturada.c] = null;
                     posAtual = { r: passo.r, c: passo.c };
                     passosExecutados++;
+                    capturouAlgo = true;
 
-                    // ✅ REGRA BRASILEIRA: se o peão promove aqui, ENCERRA a cadeia
+                    // ✅ PROMOÇÃO: se parou na coroação
                     const isPeao = pecaAqui && !pecaAqui.includes('king');
                     if (isPeao && pecaAqui === 'white' && posAtual.r === 0) {
                         tabuleiro[posAtual.r][posAtual.c] = 'white-king';
                         promoveu = true;
-                        break; // ⛔ Interrompe — resto do caminhoCompleto é ignorado
                     }
                     if (isPeao && pecaAqui === 'red' && posAtual.r === 7) {
                         tabuleiro[posAtual.r][posAtual.c] = 'red-king';
                         promoveu = true;
-                        break;
                     }
                 }
 
                 SoundFX.capture();
-                if (promoveu) {
-                    SoundFX.king();
-                    toast(`👑 Promoção! Cadeia encerrada com ${passosExecutados} captura(s). Próxima jogada poderá continuar.`, 'success');
-                } else {
-                    toast(`⚡ Capturou ${passosExecutados} peça(s)!`, 'success');
-                }
-                lancesSemCaptura = 0;
+                if (promoveu) SoundFX.king();
+                toast(`⚡ Capturou ${passosExecutados} peça(s)!${promoveu ? ' 👑 Promovida!' : ''}`, 'success');
             } else {
                 tabuleiro[paraR][paraC] = pecaMovida;
                 tabuleiro[deR][deC] = null;
-                if (pecaMovida === 'white' && paraR === 0) tabuleiro[paraR][paraC] = 'white-king';
-                if (pecaMovida === 'red' && paraR === 7) tabuleiro[paraR][paraC] = 'red-king';
+                if (pecaMovida === 'white' && paraR === 0) { tabuleiro[paraR][paraC] = 'white-king'; promoveu = true; }
+                if (pecaMovida === 'red' && paraR === 7) { tabuleiro[paraR][paraC] = 'red-king'; promoveu = true; }
                 SoundFX.move();
-                lancesSemCaptura++;
+                if (promoveu) SoundFX.king();
             }
 
             historicoMovimentos.push({
@@ -2520,8 +2612,13 @@
                 captura: mov.captura ? `(${mov.captura.r},${mov.captura.c})` : null
             });
 
-            if (verificarEmpate()) {
-                toast('🤝 Empate por repetição!', 'info');
+            // Atualiza contadores de empate
+            atualizarContadoresAposLance({ capturada: mov.captura, pecaOriginal: pecaMovida });
+
+            // Verifica empate
+            const resEmpate = verificarEmpate();
+            if (resEmpate.empate) {
+                toast(`🤝 Empate! (${resEmpate.motivo})`, 'info');
                 jogoEncerrado = true;
                 tratarFimDeJogo('empate', 'empate');
                 return;
@@ -2662,7 +2759,7 @@
             let motivoTxt = '';
             if (motivo === 'desistencia') motivoTxt = (euVenci ? 'O adversário desistiu.' : 'Você desistiu.');
             else if (motivo === 'timeout') motivoTxt = (euVenci ? 'O adversário deixou o tempo esgotar.' : 'Você deixou o tempo esgotar!');
-            else if (motivo === 'empate') motivoTxt = 'Empate por repetição (40 lances).';
+            else if (motivo === 'empate') motivoTxt = 'Empate por regra oficial.';
             else motivoTxt = (euVenci ? 'O adversário ficou sem movimentos.' : 'Você ficou sem movimentos.');
 
             setTimeout(() => {
@@ -2758,7 +2855,7 @@
             euPronto = false; adversarioPronto = false; ambosProntos = false;
             capturaMultiplaAtiva = false; capturaMultiplaPos = null;
             emPausa = false; pausaPendenteDe = null; pausaSolicitadaPorMim = false;
-            lancesSemCaptura = 0; lancesDamas = 0;
+            lancesDamasSemCaptura = 0; lancesFinaisEspeciais = 0; posicoesRepetidas = {}; tipoFinalEspecial = null;
             historicoMovimentos = [{
                 tabuleiro: tabuleiroParaFirebase(dados.tabuleiro),
                 turno: 'white', cor: 'white', de: '—', para: '—'
@@ -2831,7 +2928,7 @@
 
             function clonarTabuleiro(t) { return t.map(r => r.slice()); }
 
-            // ✅ Mesma correção de regra: promoção encerra a cadeia
+            // ✅ Mesma regra brasileira: dama pode parar em qualquer casa após captura
             function explorarCapturasIA(r, c, cor, tab, capturadasSet = new Set(), profundidade = 0) {
                 if (profundidade > 20) return [];
                 const peca = tab[r][c];
@@ -2847,9 +2944,10 @@
                         const alvo = tab[nr][nc];
                         if (!alvo || alvo.startsWith(cor)) continue;
                         if (capturadasSet.has(`${nr},${nc}`)) continue;
-                        const tr = nr + dr, tc = nc + dc;
-                        if (tr >= 0 && tr < 8 && tc >= 0 && tc < 8 && !tab[tr][tc]) {
+                        let tr = nr + dr, tc = nc + dc;
+                        while (tr >= 0 && tr < 8 && tc >= 0 && tc < 8 && !tab[tr][tc]) {
                             caps.push({ r: tr, c: tc, capturada: { r: nr, c: nc } });
+                            tr += dr; tc += dc;
                         }
                     }
                 } else {
@@ -2872,17 +2970,13 @@
                     novaTab[r][c] = null;
                     novaTab[cap.capturada.r][cap.capturada.c] = null;
 
-                    // ✅ Regra brasileira: promoção encerra a jogada
                     const isPeao = !pecaAtual.includes('king');
                     const corDaPeca = pecaAtual.startsWith('white') ? 'white' : 'red';
                     const promoveuAgora =
                         (isPeao && corDaPeca === 'white' && cap.r === 0) ||
                         (isPeao && corDaPeca === 'red'   && cap.r === 7);
-
                     if (promoveuAgora) {
                         novaTab[cap.r][cap.c] = corDaPeca + '-king';
-                        caminhos.push([cap]);
-                        continue; // ⛔ Não recursa
                     }
 
                     const novasCapturadas = new Set(capturadasSet);
@@ -2954,7 +3048,6 @@
                 const peca = novo[mov.de.r][mov.de.c];
                 if (mov.caminho && mov.caminho.length > 0) {
                     let pos = { r: mov.de.r, c: mov.de.c };
-                    let promoveu = false;
                     for (const passo of mov.caminho) {
                         const pecaAqui = novo[pos.r][pos.c];
                         novo[passo.r][passo.c] = pecaAqui;
@@ -2962,8 +3055,8 @@
                         novo[passo.capturada.r][passo.capturada.c] = null;
                         pos = { r: passo.r, c: passo.c };
                         const isPeao = pecaAqui && !pecaAqui.includes('king');
-                        if (isPeao && pecaAqui === 'white' && pos.r === 0) { novo[pos.r][pos.c] = 'white-king'; promoveu = true; break; }
-                        if (isPeao && pecaAqui === 'red' && pos.r === 7) { novo[pos.r][pos.c] = 'red-king'; promoveu = true; break; }
+                        if (isPeao && pecaAqui === 'white' && pos.r === 0) { novo[pos.r][pos.c] = 'white-king'; }
+                        if (isPeao && pecaAqui === 'red' && pos.r === 7) { novo[pos.r][pos.c] = 'red-king'; }
                     }
                 } else {
                     novo[mov.para.r][mov.para.c] = peca;
@@ -3076,8 +3169,10 @@
             jogoEncerrado = false;
             vencedorDeclarado = null;
             desistenciaProcessada = false;
-            lancesSemCaptura = 0;
-            lancesDamas = 0;
+            lancesDamasSemCaptura = 0;
+            lancesFinaisEspeciais = 0;
+            posicoesRepetidas = {};
+            tipoFinalEspecial = null;
             celulaSelecionada = null;
             movimentosValidos = [];
             emPausa = false;
@@ -3109,32 +3204,32 @@
                 return;
             }
             const pecaMovida = tabuleiro[mov.de.r][mov.de.c];
+            let promoveuIA = false;
             if (mov.caminho && mov.caminho.length > 0) {
                 let pos = { r: mov.de.r, c: mov.de.c };
-                let promoveuIA = false;
                 for (const passo of mov.caminho) {
                     const pecaAqui = tabuleiro[pos.r][pos.c];
                     tabuleiro[passo.r][passo.c] = pecaAqui;
                     tabuleiro[pos.r][pos.c] = null;
                     tabuleiro[passo.capturada.r][passo.capturada.c] = null;
                     pos = { r: passo.r, c: passo.c };
-                    // ✅ Regra brasileira: promoção encerra a cadeia
                     const isPeao = pecaAqui && !pecaAqui.includes('king');
                     if (isPeao && pecaAqui === 'red' && pos.r === 7) {
                         tabuleiro[pos.r][pos.c] = 'red-king';
                         promoveuIA = true;
-                        break;
                     }
                 }
                 SoundFX.capture();
                 if (promoveuIA) SoundFX.king();
-                lancesSemCaptura = 0;
             } else {
                 tabuleiro[mov.para.r][mov.para.c] = pecaMovida;
                 tabuleiro[mov.de.r][mov.de.c] = null;
-                if (pecaMovida === 'red' && mov.para.r === 7) tabuleiro[mov.para.r][mov.para.c] = 'red-king';
+                if (pecaMovida === 'red' && mov.para.r === 7) {
+                    tabuleiro[mov.para.r][mov.para.c] = 'red-king';
+                    promoveuIA = true;
+                }
                 SoundFX.move();
-                lancesSemCaptura++;
+                if (promoveuIA) SoundFX.king();
             }
             historicoMovimentos.push({
                 tabuleiro: tabuleiroParaFirebase(tabuleiro),
@@ -3143,13 +3238,17 @@
                 para: `(${mov.para.r},${mov.para.c})`,
                 captura: mov.captura ? 'sim' : null
             });
+
+            atualizarContadoresAposLance({ capturada: mov.captura, pecaOriginal: pecaMovida });
+
             turnoAtual = 'white';
             iaPensando = false;
             renderizarTabuleiro();
 
-            if (verificarEmpate()) {
+            const resEmpate = verificarEmpate();
+            if (resEmpate.empate) {
                 jogoEncerrado = true;
-                toast('🤝 Empate!', 'info');
+                toast(`🤝 Empate! (${resEmpate.motivo})`, 'info');
                 tratarFimDeJogo('empate', 'empate');
                 return;
             }
@@ -3221,6 +3320,9 @@
                 }
                 if (jogoEncerrado && dados.motivoFim === 'timeout' && !desistenciaProcessada && !modoEspectador) {
                     desistenciaProcessada = true; tratarFimDeJogo(vencedorDeclarado, 'timeout');
+                }
+                if (jogoEncerrado && dados.motivoFim === 'empate' && !desistenciaProcessada && !modoEspectador) {
+                    desistenciaProcessada = true; tratarFimDeJogo('empate', 'empate');
                 }
                 const pedido = dados.pedidoRevanche || null;
                 if (pedido && pedido.de !== jogadorSessao.chave && !modoEspectador) {
