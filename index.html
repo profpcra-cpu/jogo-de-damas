@@ -1073,21 +1073,24 @@
             return sala ? { tipo: 'convite', sala } : { tipo: 'nenhum' };
         }
 
+        // MODO DE ENTRADA AUTOMÁTICA AO CLICAR NO LINK DO CONVITE
         async function entrarDiretoPorConvite(codigo) {
             if (!codigo || !jogadorSessao) return false;
+            toast('⏳ Entrando automaticamente na sala...', 'info', 3000);
+
             let dados = null;
-            for (let tentativa = 1; tentativa <= 5; tentativa++) {
+            for (let tentativa = 1; tentativa <= 10; tentativa++) {
                 try {
                     const snap = await get(ref(db, 'salas_damas/' + codigo));
                     if (snap.exists()) { dados = snap.val(); break; }
                 } catch (e) {}
-                await new Promise(r => setTimeout(r, 400 + tentativa * 200));
+                await new Promise(r => setTimeout(r, 500));
             }
 
             if (!dados) {
                 abrirModal({
                     icon: '🚫', title: 'Sala não encontrada',
-                    message: 'O convite expirou ou a sala foi encerrada.',
+                    message: 'O convite expirou ou a sala não está ativa.',
                     actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }]
                 });
                 return false;
@@ -1114,12 +1117,12 @@
                 salvarSessao();
                 entrarInterfaceJogo();
                 escutarFirebase();
-                toast('Reconectado à partida!', 'success');
+                toast('✅ Reconectado à partida com sucesso!', 'success');
                 return true;
             }
 
             if (Object.keys(jogadores).length >= 2) {
-                abrirModal({ icon: '👥', title: 'Sala cheia', message: 'Esta sala já tem dois jogadores.', actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }] });
+                abrirModal({ icon: '👥', title: 'Sala cheia', message: 'Esta sala já possui dois jogadores.', actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }] });
                 return false;
             }
 
@@ -1137,7 +1140,7 @@
             });
 
             if (!resultado.committed) {
-                abrirModal({ icon: '🚫', title: 'Erro ao entrar', message: 'Não foi possível entrar na sala.', actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }] });
+                abrirModal({ icon: '🚫', title: 'Erro ao entrar', message: 'Não foi possível entrar na sala automaticamente.', actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }] });
                 return false;
             }
 
@@ -1156,7 +1159,7 @@
             salvarSessao();
             entrarInterfaceJogo();
             escutarFirebase();
-            toast(`Entrou como ${minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas'}!`, 'success');
+            toast(`🎉 Entrada automática realizada como ${minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas'}!`, 'success');
             return true;
         }
 
@@ -1230,7 +1233,7 @@
         document.getElementById('btn-whatsapp').addEventListener('click', () => {
             const baseUrl = window.location.origin + window.location.pathname;
             const link = `${baseUrl}?sala=${encodeURIComponent(idSalaAtual)}`;
-            const msg = encodeURIComponent(`♟️ *Convite para Damas — Brain Hub*\n\nDesafiado(a) por *${jogadorSessao.nome}*!\n\n👉 Entrar direto:\n${link}\n\nCódigo: *${idSalaAtual}*`);
+            const msg = encodeURIComponent(`♟️ *Convite para Damas — Brain Hub*\n\nDesafiado(a) por *${jogadorSessao.nome}*!\n\n👉 Clique para entrar direto na partida:\n${link}\n\nCódigo: *${idSalaAtual}*`);
             window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
         });
 
