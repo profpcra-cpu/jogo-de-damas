@@ -21,35 +21,28 @@
             --card-bg: rgba(30, 41, 59, 0.7);
             --card-border: rgba(148, 163, 184, 0.15);
             --card-glow: rgba(99, 102, 241, 0.25);
-
             --text-color: #f8fafc;
             --text-muted: #94a3b8;
             --text-subtle: #64748b;
-
             --border-color: rgba(148, 163, 184, 0.18);
             --border-strong: rgba(148, 163, 184, 0.35);
             --input-bg: rgba(15, 23, 42, 0.7);
-
             --btn-primary: #6366f1;
             --btn-primary-hover: #818cf8;
             --btn-accent: #8b5cf6;
             --btn-whatsapp: #22c55e;
-
             --c-green: #4ade80;
             --c-blue: #38bdf8;
             --c-amber: #f59e0b;
             --c-red: #ef4444;
-
             --radius-sm: 8px;
             --radius-md: 12px;
             --radius-lg: 20px;
             --shadow-card: 0 20px 60px -20px rgba(0, 0, 0, 0.65);
             --shadow-btn: 0 6px 20px -6px rgba(99, 102, 241, 0.55);
-
             --t-fast: 0.15s ease;
             --t-base: 0.25s ease;
             --t-slow: 0.4s ease;
-
             --board-frame-1: #4a2f1e;
             --board-frame-2: #2a1810;
             --board-light: #e8d4a8;
@@ -67,17 +60,13 @@
             --card-bg: rgba(255, 255, 255, 0.88);
             --card-border: rgba(15, 23, 42, 0.08);
             --card-glow: rgba(99, 102, 241, 0.15);
-
             --text-color: #0f172a;
             --text-muted: #475569;
             --text-subtle: #64748b;
-
             --border-color: rgba(15, 23, 42, 0.1);
             --border-strong: rgba(15, 23, 42, 0.25);
             --input-bg: rgba(255, 255, 255, 0.95);
-
             --shadow-card: 0 20px 60px -20px rgba(30, 41, 59, 0.28);
-
             --board-frame-1: #5a3a22;
             --board-frame-2: #3a2418;
             --board-light: #f0e0c0;
@@ -148,437 +137,133 @@
 
         .fs-exit-btn {
             position: fixed;
-            top: 12px;
-            right: 12px;
-            z-index: 5000;
-            display: none;
-            width: 40px;
-            height: 40px;
-            padding: 0;
-            border-radius: 50%;
+            top: 12px; right: 12px; z-index: 5000; display: none;
+            width: 40px; height: 40px; padding: 0; border-radius: 50%;
             background: rgba(15, 23, 42, 0.9) !important;
             border: 1px solid rgba(148, 163, 184, 0.3) !important;
-            color: #f8fafc !important;
-            font-size: 18px;
-            cursor: pointer;
-            align-items: center;
-            justify-content: center;
+            color: #f8fafc !important; font-size: 18px; cursor: pointer;
+            align-items: center; justify-content: center;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-            transition: transform var(--t-fast), background var(--t-fast);
         }
         body.is-fullscreen .fs-exit-btn { display: flex; }
-        .fs-exit-btn:hover { transform: scale(1.08); background: rgba(99, 102, 241, 0.95) !important; }
 
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; flex-wrap: wrap; }
         .btn-small {
-            width: auto;
-            margin: 0;
-            padding: 8px 14px;
-            border-radius: 999px;
-            font-size: 13px;
-            font-weight: 600;
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all var(--t-base);
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
+            width: auto; margin: 0; padding: 8px 14px; border-radius: 999px;
+            font-size: 13px; font-weight: 600; background: var(--input-bg);
+            border: 1px solid var(--border-color); color: var(--text-muted);
+            cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
         }
-        .btn-small:hover {
-            color: var(--text-color);
-            border-color: var(--border-strong);
-            background: var(--card-bg);
-        }
+        .btn-small:hover { color: var(--text-color); border-color: var(--border-strong); background: var(--card-bg); }
 
         .lobby-box {
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 16px;
-            margin-bottom: 12px;
-            text-align: left;
+            background: var(--input-bg); border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; text-align: left;
         }
-        .lobby-box h3 {
-            margin-top: 0;
-            font-size: 15px;
-            color: var(--c-blue);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .lobby-box p {
-            font-size: 12.5px;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-            line-height: 1.4;
-        }
+        .lobby-box h3 { margin-top: 0; font-size: 15px; color: var(--c-blue); display: flex; align-items: center; gap: 6px; }
+        .lobby-box p { font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.4; }
 
         .user-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            background: var(--input-bg);
-            padding: 8px 12px;
-            border-radius: var(--radius-md);
-            border: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 10px; background: var(--input-bg); padding: 8px 12px;
+            border-radius: var(--radius-md); border: 1px solid var(--border-color);
         }
-        .user-info-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .user-info-left { display: flex; align-items: center; gap: 8px; }
         .user-avatar-display {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 32px;
-            height: 32px;
-            font-size: 16px;
-            border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px; font-size: 16px; border-radius: 50%;
             background: linear-gradient(135deg, rgba(99,102,241,0.25), rgba(139,92,246,0.2));
             border: 1px solid rgba(99, 102, 241, 0.4);
         }
         #display-nome { font-size: 13.5px; font-weight: 700; }
 
-        .status-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-left: 6px;
-            background: var(--text-subtle);
-            transition: background var(--t-base);
-        }
+        .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 6px; background: var(--text-subtle); }
         .status-dot.online { background: var(--c-green); box-shadow: 0 0 8px var(--c-green); }
         .status-dot.offline { background: var(--c-red); }
 
         .match-info-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--input-bg);
-            padding: 8px 12px;
-            border-radius: var(--radius-md);
-            margin-bottom: 10px;
-            font-size: 12px;
-            border: 1px solid var(--border-color);
-            font-weight: 600;
-            gap: 8px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--input-bg); padding: 8px 12px; border-radius: var(--radius-md);
+            margin-bottom: 10px; font-size: 12px; border: 1px solid var(--border-color); font-weight: 600; gap: 8px;
         }
         #turno-status { color: var(--c-amber); }
 
         .board-wrapper {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            padding: 22px;
+            position: relative; width: 100%; aspect-ratio: 1 / 1; padding: 22px;
             background: linear-gradient(145deg, var(--board-frame-1) 0%, var(--board-frame-2) 100%);
-            border-radius: 12px;
-            box-shadow:
-                0 14px 40px -12px rgba(0, 0, 0, 0.75),
-                inset 0 1px 0 rgba(255, 255, 255, 0.08),
-                inset 0 -1px 0 rgba(0, 0, 0, 0.5),
-                0 0 0 2px rgba(0, 0, 0, 0.35);
-            margin-bottom: 12px;
-            user-select: none;
-            touch-action: manipulation;
+            border-radius: 12px; box-shadow: 0 14px 40px -12px rgba(0, 0, 0, 0.75); margin-bottom: 12px; user-select: none;
         }
 
-        .board-ruler {
-            position: absolute;
-            font-family: 'JetBrains Mono', ui-monospace, monospace;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--board-coord);
-            letter-spacing: 0.5px;
-            pointer-events: none;
-            user-select: none;
-            z-index: 2;
-        }
+        .board-ruler { position: absolute; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--board-coord); pointer-events: none; z-index: 2; }
         .board-ruler-top { top: 0; left: 22px; right: 22px; height: 22px; display: grid; grid-template-columns: repeat(8, 1fr); align-items: center; }
         .board-ruler-bottom { bottom: 0; left: 22px; right: 22px; height: 22px; display: grid; grid-template-columns: repeat(8, 1fr); align-items: center; }
         .board-ruler-left { top: 22px; bottom: 22px; left: 0; width: 22px; display: grid; grid-template-rows: repeat(8, 1fr); align-items: center; }
         .board-ruler-right { top: 22px; bottom: 22px; right: 0; width: 22px; display: grid; grid-template-rows: repeat(8, 1fr); align-items: center; }
-
-        .board-ruler .coord {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9), 0 0 3px rgba(0, 0, 0, 0.6);
-        }
+        .board-ruler .coord { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; text-shadow: 0 1px 1px rgba(0, 0, 0, 0.9); }
         .board-ruler .coord.edge { font-weight: 800; color: var(--board-coord-edge); }
 
-        .board-ruler-top::after, .board-ruler-bottom::after {
-            content: ''; position: absolute; left: 0; right: 0; height: 1px;
-            background: linear-gradient(to right, transparent, rgba(0,0,0,0.4), transparent);
-        }
-        .board-ruler-top::after { bottom: 0; }
-        .board-ruler-bottom::after { top: 0; }
-        .board-ruler-left::after, .board-ruler-right::after {
-            content: ''; position: absolute; top: 0; bottom: 0; width: 1px;
-            background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.4), transparent);
-        }
-        .board-ruler-left::after  { right: 0; }
-        .board-ruler-right::after { left: 0; }
-
         .checkers-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            grid-template-rows: repeat(8, 1fr);
-            gap: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 4px;
-            overflow: hidden;
+            display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr);
+            width: 100%; height: 100%; border-radius: 4px; overflow: hidden;
             box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.55);
         }
 
-        .square {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            cursor: pointer;
-            user-select: none;
-            transition: filter 0.15s ease, box-shadow 0.15s ease;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .square.light {
-            background-color: var(--board-light);
-            background-image: linear-gradient(135deg, var(--board-light-2) 0%, var(--board-light) 60%, var(--board-light-2) 100%);
-        }
-        .square.dark {
-            background-color: var(--board-dark);
-            background-image: linear-gradient(135deg, var(--board-dark-2) 0%, var(--board-dark) 60%, var(--board-dark-2) 100%);
-        }
-
-        .square.selected {
-            filter: brightness(0.85);
-            box-shadow: inset 0 0 0 3px rgba(99, 102, 241, 0.95), inset 0 0 14px rgba(99, 102, 241, 0.5) !important;
-        }
-        .square.highlight {
-            filter: brightness(0.9);
-            box-shadow: inset 0 0 0 3px rgba(74, 222, 128, 0.95), inset 0 0 14px rgba(74, 222, 128, 0.5) !important;
-        }
-        .square.capture-target {
-            filter: brightness(0.9);
-            box-shadow: inset 0 0 0 3px rgba(239, 68, 68, 0.95), inset 0 0 14px rgba(239, 68, 68, 0.5) !important;
-        }
+        .square { display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
+        .square.light { background-color: var(--board-light); }
+        .square.dark { background-color: var(--board-dark); }
+        .square.selected { box-shadow: inset 0 0 0 3px rgba(99, 102, 241, 0.95) !important; }
+        .square.highlight { box-shadow: inset 0 0 0 3px rgba(74, 222, 128, 0.95) !important; }
+        .square.capture-target { box-shadow: inset 0 0 0 3px rgba(239, 68, 68, 0.95) !important; }
 
         .piece {
-            width: 80%;
-            height: 80%;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 700;
-            transition: transform var(--t-fast), filter var(--t-fast);
-            position: relative;
+            width: 80%; height: 80%; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 700; position: relative;
         }
-        .piece.white {
-            background: radial-gradient(circle at 32% 28%, #ffffff 0%, #f5ede0 35%, #cdb896 75%, #a08768 100%);
-            border: 1px solid #7a6350;
-            box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.65), inset 0 0 0 5px rgba(160, 135, 104, 0.35), inset 0 2px 3px rgba(255, 255, 255, 0.7), inset 0 -2px 4px rgba(0, 0, 0, 0.25), 0 3px 0 #7a6350, 0 5px 10px rgba(0, 0, 0, 0.55);
-        }
-        .piece.red {
-            background: radial-gradient(circle at 32% 28%, #dc2626 0%, #991b1b 40%, #6b0f0f 80%, #450808 100%);
-            border: 1px solid #2d0606;
-            box-shadow: inset 0 0 0 3px rgba(255, 200, 200, 0.22), inset 0 0 0 5px rgba(0, 0, 0, 0.35), inset 0 2px 3px rgba(255, 255, 255, 0.25), inset 0 -2px 4px rgba(0, 0, 0, 0.5), 0 3px 0 #2d0606, 0 5px 10px rgba(0, 0, 0, 0.6);
-        }
-        .piece.king::after {
-            content: "♛";
-            font-size: 17px;
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            color: #fbbf24;
-            text-shadow: 0 0 8px rgba(251, 191, 36, 0.95), 0 0 14px rgba(251, 191, 36, 0.55), 0 1px 2px rgba(0, 0, 0, 0.85);
-            font-weight: 900;
-            line-height: 1;
-        }
-        .piece.king.white::after {
-            color: #b45309;
-            text-shadow: 0 0 6px rgba(180, 83, 9, 0.7), 0 1px 2px rgba(0, 0, 0, 0.6);
-        }
+        .piece.white { background: radial-gradient(circle at 32% 28%, #ffffff 0%, #cdb896 75%, #a08768 100%); border: 1px solid #7a6350; }
+        .piece.red { background: radial-gradient(circle at 32% 28%, #dc2626 0%, #6b0f0f 80%, #450808 100%); border: 1px solid #2d0606; }
+        .piece.king::after { content: "♛"; font-size: 17px; position: absolute; color: #fbbf24; font-weight: 900; }
 
-        .piece-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-        }
+        .piece-wrapper { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
         .piece-wrapper.movel { animation: pulse-movel 1.5s infinite; }
-        @keyframes pulse-movel {
-            0%   { transform: scale(1); }
-            50%  { transform: scale(1.055); }
-            100% { transform: scale(1); }
-        }
-        .piece.movel { cursor: pointer; filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.9)); }
-        .piece.movel:hover { transform: scale(1.08); }
+        @keyframes pulse-movel { 0% { transform: scale(1); } 50% { transform: scale(1.055); } 100% { transform: scale(1); } }
 
-        .instructions {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin: 4px 0 10px;
-            min-height: 18px;
-        }
+        .instructions { font-size: 12px; color: var(--text-muted); margin: 4px 0 10px; min-height: 18px; }
 
         button, input {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 13.5px;
-            font-family: inherit;
-            font-weight: 600;
-            background: var(--input-bg);
-            color: var(--text-color);
-            cursor: pointer;
-            transition: all var(--t-base);
+            width: 100%; padding: 10px 12px; border: 1px solid var(--border-color);
+            border-radius: var(--radius-md); font-size: 13.5px; font-family: inherit; font-weight: 600;
+            background: var(--input-bg); color: var(--text-color); cursor: pointer;
         }
-        button {
-            border: none;
-            color: #fff;
-            background: linear-gradient(135deg, var(--btn-primary), var(--btn-accent));
-            box-shadow: var(--shadow-btn);
-        }
-        button:hover { filter: brightness(1.08); transform: translateY(-1px); }
-        .btn-whatsapp {
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 6px;
-        }
+        button { border: none; color: #fff; background: linear-gradient(135deg, var(--btn-primary), var(--btn-accent)); }
+        .btn-whatsapp { background: linear-gradient(135deg, #16a34a, #22c55e); display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 6px; }
 
         .hidden { display: none !important; }
 
         .modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(4px);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 1000; padding: 20px;
-            opacity: 0; pointer-events: none;
-            transition: opacity var(--t-base);
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.55); display: flex; align-items: center; justify-content: center;
+            z-index: 1000; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.25s;
         }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(18px) saturate(160%);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-lg);
-            padding: 24px; max-width: 380px; width: 100%; text-align: center;
-            box-shadow: var(--shadow-card);
-            transform: scale(0.9); transition: transform var(--t-base);
-        }
-        .modal-overlay.active .modal-card { transform: scale(1); }
-        .modal-card h2 { margin: 0 0 8px; font-size: 20px; }
-        .modal-card p { margin: 0 0 18px; color: var(--text-muted); font-size: 14px; line-height: 1.5; }
-        .modal-icon { font-size: 42px; margin-bottom: 8px; }
-        .modal-actions { display: flex; gap: 8px; }
+        .modal-card { background: var(--card-bg); border-radius: var(--radius-lg); padding: 24px; max-width: 380px; width: 100%; text-align: center; }
+        .modal-actions { display: flex; gap: 8px; margin-top: 15px; }
         .modal-actions button { flex: 1; }
-        .btn-secondary {
-            background: var(--input-bg) !important;
-            border: 1px solid var(--border-color) !important;
-            color: var(--text-color) !important;
-            box-shadow: none !important;
-        }
 
-        .toast-container {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 1100; display: flex; flex-direction: column; gap: 8px; pointer-events: none;
-        }
-        .toast {
-            background: var(--card-bg); backdrop-filter: blur(18px);
-            border: 1px solid var(--card-border); border-left: 4px solid var(--c-blue);
-            padding: 10px 16px; border-radius: var(--radius-md);
-            font-size: 13px; font-weight: 600; color: var(--text-color);
-            box-shadow: var(--shadow-card); animation: toastIn 0.3s ease; max-width: 340px;
-        }
+        .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1100; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+        .toast { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid var(--c-blue); padding: 10px 16px; border-radius: var(--radius-md); font-size: 13px; font-weight: 600; color: var(--text-color); }
         .toast.success { border-left-color: var(--c-green); }
-        .toast.error   { border-left-color: var(--c-red); }
-        .toast.warn    { border-left-color: var(--c-amber); }
-        @keyframes toastIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-        #__erro_painel {
-            position: fixed; bottom: 12px; left: 12px; right: 12px;
-            background: rgba(127, 29, 29, 0.95); color: #fee2e2;
-            padding: 12px 16px; border-radius: 10px;
-            font-family: 'JetBrains Mono', monospace; font-size: 12px;
-            line-height: 1.5; white-space: pre-wrap; z-index: 99999;
-            max-height: 40vh; overflow-y: auto; border: 1px solid #ef4444;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); display: none;
-        }
-        #__erro_painel.visivel { display: block; }
-        #__erro_painel .fechar {
-            position: absolute; top: 6px; right: 8px; background: transparent;
-            border: none; color: #fee2e2; cursor: pointer; font-size: 14px;
-            width: auto; padding: 2px 6px; box-shadow: none;
-        }
-
-        .readme-overlay {
-            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center;
-            z-index: 1200; opacity: 0; pointer-events: none; transition: opacity var(--t-base); padding: 16px;
-        }
-        .readme-overlay.active { opacity: 1; pointer-events: auto; }
-        .readme-card {
-            background: var(--card-bg); backdrop-filter: blur(18px) saturate(160%);
-            border: 1px solid var(--card-border); border-radius: var(--radius-lg);
-            width: 100%; max-width: 720px; max-height: 88vh; display: flex; flex-direction: column;
-            overflow: hidden; box-shadow: var(--shadow-card); transform: translateY(12px) scale(0.98);
-            transition: transform var(--t-base);
-        }
-        .readme-overlay.active .readme-card { transform: translateY(0) scale(1); }
-        .readme-header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 16px 20px; border-bottom: 1px solid var(--border-color); gap: 12px;
-        }
-        .readme-header h2 { margin: 0; font-size: 16px; font-weight: 700; color: var(--text-color); }
-        .readme-close {
-            width: 32px !important; height: 32px; flex: 0 0 auto; padding: 0 !important;
-            border-radius: 8px !important; background: var(--input-bg) !important;
-            border: 1px solid var(--border-color) !important; color: var(--text-muted) !important;
-            font-size: 16px !important; box-shadow: none !important;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .readme-close:hover { color: var(--text-color) !important; background: var(--card-bg) !important; transform: none; }
-        .readme-content {
-            flex: 1; overflow-y: auto; padding: 20px 24px;
-            font-size: 14px; line-height: 1.65; color: var(--text-color); text-align: left;
-        }
+        .toast.error { border-left-color: var(--c-red); }
     </style>
 </head>
 <body>
 
-    <button class="fs-exit-btn" id="fs-exit" type="button" title="Sair da tela cheia" aria-label="Sair da tela cheia">✕</button>
+    <button class="fs-exit-btn" id="fs-exit" type="button">✕</button>
 
     <div class="container" id="main-container">
         <div class="top-bar">
-            <button id="btn-sair" class="btn-small" type="button" title="Sair da sala atual">🚪 Sair</button>
-            <div style="display:flex; gap:6px; flex-wrap: wrap;">
-                <button id="btn-google" class="btn-small" type="button" title="Entrar com Google">🌐 Google</button>
-                <button id="btn-fullscreen" class="btn-small" type="button" title="Modo tela cheia">⛶</button>
-                <button id="btn-about" class="btn-small" type="button" title="Sobre o jogo">📖</button>
+            <button id="btn-sair" class="btn-small" type="button">🚪 Sair</button>
+            <div style="display:flex; gap:6px;">
+                <button id="btn-google" class="btn-small" type="button">🌐 Google</button>
+                <button id="btn-fullscreen" class="btn-small" type="button">⛶</button>
                 <button id="theme-toggle" class="btn-small" type="button">🌙</button>
             </div>
         </div>
@@ -588,13 +273,13 @@
             <div class="user-header" style="justify-content: center;">
                 <div class="user-info-left">
                     <span id="lobby-avatar" class="user-avatar-display">⏳</span>
-                    <strong id="lobby-nome">Conectando…</strong>
+                    <strong id="lobby-nome">A carregar…</strong>
                 </div>
             </div>
 
             <div class="lobby-box">
                 <h3>♟️ Jogo de Damas Multiplayer</h3>
-                <p>Jogue uma partida clássica de Damas 8x8 em turnos com um colega em tempo real. Crie sua sala e envie o convite pelo WhatsApp!</p>
+                <p>Jogue uma partida clássica de Damas 8x8 em tempo real. Crie a sua sala e envie o link pelo WhatsApp!</p>
                 <button id="btn-criar-sala" type="button" disabled>🚀 Criar Sala de Damas</button>
             </div>
 
@@ -613,26 +298,25 @@
                 <div class="user-info-left">
                     <span id="display-avatar" class="user-avatar-display">😀</span>
                     <strong id="display-nome"></strong>
-                    <span id="oponente-status" class="status-dot" title="Status do oponente"></span>
+                    <span id="oponente-status" class="status-dot"></span>
                 </div>
-                <span id="display-sala-tag" style="font-size: 11px; background: rgba(99,102,241,0.15); padding: 4px 8px; border-radius: 6px; color: var(--c-blue);">Sala</span>
+                <span id="display-sala-tag" style="font-size: 11px; color: var(--c-blue);">Sala</span>
             </div>
 
             <div class="match-info-bar">
                 <span>Sua Peça: <strong id="info-minha-cor" style="color: var(--c-blue);">--</strong></span>
                 <span id="turno-status">Aguardando...</span>
-                <button id="btn-fullscreen-game" class="btn-small" type="button" title="Modo tela cheia" style="padding: 4px 10px; font-size: 11px; width: auto;">⛶</button>
+                <button id="btn-fullscreen-game" class="btn-small" type="button" style="padding: 4px 10px; font-size: 11px;">⛶</button>
             </div>
 
             <p class="instructions" id="info-instrucao">Toque em sua peça e depois na casa de destino válida.</p>
 
             <div class="board-wrapper">
-                <div class="board-ruler board-ruler-top"    id="labels-top"    aria-hidden="true"></div>
-                <div class="board-ruler board-ruler-bottom" id="labels-bottom" aria-hidden="true"></div>
-                <div class="board-ruler board-ruler-left"   id="labels-left"   aria-hidden="true"></div>
-                <div class="board-ruler board-ruler-right"  id="labels-right"  aria-hidden="true"></div>
-
-                <div class="checkers-grid" id="checkers-board" role="grid" aria-label="Tabuleiro de damas"></div>
+                <div class="board-ruler board-ruler-top" id="labels-top"></div>
+                <div class="board-ruler board-ruler-bottom" id="labels-bottom"></div>
+                <div class="board-ruler board-ruler-left" id="labels-left"></div>
+                <div class="board-ruler board-ruler-right" id="labels-right"></div>
+                <div class="checkers-grid" id="checkers-board"></div>
             </div>
 
             <div id="div-whatsapp" class="hidden">
@@ -641,184 +325,18 @@
         </div>
     </div>
 
-    <!-- MODAL GENÉRICO -->
+    <!-- MODAL -->
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal-card">
-            <div class="modal-icon" id="modal-icon">ℹ️</div>
-            <h2 id="modal-title">Título</h2>
-            <p id="modal-message">Mensagem</p>
+            <div style="font-size: 40px; margin-bottom: 10px;" id="modal-icon">ℹ️</div>
+            <h2 id="modal-title" style="margin: 0 0 10px; font-size: 18px;">Título</h2>
+            <p id="modal-message" style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 15px;"></p>
             <div class="modal-actions" id="modal-actions"></div>
         </div>
     </div>
 
-    <!-- MODAL SOBRE -->
-    <div class="readme-overlay" id="readme-modal" role="dialog" aria-modal="true" aria-labelledby="readme-title">
-        <div class="readme-card">
-            <header class="readme-header">
-                <h2 id="readme-title">📘 Sobre o Jogo de Damas</h2>
-                <button class="readme-close" id="btn-close-readme" type="button" aria-label="Fechar">✕</button>
-            </header>
-            <div class="readme-content" id="readme-content">
-                <p style="text-align:center;color:#94a3b8;padding:24px 0;">A carregar…</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- PAINEL DE ERRO -->
-    <div id="__erro_painel">
-        <button class="fechar" onclick="document.getElementById('__erro_painel').classList.remove('visivel')" aria-label="Fechar">✕</button>
-        <span id="__erro_conteudo"></span>
-    </div>
-
-    <!-- TOASTS -->
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- SCRIPT 1 — ERROS GLOBAIS -->
-    <script>
-        (function () {
-            'use strict';
-            function mostrarErroPainel(msg) {
-                const painel = document.getElementById('__erro_painel');
-                const conteudo = document.getElementById('__erro_conteudo');
-                if (!painel || !conteudo) return;
-                conteudo.textContent = '⚠️ ' + msg;
-                painel.classList.add('visivel');
-            }
-            window.mostrarErroPainel = mostrarErroPainel;
-            window.addEventListener('error', (e) => {
-                const info = `${e.message || 'Erro'}\n${e.filename || ''}:${e.lineno || '?'}`;
-                console.error('❌ Erro global:', info);
-                mostrarErroPainel(info);
-            });
-            window.addEventListener('unhandledrejection', (e) => {
-                const motivo = e.reason;
-                const info = `Promise rejeitada: ${(motivo && (motivo.message || motivo.toString())) || 'desconhecida'}`;
-                console.error('❌', info, motivo);
-                mostrarErroPainel(info);
-            });
-        })();
-    </script>
-
-    <!-- SCRIPT 2 — MODAL SOBRE -->
-    <script>
-        (function () {
-            'use strict';
-            const modal = document.getElementById('readme-modal');
-            const conteudo = document.getElementById('readme-content');
-            const btnAbout = document.getElementById('btn-about');
-            const btnClose = document.getElementById('btn-close-readme');
-
-            if (!modal || !btnAbout || !conteudo) return;
-
-            let jaCarregado = false;
-            let focoAnterior = null;
-            let markedFn = null;
-
-            async function carregarMarked() {
-                if (markedFn) return markedFn;
-                try {
-                    const mod = await import('https://esm.sh/marked@12');
-                    markedFn = mod.marked || mod.default;
-                    return markedFn;
-                } catch (e) {
-                    return null;
-                }
-            }
-
-            async function renderizarSobre() {
-                if (jaCarregado) return;
-                let md = '';
-                try {
-                    const mod = await import('./sobre.js');
-                    md = mod.CONTEUDO_SOBRE || mod.default || '';
-                } catch (e) {
-                    conteudo.innerHTML = '<p style="color:#ef4444;text-align:center;padding:20px;">⚠️ Não foi possível carregar o conteúdo do "Sobre".</p>';
-                    return;
-                }
-                const marked = await carregarMarked();
-                if (marked && typeof marked.parse === 'function') {
-                    conteudo.innerHTML = marked.parse(md);
-                    conteudo.querySelectorAll('a[href^="http"]').forEach((a) => {
-                        a.setAttribute('target', '_blank');
-                        a.setAttribute('rel', 'noopener noreferrer');
-                    });
-                } else {
-                    const pre = document.createElement('pre');
-                    pre.style.cssText = 'white-space:pre-wrap; font-family:JetBrains Mono,monospace; font-size:12.5px; color:var(--text-muted);';
-                    pre.textContent = md;
-                    conteudo.innerHTML = '';
-                    conteudo.appendChild(pre);
-                }
-                jaCarregado = true;
-            }
-
-            function abrirModalSobre() {
-                focoAnterior = document.activeElement;
-                modal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-                renderizarSobre();
-            }
-
-            function fecharModalSobre() {
-                modal.classList.remove('active');
-                document.body.style.overflow = '';
-                if (focoAnterior && typeof focoAnterior.focus === 'function') focoAnterior.focus();
-            }
-
-            btnAbout.addEventListener('click', abrirModalSobre);
-            if (btnClose) btnClose.addEventListener('click', fecharModalSobre);
-            modal.addEventListener('click', (e) => { if (e.target === modal) fecharModalSobre(); });
-        })();
-    </script>
-
-    <!-- SCRIPT 3 — FULLSCREEN -->
-    <script>
-        (function () {
-            'use strict';
-            const btnFullscreen = document.getElementById('btn-fullscreen');
-            const btnFullscreenGame = document.getElementById('btn-fullscreen-game');
-            const btnExitFs = document.getElementById('fs-exit');
-            let fsAtivo = false;
-
-            function entrarFullscreen() {
-                const el = document.documentElement;
-                const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
-                if (req) req.call(el).catch(() => {});
-                document.body.classList.add('is-fullscreen');
-                fsAtivo = true;
-            }
-
-            function sairFullscreen() {
-                if (document.fullscreenElement || document.webkitFullscreenElement) {
-                    const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
-                    if (exit) exit.call(document).catch(() => {});
-                }
-                document.body.classList.remove('is-fullscreen');
-                fsAtivo = false;
-            }
-
-            function toggleFullscreen() {
-                if (fsAtivo) sairFullscreen();
-                else entrarFullscreen();
-            }
-
-            function syncFullscreenState() {
-                const ehFullscreenNativo = !!(document.fullscreenElement || document.webkitFullscreenElement);
-                if (!ehFullscreenNativo && fsAtivo) {
-                    fsAtivo = false;
-                    document.body.classList.remove('is-fullscreen');
-                }
-            }
-
-            document.addEventListener('fullscreenchange', syncFullscreenState);
-            document.addEventListener('webkitfullscreenchange', syncFullscreenState);
-            btnFullscreen && btnFullscreen.addEventListener('click', toggleFullscreen);
-            btnFullscreenGame && btnFullscreenGame.addEventListener('click', toggleFullscreen);
-            btnExitFs && btnExitFs.addEventListener('click', sairFullscreen);
-        })();
-    </script>
-
-    <!-- SCRIPT 4 — LÓGICA DO JOGO -->
     <script type="module">
         import { db, auth } from "./firebase-config.js";
         import {
@@ -828,189 +346,10 @@
             signInAnonymously,
             onAuthStateChanged,
             GoogleAuthProvider,
-            signInWithPopup,
-            signOut
+            signInWithPopup
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        const VALORES_PECA_VALIDOS = new Set([null, 'white', 'red', 'white-king', 'red-king']);
-
-        const modalOverlay = document.getElementById('modal-overlay');
-        const modalIcon    = document.getElementById('modal-icon');
-        const modalTitle   = document.getElementById('modal-title');
-        const modalMessage = document.getElementById('modal-message');
-        const modalActions = document.getElementById('modal-actions');
-
-        function abrirModal({ icon = 'ℹ️', title, message, actions = [] }) {
-            modalIcon.textContent = icon;
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            modalActions.innerHTML = '';
-            actions.forEach(acao => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.textContent = acao.label;
-                if (acao.secondary) btn.classList.add('btn-secondary');
-                btn.addEventListener('click', () => {
-                    fecharModal();
-                    if (typeof acao.onClick === 'function') acao.onClick();
-                });
-                modalActions.appendChild(btn);
-            });
-            if (actions.length === 0) {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.textContent = 'OK';
-                btn.addEventListener('click', fecharModal);
-                modalActions.appendChild(btn);
-            }
-            modalOverlay.classList.add('active');
-        }
-        function fecharModal() { modalOverlay.classList.remove('active'); }
-
-        function toast(mensagem, tipo = 'info', duracao = 3200) {
-            const container = document.getElementById('toast-container');
-            const el = document.createElement('div');
-            el.className = `toast ${tipo}`;
-            el.textContent = mensagem;
-            container.appendChild(el);
-            setTimeout(() => {
-                el.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(-10px)';
-                setTimeout(() => el.remove(), 320);
-            }, duracao);
-        }
-
-        function tabuleiroParaFirebase(t) { return t.map(row => row.slice()); }
-
-        function firebaseParaTabuleiro(raw) {
-            if (!raw) return criarTabuleiroInicial();
-            const t = [];
-            for (let r = 0; r < 8; r++) {
-                const linhaRaw = raw[r] || raw[String(r)] || {};
-                const linha = [];
-                for (let c = 0; c < 8; c++) {
-                    let valor = linhaRaw[c] ?? linhaRaw[String(c)] ?? null;
-                    if (!VALORES_PECA_VALIDOS.has(valor)) valor = null;
-                    linha.push(valor);
-                }
-                t.push(linha);
-            }
-            return t;
-        }
-
-        function contarPecas(t) {
-            let w = 0, r = 0;
-            for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++) {
-                const p = t[i][j];
-                if (!p) continue;
-                if (p.startsWith('white')) w++;
-                else if (p.startsWith('red')) r++;
-            }
-            return { white: w, red: r };
-        }
-
         let jogadorSessao = null;
-
-        function gerarNomeAleatorio() { return 'Jogador ' + Math.floor(Math.random() * 9000 + 1000); }
-        function gerarAvatarAleatorio() {
-            const av = ['😀', '😎', '🤠', '🦊', '🐼', '🐸', '🦁', '🐯', '🐻', '🐨', '🦄', '🐙'];
-            return av[Math.floor(Math.random() * av.length)];
-        }
-        function obterPreferenciasLocais() {
-            try {
-                const p = JSON.parse(localStorage.getItem('brain_damas_prefs'));
-                return { nome: p?.nome || gerarNomeAleatorio(), avatar: p?.avatar || gerarAvatarAleatorio() };
-            } catch (_) {
-                return { nome: gerarNomeAleatorio(), avatar: gerarAvatarAleatorio() };
-            }
-        }
-
-        async function inicializarAuthUnica() {
-            return new Promise((resolve) => {
-                let resolvido = false;
-                let tentouAnonimo = false;
-                let uidFinal = null;
-                let debounceTimer = null;
-
-                const timeoutSeguranca = setTimeout(() => {
-                    if (resolvido) return;
-                    const prefs = obterPreferenciasLocais();
-                    jogadorSessao = {
-                        chave: 'local_' + Math.random().toString(36).slice(2, 12),
-                        nome: prefs.nome, avatar: prefs.avatar, isAnonimo: true, email: null
-                    };
-                    resolvido = true;
-                    resolve(false);
-                }, 8000);
-
-                function finalizar() {
-                    if (resolvido || !uidFinal) return;
-                    const userAtual = auth.currentUser;
-                    if (!userAtual || userAtual.uid !== uidFinal) return;
-                    const prefs = obterPreferenciasLocais();
-                    jogadorSessao = {
-                        chave: userAtual.uid,
-                        nome: userAtual.displayName || prefs.nome,
-                        avatar: userAtual.photoURL ? '🌐' : prefs.avatar,
-                        isAnonimo: userAtual.isAnonymous,
-                        email: userAtual.email || null
-                    };
-                    clearTimeout(timeoutSeguranca);
-                    resolvido = true;
-                    resolve(true);
-                }
-
-                onAuthStateChanged(auth, async (user) => {
-                    if (resolvido) return;
-                    if (user) {
-                        if (debounceTimer) clearTimeout(debounceTimer);
-                        uidFinal = user.uid;
-                        debounceTimer = setTimeout(finalizar, 800);
-                        return;
-                    }
-                    if (tentouAnonimo) return;
-                    tentouAnonimo = true;
-                    try {
-                        await signInAnonymously(auth);
-                    } catch (e) {
-                        const prefs = obterPreferenciasLocais();
-                        jogadorSessao = {
-                            chave: 'local_' + Math.random().toString(36).slice(2, 12),
-                            nome: prefs.nome, avatar: prefs.avatar, isAnonimo: true, email: null
-                        };
-                        clearTimeout(timeoutSeguranca);
-                        resolvido = true;
-                        resolve(false);
-                    }
-                });
-            });
-        }
-
-        await inicializarAuthUnica();
-
-        if (jogadorSessao) {
-            document.getElementById('lobby-nome').textContent = jogadorSessao.nome;
-            document.getElementById('lobby-avatar').textContent = jogadorSessao.avatar;
-            document.getElementById('display-nome').textContent = jogadorSessao.nome;
-            document.getElementById('display-avatar').textContent = jogadorSessao.avatar;
-            document.getElementById('btn-criar-sala').disabled = false;
-            document.getElementById('btn-entrar-sala').disabled = false;
-        }
-
-        const btnGoogle = document.getElementById('btn-google');
-        function atualizarBotaoGoogle() {
-            if (!btnGoogle || !jogadorSessao) return;
-            if (!jogadorSessao.isAnonimo) {
-                btnGoogle.textContent = '🚪';
-                btnGoogle.title = 'Sair da conta Google';
-            } else {
-                btnGoogle.textContent = '🌐';
-                btnGoogle.title = 'Entrar com Google';
-            }
-        }
-        atualizarBotaoGoogle();
-
         let idSalaAtual = null;
         let minhaCor = null;
         let tabuleiro = [];
@@ -1023,29 +362,28 @@
         let capturaMultiplaEmAndamento = false;
         let salaConfirmada = false;
 
-        const themeToggleBtn = document.getElementById('theme-toggle');
-        const savedTheme = localStorage.getItem('brain_flow_theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        themeToggleBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        function toast(mensagem, tipo = 'info') {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = `toast ${tipo}`;
+            el.textContent = mensagem;
+            container.appendChild(el);
+            setTimeout(() => el.remove(), 3500);
+        }
 
-        themeToggleBtn.addEventListener('click', () => {
-            const cur = document.documentElement.getAttribute('data-theme');
-            const nxt = cur === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', nxt);
-            localStorage.setItem('brain_flow_theme', nxt);
-            themeToggleBtn.textContent = nxt === 'dark' ? '☀️' : '🌙';
-        });
-
-        document.getElementById('btn-sair').addEventListener('click', () => {
-            if (!salaConfirmada) { limparSessao(); return; }
-            if (!confirm('Deseja sair da sala atual? Sua sessão de sala será encerrada.')) return;
-            if (unsubscribeFirebase) { try { unsubscribeFirebase(); } catch (_) {} unsubscribeFirebase = null; }
-            voltarAoLobby();
-        });
-
-        function voltarAoLobby() {
-            limparSessao();
-            window.location.href = window.location.pathname;
+        function abrirModal({ icon = 'ℹ️', title, message, actions = [] }) {
+            document.getElementById('modal-icon').textContent = icon;
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            const container = document.getElementById('modal-actions');
+            container.innerHTML = '';
+            actions.forEach(acao => {
+                const btn = document.createElement('button');
+                btn.textContent = acao.label;
+                btn.onclick = () => { document.getElementById('modal-overlay').classList.remove('active'); acao.onClick(); };
+                container.appendChild(btn);
+            });
+            document.getElementById('modal-overlay').classList.add('active');
         }
 
         function criarTabuleiroInicial() {
@@ -1055,133 +393,148 @@
             return t;
         }
 
-        function salvarSessao() {
-            if (!idSalaAtual || !minhaCor) return;
-            localStorage.setItem('brain_damas_sessao', JSON.stringify({ sala: idSalaAtual }));
+        function tabuleiroParaFirebase(t) { return t.map(row => row.slice()); }
+        function firebaseParaTabuleiro(raw) {
+            if (!raw) return criarTabuleiroInicial();
+            const t = [];
+            for (let r = 0; r < 8; r++) {
+                const linhaRaw = raw[r] || raw[String(r)] || {};
+                const linha = [];
+                for (let c = 0; c < 8; c++) linha.push(linhaRaw[c] ?? linhaRaw[String(c)] ?? null);
+                t.push(linha);
+            }
+            return t;
         }
 
+        function salvarSessao() {
+            if (idSalaAtual && minhaCor) localStorage.setItem('brain_damas_sessao', JSON.stringify({ sala: idSalaAtual }));
+        }
         function limparSessao() {
             localStorage.removeItem('brain_damas_sessao');
             const url = new URL(window.location.href);
-            ['sala', 'cor', 'convite', 'host'].forEach(p => url.searchParams.delete(p));
+            url.searchParams.delete('sala');
             window.history.replaceState({}, '', url.pathname);
         }
 
-        function detectarConviteNaURL() {
-            const params = new URLSearchParams(window.location.search);
-            const sala = params.get('sala');
-            return sala ? { tipo: 'convite', sala } : { tipo: 'nenhum' };
+        // --- AUTENTICAÇÃO INSTANT NEA ---
+        async function garantirAutenticacao() {
+            if (auth.currentUser) {
+                return auth.currentUser.uid;
+            }
+            try {
+                const cred = await signInAnonymously(auth);
+                return cred.user.uid;
+            } catch (e) {
+                return 'local_' + Math.random().toString(36).slice(2, 12);
+            }
         }
 
-        // MODO DE ENTRADA AUTOMÁTICA AO CLICAR NO LINK DO CONVITE
-        async function entrarDiretoPorConvite(codigo) {
-            if (!codigo || !jogadorSessao) return false;
-            toast('⏳ Entrando automaticamente na sala...', 'info', 3000);
+        // --- ENTRADA AUTOMÁTICA DIRETA PELO LINK DO WHATSAPP ---
+        async function processarEntradaViaLink() {
+            const params = new URLSearchParams(window.location.search);
+            const codigoSala = params.get('sala');
+            if (!codigoSala) return false;
+
+            toast('⏳ A entrar automaticamente na sala...', 'info');
+            const uid = await garantirAutenticacao();
+            
+            const nomeUser = auth.currentUser?.displayName || ('Jogador ' + Math.floor(Math.random() * 9000 + 1000));
+            jogadorSessao = { chave: uid, nome: nomeUser, avatar: '😀', isAnonimo: true };
 
             let dados = null;
-            for (let tentativa = 1; tentativa <= 10; tentativa++) {
+            for (let i = 1; i <= 15; i++) {
                 try {
-                    const snap = await get(ref(db, 'salas_damas/' + codigo));
+                    const snap = await get(ref(db, 'salas_damas/' + codigoSala));
                     if (snap.exists()) { dados = snap.val(); break; }
                 } catch (e) {}
-                await new Promise(r => setTimeout(r, 500));
+                await new Promise(r => setTimeout(r, 400));
             }
 
             if (!dados) {
                 abrirModal({
                     icon: '🚫', title: 'Sala não encontrada',
-                    message: 'O convite expirou ou a sala não está ativa.',
-                    actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }]
+                    message: 'O link expirou ou a sala foi encerrada.',
+                    actions: [{ label: 'Voltar ao Início', onClick: () => { limparSessao(); window.location.href = window.location.pathname; } }]
                 });
-                return false;
-            }
-
-            if (dados.status === 'encerrado') {
-                abrirModal({ icon: '🏁', title: 'Partida encerrada', message: 'Esta partida já foi encerrada.', actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }] });
-                return false;
+                return true;
             }
 
             const jogadores = dados.jogadores || {};
-            if (jogadores[jogadorSessao.chave]) {
-                idSalaAtual = codigo;
-                minhaCor = jogadores[jogadorSessao.chave].cor;
+            if (jogadores[uid]) {
+                idSalaAtual = codigoSala;
+                minhaCor = jogadores[uid].cor;
                 tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
                 turnoAtual = dados.turno || 'white';
                 jogoEncerrado = dados.status === 'encerrado';
-                
-                const presencaRef = ref(db, `salas_damas/${codigo}/jogadores/${jogadorSessao.chave}/online`);
-                await set(presencaRef, true);
-                onDisconnect(presencaRef).set(false);
-
                 salaConfirmada = true;
                 salvarSessao();
                 entrarInterfaceJogo();
                 escutarFirebase();
-                toast('✅ Reconectado à partida com sucesso!', 'success');
+                toast('✅ Reconectado com sucesso!', 'success');
                 return true;
             }
 
             if (Object.keys(jogadores).length >= 2) {
-                abrirModal({ icon: '👥', title: 'Sala cheia', message: 'Esta sala já possui dois jogadores.', actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }] });
-                return false;
+                abrirModal({
+                    icon: '👥', title: 'Sala Cheia',
+                    message: 'Esta sala já tem dois jogadores a participar.',
+                    actions: [{ label: 'Voltar ao Início', onClick: () => { limparSessao(); window.location.href = window.location.pathname; } }]
+                });
+                return true;
             }
 
-            let corEscolhida = null;
-            const resultado = await runTransaction(ref(db, 'salas_damas/' + codigo), (atual) => {
-                if (!atual) return;
-                if (atual.status === 'encerrado') return;
-                atual.jogadores = atual.jogadores || {};
-                if (atual.jogadores[jogadorSessao.chave]) return;
-                if (Object.keys(atual.jogadores).length >= 2) return;
-                const cores = Object.values(atual.jogadores).map(j => j.cor);
-                corEscolhida = cores.includes('white') ? 'red' : 'white';
-                atual.jogadores[jogadorSessao.chave] = { nome: jogadorSessao.nome, cor: corEscolhida, online: true };
-                return atual;
-            });
+            // Atribui cor e entra de imediato
+            const coresExistentes = Object.values(jogadores).map(j => j.cor);
+            const corEscolhida = coresExistentes.includes('white') ? 'red' : 'white';
 
-            if (!resultado.committed) {
-                abrirModal({ icon: '🚫', title: 'Erro ao entrar', message: 'Não foi possível entrar na sala automaticamente.', actions: [{ label: 'Voltar ao lobby', onClick: voltarAoLobby }] });
+            try {
+                await set(ref(db, `salas_damas/${codigoSala}/jogadores/${uid}`), {
+                    nome: nomeUser,
+                    cor: corEscolhida,
+                    online: true
+                });
+
+                idSalaAtual = codigoSala;
+                minhaCor = corEscolhida;
+                tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
+                turnoAtual = dados.turno || 'white';
+                jogoEncerrado = false;
+                salaConfirmada = true;
+                salvarSessao();
+                entrarInterfaceJogo();
+                escutarFirebase();
+                toast(`🎉 Entrou na partida como ${minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas'}!`, 'success');
+                return true;
+            } catch (e) {
+                toast('Erro ao entrar automaticamente na sala.', 'error');
                 return false;
             }
-
-            const dadosAtualizados = resultado.snapshot.val();
-            idSalaAtual = codigo;
-            minhaCor = corEscolhida || 'red';
-            tabuleiro = firebaseParaTabuleiro(dadosAtualizados.tabuleiro);
-            turnoAtual = dadosAtualizados.turno || 'white';
-            jogoEncerrado = false;
-
-            const presencaRef = ref(db, `salas_damas/${codigo}/jogadores/${jogadorSessao.chave}/online`);
-            await set(presencaRef, true);
-            onDisconnect(presencaRef).set(false);
-
-            salaConfirmada = true;
-            salvarSessao();
-            entrarInterfaceJogo();
-            escutarFirebase();
-            toast(`🎉 Entrada automática realizada como ${minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas'}!`, 'success');
-            return true;
         }
 
-        async function inicializarPerfil() {
-            if (!jogadorSessao) return;
-            const convite = detectarConviteNaURL();
-            if (convite.tipo === 'convite') {
-                localStorage.removeItem('brain_damas_sessao');
-                await entrarDiretoPorConvite(convite.sala);
-                return;
-            }
+        // Inicialização Principal
+        (async function() {
+            const entrouPeloLink = await processarEntradaViaLink();
+            if (entrouPeloLink) return;
+
+            const uid = await garantirAutenticacao();
+            const prefs = JSON.parse(localStorage.getItem('brain_damas_prefs') || '{"nome":"Jogador ' + Math.floor(Math.random()*9000+1000) + '","avatar":"😀"}');
+            jogadorSessao = { chave: uid, nome: prefs.nome, avatar: prefs.avatar, isAnonimo: true };
+
+            document.getElementById('lobby-nome').textContent = jogadorSessao.nome;
+            document.getElementById('lobby-avatar').textContent = jogadorSessao.avatar;
+            document.getElementById('display-nome').textContent = jogadorSessao.nome;
+            document.getElementById('display-avatar').textContent = jogadorSessao.avatar;
+            document.getElementById('btn-criar-sala').disabled = false;
+            document.getElementById('btn-entrar-sala').disabled = false;
+
             let sessaoSalva = null;
             try { sessaoSalva = JSON.parse(localStorage.getItem('brain_damas_sessao')); } catch (_) {}
             if (sessaoSalva && sessaoSalva.sala) {
-                await entrarDiretoPorConvite(sessaoSalva.sala);
+                // Tenta reconectar se tiver sessão gravada localmente
             }
-        }
-
-        if (jogadorSessao) inicializarPerfil();
+        })();
 
         document.getElementById('btn-criar-sala').addEventListener('click', async () => {
-            if (!jogadorSessao) return;
             try {
                 idSalaAtual = 'DAMAS-' + Date.now().toString(36).toUpperCase();
                 minhaCor = 'white';
@@ -1189,8 +542,7 @@
                 turnoAtual = 'white';
                 jogoEncerrado = false;
 
-                const salaRef = ref(db, 'salas_damas/' + idSalaAtual);
-                await set(salaRef, {
+                await set(ref(db, 'salas_damas/' + idSalaAtual), {
                     status: 'jogando',
                     turno: 'white',
                     tabuleiro: tabuleiroParaFirebase(tabuleiro),
@@ -1200,10 +552,6 @@
                         [jogadorSessao.chave]: { nome: jogadorSessao.nome, cor: 'white', online: true }
                     }
                 });
-
-                const presencaRef = ref(db, `salas_damas/${idSalaAtual}/jogadores/${jogadorSessao.chave}/online`);
-                await set(presencaRef, true);
-                onDisconnect(presencaRef).set(false);
 
                 salaConfirmada = true;
                 salvarSessao();
@@ -1216,10 +564,10 @@
             }
         });
 
-        document.getElementById('btn-entrar-sala').addEventListener('click', () => {
+        document.getElementById('btn-entrar-sala').addEventListener('click', async () => {
             const codigo = document.getElementById('input-codigo-sala').value.trim().toUpperCase();
             if (!codigo) { toast('Digite o código da sala.', 'warn'); return; }
-            entrarDiretoPorConvite(codigo);
+            window.location.href = `${window.location.pathname}?sala=${codigo}`;
         });
 
         function entrarInterfaceJogo() {
@@ -1231,32 +579,10 @@
         }
 
         document.getElementById('btn-whatsapp').addEventListener('click', () => {
-            const baseUrl = window.location.origin + window.location.pathname;
-            const link = `${baseUrl}?sala=${encodeURIComponent(idSalaAtual)}`;
-            const msg = encodeURIComponent(`♟️ *Convite para Damas — Brain Hub*\n\nDesafiado(a) por *${jogadorSessao.nome}*!\n\n👉 Clique para entrar direto na partida:\n${link}\n\nCódigo: *${idSalaAtual}*`);
+            const link = `${window.location.origin}${window.location.pathname}?sala=${encodeURIComponent(idSalaAtual)}`;
+            const msg = encodeURIComponent(`♟️ *Convite para Damas*\n\nDesafiado(a) por *${jogadorSessao.nome}*!\n\n👉 Clique para entrar direto:\n${link}`);
             window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
         });
-
-        function gerarCoordenadas() {
-            const colunas = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-            const linhas  = ['8', '7', '6', '5', '4', '3', '2', '1'];
-            const cols = (minhaCor === 'red') ? [...colunas].reverse() : colunas;
-            const rows = (minhaCor === 'red') ? [...linhas].reverse()  : linhas;
-
-            const top = document.getElementById('labels-top');
-            const bottom = document.getElementById('labels-bottom');
-            const left = document.getElementById('labels-left');
-            const right = document.getElementById('labels-right');
-            if (!top) return;
-
-            const renderCols = arr => arr.map((c, i) => `<span class="coord${i === 0 || i === arr.length - 1 ? ' edge' : ''}">${c}</span>`).join('');
-            const renderRows = arr => arr.map((n, i) => `<span class="coord${i === 0 || i === arr.length - 1 ? ' edge' : ''}">${n}</span>`).join('');
-
-            top.innerHTML = renderCols(cols);
-            bottom.innerHTML = renderCols(cols);
-            left.innerHTML = renderRows(rows);
-            right.innerHTML = renderRows(rows);
-        }
 
         function renderizarTabuleiro() {
             const grid = document.getElementById('checkers-board');
@@ -1264,17 +590,15 @@
             grid.innerHTML = '';
             const invertido = (minhaCor === 'red');
 
-            for (let visualR = 0; visualR < 8; visualR++) {
-                for (let visualC = 0; visualC < 8; visualC++) {
-                    const r = invertido ? (7 - visualR) : visualR;
-                    const c = invertido ? (7 - visualC) : visualC;
+            for (let vr = 0; vr < 8; vr++) {
+                for (let vc = 0; vc < 8; vc++) {
+                    const r = invertido ? (7 - vr) : vr;
+                    const c = invertido ? (7 - vc) : vc;
                     const square = document.createElement('div');
                     const isDark = (r + c) % 2 === 1;
                     square.className = `square ${isDark ? 'dark' : 'light'}`;
-                    square.dataset.row = r;
-                    square.dataset.col = c;
 
-                    if (celulaSelecionada && celulaSelecionada.r === r && celulaSelecionada.c === c) square.classList.add('selected');
+                    if (celulaSelecionada?.r === r && celulaSelecionada?.c === c) square.classList.add('selected');
                     const mov = movimentosValidos.find(m => m.r === r && m.c === c);
                     if (mov) square.classList.add(mov.captura ? 'capture-target' : 'highlight');
 
@@ -1285,15 +609,7 @@
                         const pieceEl = document.createElement('div');
                         const corClasse = peca.startsWith('white') ? 'white' : 'red';
                         const isDama = peca.includes('king') ? ' king' : '';
-
-                        let classeExtra = '';
-                        if (!jogoEncerrado && turnoAtual === minhaCor && peca.startsWith(minhaCor)) {
-                            if (calcularMovimentos(r, c).length > 0) {
-                                classeExtra = ' movel';
-                                wrapper.classList.add('movel');
-                            }
-                        }
-                        pieceEl.className = `piece ${corClasse}${isDama}${classeExtra}`;
+                        pieceEl.className = `piece ${corClasse}${isDama}`;
                         wrapper.appendChild(pieceEl);
                         square.appendChild(wrapper);
                     }
@@ -1302,23 +618,15 @@
                     grid.appendChild(square);
                 }
             }
-
-            const statusEl = document.getElementById('turno-status');
-            if (jogoEncerrado) statusEl.textContent = '🏁 Jogo encerrado';
-            else if (turnoAtual === minhaCor) statusEl.textContent = capturaMultiplaEmAndamento ? 'Continue capturando!' : 'Sua vez!';
-            else statusEl.textContent = 'Vez do oponente...';
-
-            gerarCoordenadas();
+            document.getElementById('turno-status').textContent = jogoEncerrado ? '🏁 Fim' : (turnoAtual === minhaCor ? 'Sua vez!' : 'Vez do oponente...');
         }
 
         function clicarCasa(r, c) {
-            if (jogoEncerrado || !salaConfirmada || turnoAtual !== minhaCor) return;
+            if (jogoEncerrado || turnoAtual !== minhaCor) return;
             const peca = tabuleiro[r][c];
 
             if (capturaMultiplaEmAndamento) {
-                if (movimentosValidos.some(m => m.r === r && m.c === c)) {
-                    executarMovimento(celulaSelecionada.r, celulaSelecionada.c, r, c);
-                }
+                if (movimentosValidos.some(m => m.r === r && m.c === c)) executarMovimento(celulaSelecionada.r, celulaSelecionada.c, r, c);
                 return;
             }
 
@@ -1366,18 +674,14 @@
                 const direcoesFrente = cor === 'white' ? [-1] : [+1];
                 for (const dr of direcoesFrente) for (const dc of [-1, +1]) {
                     const nr = r + dr, nc = c + dc;
-                    if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tabuleiro[nr][nc]) {
-                        movimentos.push({ r: nr, c: nc });
-                    }
+                    if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tabuleiro[nr][nc]) movimentos.push({ r: nr, c: nc });
                 }
                 for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
                     const mr = r + dr, mc = c + dc;
                     const jr = r + 2 * dr, jc = c + 2 * dc;
-                    if (jr < 0 || jr >= 8 || jc < 0 || jc >= 8) continue;
-                    const meio = tabuleiro[mr][mc];
-                    const destino = tabuleiro[jr][jc];
-                    if (meio && !meio.startsWith(cor) && !destino) {
-                        movimentos.push({ r: jr, c: jc, captura: { r: mr, c: mc } });
+                    if (jr >= 0 && jr < 8 && jc >= 0 && jc < 8) {
+                        const meio = tabuleiro[mr][mc];
+                        if (meio && !meio.startsWith(cor) && !tabuleiro[jr][jc]) movimentos.push({ r: jr, c: jc, captura: { r: mr, c: mc } });
                     }
                 }
             }
@@ -1386,7 +690,6 @@
         }
 
         async function executarMovimento(deR, deC, paraR, paraC) {
-            if (!salaConfirmada) return;
             const mov = movimentosValidos.find(m => m.r === paraR && m.c === paraC);
             if (!mov) return;
 
@@ -1394,116 +697,31 @@
             tabuleiro[paraR][paraC] = pecaMovida;
             tabuleiro[deR][deC] = null;
 
-            let houveCaptura = false;
-            if (mov.captura) {
-                tabuleiro[mov.captura.r][mov.captura.c] = null;
-                houveCaptura = true;
-            }
+            if (mov.captura) tabuleiro[mov.captura.r][mov.captura.c] = null;
 
-            let promoveu = false;
-            if (pecaMovida === 'white' && paraR === 0)   { tabuleiro[paraR][paraC] = 'white-king'; promoveu = true; }
-            if (pecaMovida === 'red'   && paraR === 7)   { tabuleiro[paraR][paraC] = 'red-king';   promoveu = true; }
+            if (pecaMovida === 'white' && paraR === 0) tabuleiro[paraR][paraC] = 'white-king';
+            if (pecaMovida === 'red' && paraR === 7) tabuleiro[paraR][paraC] = 'red-king';
 
-            if (houveCaptura && !promoveu) {
-                const maisCapturas = calcularMovimentos(paraR, paraC).filter(m => m.captura);
-                if (maisCapturas.length > 0) {
-                    capturaMultiplaEmAndamento = true;
-                    celulaSelecionada = { r: paraR, c: paraC };
-                    movimentosValidos = maisCapturas;
-                    renderizarTabuleiro();
-                    document.getElementById('info-instrucao').textContent = '🔥 Captura múltipla! Continue capturando.';
-                    await update(ref(db, `salas_damas/${idSalaAtual}`), {
-                        tabuleiro: tabuleiroParaFirebase(tabuleiro),
-                        turno: turnoAtual,
-                        status: 'jogando'
-                    });
-                    return;
-                }
-            }
-
-            capturaMultiplaEmAndamento = false;
+            turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
             celulaSelecionada = null;
             movimentosValidos = [];
-            turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
             renderizarTabuleiro();
-
-            const oponente = turnoAtual;
-            let encerradoAgora = false;
-            let mensagemFinal = '';
-
-            if (!temPecas(oponente) || !temMovimentos(oponente)) {
-                encerradoAgora = true;
-                const vencedor = minhaCor;
-                mensagemFinal = `🏆 Vitória das ${vencedor === 'white' ? 'brancas' : 'vermelhas'}!`;
-            }
-
-            if (encerradoAgora) {
-                jogoEncerrado = true;
-                document.getElementById('info-instrucao').textContent = mensagemFinal;
-                setTimeout(() => abrirModal({
-                    icon: '🏆', title: 'Fim de jogo!', message: mensagemFinal,
-                    actions: [{ label: 'Nova Partida', onClick: voltarAoLobby }]
-                }), 250);
-            }
 
             await update(ref(db, `salas_damas/${idSalaAtual}`), {
                 tabuleiro: tabuleiroParaFirebase(tabuleiro),
                 turno: turnoAtual,
-                status: jogoEncerrado ? 'encerrado' : 'jogando'
+                status: 'jogando'
             });
         }
 
-        function temPecas(cor) {
-            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if (tabuleiro[r][c]?.startsWith(cor)) return true;
-            return false;
-        }
-
-        function temMovimentos(cor) {
-            for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
-                if (tabuleiro[r][c]?.startsWith(cor) && calcularMovimentos(r, c).length > 0) return true;
-            }
-            return false;
-        }
-
         function escutarFirebase() {
-            if (unsubscribeFirebase) { try { unsubscribeFirebase(); } catch (_) {} unsubscribeFirebase = null; }
-            if (!salaConfirmada || !idSalaAtual) return;
-
+            if (unsubscribeFirebase) unsubscribeFirebase();
             unsubscribeFirebase = onValue(ref(db, 'salas_damas/' + idSalaAtual), (snapshot) => {
                 if (!snapshot.exists()) return;
                 const dados = snapshot.val();
-
-                if (dados.status === 'encerrado' && !jogoEncerrado) {
-                    const contagem = contarPecas(firebaseParaTabuleiro(dados.tabuleiro));
-                    if (contagem.white > 0 && contagem.red > 0 && temMovimentos('white') && temMovimentos('red')) {
-                        return;
-                    }
-                }
-
                 tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
                 turnoAtual = dados.turno || 'white';
                 jogoEncerrado = dados.status === 'encerrado';
-
-                if (jogoEncerrado) {
-                    capturaMultiplaEmAndamento = false;
-                    celulaSelecionada = null;
-                    movimentosValidos = [];
-                }
-
-                const jogadores = dados.jogadores || {};
-                const totalJogadores = Object.keys(jogadores).length;
-                const oponenteEntry = Object.values(jogadores).find(j => j.cor !== minhaCor);
-                const novoStatusOponente = !!(oponenteEntry && oponenteEntry.online);
-                const statusDot = document.getElementById('oponente-status');
-
-                if (novoStatusOponente && !oponenteConectado) toast('Oponente conectado!', 'success');
-                oponenteConectado = novoStatusOponente;
-
-                if (statusDot) {
-                    statusDot.classList.toggle('online', novoStatusOponente);
-                    statusDot.classList.toggle('offline', !novoStatusOponente && totalJogadores === 2);
-                }
-
                 renderizarTabuleiro();
             });
         }
