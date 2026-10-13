@@ -1,4 +1,6 @@
-// Motor de Jogo e Regras CBD (v7.3 - Corrigido)
+// ============================================================
+// Motor de Jogo e Regras CBD (v7.5 - Completo)
+// ============================================================
 
 export function criarTabuleiroInicial() {
     const t = Array.from({ length: 8 }, () => Array(8).fill(null));
@@ -79,8 +81,8 @@ export function explorarCapturas(r, c, cor, tab, capturadasSet = new Set(), prof
     for (const cap of caps) {
         const novaTab = tab.map(row => row.slice());
         const pecaAtual = novaTab[r][c];
-        novaTab[cap.r][cap.c] = pecaAtual; 
-        novaTab[r][c] = null; 
+        novaTab[cap.r][cap.c] = pecaAtual;
+        novaTab[r][c] = null;
         novaTab[cap.capturada.r][cap.capturada.c] = null;
 
         const isPeao = !pecaAtual.includes('king');
@@ -94,7 +96,7 @@ export function explorarCapturas(r, c, cor, tab, capturadasSet = new Set(), prof
         const novasCapturadas = new Set(capturadasSet);
         novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
 
-        // REGRA OFICIAL: Se o peão virou dama no meio do salto, ele pára a captura por aqui (não continua saltando como dama no mesmo lance).
+        // Regra CBD: promoção durante salto interrompe a captura múltipla
         let continuacoes = [];
         if (!virouDamaAgora) {
             continuacoes = explorarCapturas(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
@@ -175,4 +177,128 @@ export function calcularMovimentos(tab, r, c, corDaVez) {
         }
     }
     return movs;
+}
+
+// ============================================================
+// ✅ NOVO: executar movimento no tabuleiro (fonte única de verdade)
+// ============================================================
+/**
+ * Aplica um movimento a um tabuleiro (brasileiro 8x8).
+ * @param {Array} tabuleiroAtual - matriz 8x8
+ * @param {Object} movimento - { de: {r,c}, para: {r,c}, caminho?: [{r,c,capturada:{r,c}}, ...] }
+ * @returns {Array} novo tabuleiro
+ */
+export function executarMovimentoNoJogo(tabuleiroAtual, movimento) {
+    const novoTabuleiro = tabuleiroAtual.map(row => row.slice());
+
+    if (movimento.caminho && movimento.caminho.length > 0) {
+        const origem = movimento.de;
+        const pecaOriginal = novoTabuleiro[origem.r][origem.c];
+        if (!pecaOriginal) return novoTabuleiro; // sanity check
+
+        novoTabuleiro[origem.r][origem.c] = null;
+
+        // Remover TODAS as capturadas primeiro
+        for (const passo of movimento.caminho) {
+            if (passo.capturada) {
+                novoTabuleiro[passo.capturada.r][passo.capturada.c] = null;
+            }
+        }
+
+        // Colocar peça no destino final (com possível promoção)
+        const ultimoPasso = movimento.caminho[movimento.caminho.length - 1];
+        let pecaFinal = pecaOriginal;
+        const isPeao = !pecaOriginal.includes('king');
+        const corPeca = pecaOriginal.startsWith('white') ? 'white' : 'red';
+        if (isPeao && ((corPeca === 'white' && ultimoPasso.r === 0) || (corPeca === 'red' && ultimoPasso.r === 7))) {
+            pecaFinal = corPeca + '-king';
+        }
+        novoTabuleiro[ultimoPasso.r][ultimoPasso.c] = pecaFinal;
+    } else {
+        const peca = novoTabuleiro[movimento.de.r][movimento.de.c];
+        if (!peca) return novoTabuleiro; // sanity check
+
+        novoTabuleiro[movimento.de.r][movimento.de.c] = null;
+        let pecaFinal = peca;
+        const isPeao = !peca.includes('king');
+        const corPeca = peca.startsWith('white') ? 'white' : 'red';
+        if (isPeao && ((corPeca === 'white' && movimento.para.r === 0) || (corPeca === 'red' && movimento.para.r === 7))) {
+            pecaFinal = corPeca + '-king';
+        }
+        novoTabuleiro[movimento.para.r][movimento.para.c] = pecaFinal;
+    }
+    return novoTabuleiro;
+}
+
+// ============================================================
+// ✅ NOVO: verificação completa de fim de jogo (ordem CBD)
+// ============================================================
+/**
+ * Verifica se a partida terminou.
+ * Ordem de prioridade:
+ *   1. Vitória por captura total (adversário sem peças)
+ *   2. Vitória por imobilização (adversário sem movimentos)
+ *   3. Empate (40 lances, repetição 3x, finais específicos)
+ * @returns {null|{tipo:'vitoria', vencedor:'white'|'red', motivo:string}|{tipo:'empate', motivo:string}}
+ */
+export function verificarFimDeJogoCompleto(tab, turno, contadores = {}) {
+    const pecasBrancas = contarPecasDaCor(tab, 'white');
+    const pecasPretas = contarPecasDaCor(tab, 'red');
+
+    // 1. Captura total
+    if (pecasBrancas === 0 && pecasPretas === 0) {
+        return { tipo: 'empate', motivo: 'tabuleiro-vazio' };
+    }
+    if (pecasBrancas === 0) return { tipo: 'vitoria', vencedor: 'red', motivo: 'sem-pecas' };
+    if (pecasPretas === 0) return { tipo: 'vitoria', vencedor: 'white', motivo: 'sem-pecas' };
+
+    // 2. Imobilização
+    if (!jogadorTemAlgumMovimento(tab, turno)) {
+        return {
+            tipo: 'vitoria',
+            vencedor: turno === 'white' ? 'red' : 'white',
+            motivo: 'sem-movimentos'
+        };
+    }
+
+    // 3. Empates
+    const lancesSemCaptura = contadores.lancesDamasSemCaptura || 0;
+    if (lancesSemCaptura >= 20) {
+        return { tipo: 'empate', motivo: '20-lances-dama-sem-captura' };
+    }
+
+    const repeticoes = contadores.posicoesRepetidas || {};
+    const chave = JSON.stringify(tab) + '|' + turno;
+    const count = (repeticoes[chave] || 0) + 1;
+    if (count >= 3) {
+        return { tipo: 'empate', motivo: 'posicao-repetida-3x' };
+    }
+
+    return null;
+}
+
+// ============================================================
+// ✅ NOVO: detetor de finais específicos (para a UI)
+// ============================================================
+export function detectarFinalEspecial(tab) {
+    const contarPecas = (cor) => {
+        let pedras = 0, damas = 0;
+        for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+            const p = tab[r][c];
+            if (p && p.startsWith(cor)) {
+                if (p.includes('king')) damas++; else pedras++;
+            }
+        }
+        return { pedras, damas };
+    };
+    const b = contarPecas('white');
+    const p = contarPecas('red');
+    if (b.damas + b.pedras === 0 || p.damas + p.pedras === 0) return null;
+    if (b.damas === 2 && p.damas === 2 && b.pedras === 0 && p.pedras === 0) return '2v2damas';
+    if (b.damas === 2 && p.damas === 1 && b.pedras === 0 && p.pedras === 0) return '2v1dama';
+    if (b.damas === 1 && p.damas === 2 && b.pedras === 0 && p.pedras === 0) return '1v2dama';
+    if (b.damas === 1 && p.damas === 1 && b.pedras === 0 && p.pedras === 0) return '1v1dama';
+    if (b.damas === 3 && p.damas === 1 && b.pedras === 0 && p.pedras === 0) return '3v1dama';
+    if (b.damas === 1 && p.damas === 3 && b.pedras === 0 && p.pedras === 0) return '1v3dama';
+    return null;
 }
