@@ -1,5 +1,5 @@
 // ============================================================
-// Motor de Jogo e Regras Internacionais (100 casas / 10x10) - Corrigido
+// Motor de Jogo e Regras Internacionais (100 casas / 10x10) - Completo e Corrigido
 // ============================================================
 
 export function criarTabuleiroInternacional() {
@@ -54,7 +54,6 @@ export function explorarCapturasInt(r, c, cor, tab, capturadasSet = new Set(), p
     if (isDama) {
         for (const dr of dirs) for (const dc of dirs) {
             let nr = r + dr, nc = c + dc;
-            // Procura pela primeira peça adversária na diagonal
             while (nr >= 0 && nr < 10 && nc >= 0 && nc < 10 && !tab[nr][nc]) { 
                 nr += dr; 
                 nc += dc; 
@@ -64,7 +63,6 @@ export function explorarCapturasInt(r, c, cor, tab, capturadasSet = new Set(), p
             if (!alvo || alvo.startsWith(cor)) continue;
             if (capturadasSet.has(`${nr},${nc}`)) continue;
 
-            // A partir da peça adversária, recolhe todas as casas vazias onde a dama pode pousar
             let tr = nr + dr, tc = nc + dc;
             while (tr >= 0 && tr < 10 && tc >= 0 && tc < 10 && !tab[tr][tc]) {
                 caps.push({ r: tr, c: tc, capturada: { r: nr, c: nc } });
@@ -104,7 +102,6 @@ export function explorarCapturasInt(r, c, cor, tab, capturadasSet = new Set(), p
         const novasCapturadas = new Set(capturadasSet);
         novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
 
-        // REGRA OFICIAL: Se o peão virou dama no meio do salto, ele cessa as capturas adicionais neste turno
         let continuacoes = [];
         if (!virouDamaAgora) {
             continuacoes = explorarCapturasInt(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
@@ -187,4 +184,46 @@ export function calcularMovimentosInt(tab, r, c, corDaVez) {
         }
     }
     return movs;
+}
+
+// FUNÇÃO ESSENCIAL: Aplica o movimento no jogo garantindo a remoção de peças capturadas
+export function executarMovimentoNoJogoInt(tabuleiroAtual, origem, movimentoEscolhido) {
+    const novoTabuleiro = tabuleiroAtual.map(row => row.slice());
+    const peca = novoTabuleiro[origem.r][origem.c];
+    
+    // Se o movimento possui caminho completo (captura)
+    if (movimentoEscolhido.caminhoCompleto && movimentoEscolhido.caminhoCompleto.length > 0) {
+        novoTabuleiro[origem.r][origem.c] = null;
+
+        // Limpa rigorosamente todas as peças capturadas ao longo do caminho
+        for (const passo of movimentoEscolhido.caminhoCompleto) {
+            if (passo.capturada) {
+                novoTabuleiro[passo.capturada.r][passo.capturada.c] = null;
+            }
+        }
+
+        const ultimoPasso = movimentoEscolhido.caminhoCompleto[movimentoEscolhido.caminhoCompleto.length - 1];
+        let pecaFinal = peca;
+        const isPeao = peca && !peca.includes('king');
+        const corPeca = peca.startsWith('white') ? 'white' : 'red';
+        
+        if (isPeao && ((corPeca === 'white' && ultimoPasso.r === 0) || (corPeca === 'red' && ultimoPasso.r === 9))) {
+            pecaFinal = corPeca + '-king';
+        }
+        novoTabuleiro[ultimoPasso.r][ultimoPasso.c] = pecaFinal;
+
+    } else {
+        // Movimento simples
+        novoTabuleiro[origem.r][origem.c] = null;
+        let pecaFinal = peca;
+        const isPeao = peca && !peca.includes('king');
+        const corPeca = peca.startsWith('white') ? 'white' : 'red';
+        
+        if (isPeao && ((corPeca === 'white' && movimentoEscolhido.r === 0) || (corPeca === 'red' && movimentoEscolhido.r === 9))) {
+            pecaFinal = corPeca + '-king';
+        }
+        novoTabuleiro[movimentoEscolhido.r][movimentoEscolhido.c] = pecaFinal;
+    }
+
+    return novoTabuleiro;
 }
