@@ -1,5 +1,5 @@
 // ============================================================
-// Brain Damas v7.2 — Motor de Interface Principal (Brasileiras + Internacionais)
+// Brain Damas v7.2 — Motor de Interface Principal (Completo)
 // ============================================================
 
 import { db, auth } from "./firebase-config.js";
@@ -11,9 +11,6 @@ import {
     firebaseParaTabuleiro,
     contarPecasDaCor,
     jogadorTemAlgumMovimento,
-    explorarCapturas,
-    todosCaminhosCaptura,
-    maxCapturasDaPeca,
     maxCapturasGlobais,
     capturasObrigatorias,
     jogadorTemCapturaObrigatoria,
@@ -22,117 +19,56 @@ import {
 
 import {
     criarTabuleiroInternacional,
-    tabuleiroParaFirebaseInt,
-    firebaseParaTabuleiroInt,
     contarPecasDaCorInt,
-    jogadorTemAlgumMovimentoInt,
-    calcularMovimentosInt,
-    maxCapturasGlobaisInt,
+    calculaMovimentosInt as calcularMovimentosInt,
     capturasObrigatoriasInt,
     jogadorTemCapturaObrigatoriaInt
 } from "./game-engine-internacional.js";
 
-// Importação condicional do Firebase RTDB e Auth via CDN
-let rtdb = null, fbauth = null;
-try {
-    rtdb = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js");
-    fbauth = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
-} catch (e) {
-    console.warn('[Firebase] Módulos de rede não carregados — modo offline.');
-}
-
-const fns = rtdb && fbauth ? {
-    ref: rtdb.ref, get: rtdb.get, set: rtdb.set, update: rtdb.update,
-    onValue: rtdb.onValue, runTransaction: rtdb.runTransaction, push: rtdb.push,
-    remove: rtdb.remove, serverTimestamp: rtdb.serverTimestamp,
-    onDisconnect: rtdb.onDisconnect,
-    signInAnonymously: fbauth.signInAnonymously,
-    onAuthStateChanged: fbauth.onAuthStateChanged
-} : {};
-
-const firebaseDisponivel = !!db;
-
-// === ESTADO GLOBAL ===
-let jogadorSessao = null;
+// Estado Global
 let apelido = '';
 let idSalaAtual = null;
-let minhaCor = null;
+let minhaCor = 'white';
 let tabuleiro = [];
 let celulaSelecionada = null;
 let movimentosValidos = [];
 let turnoAtual = 'white';
 let jogoEncerrado = false;
-let unsubscribeFirebase = null;
-let salaConfirmada = false;
-
-let vencedorDeclarado = null;
-let desistenciaProcessada = false;
-let modoEspectador = false;
 let placarSessao = { vitorias: 0, derrotas: 0 };
-let nomeOponente = 'Oponente';
-
-let modoTorneio = 0;
-let torneioPlacar = { eu: 0, op: 0 };
-
-let historicoMovimentos = [];
 let historicoPartidas = [];
 let notacaoAtual = [];
-
-let euPronto = false;
-let adversarioPronto = false;
-let ambosProntos = false;
-
-let offsetServidor = 0;
-let turnoInicioServidor = 0;
+let tempoLimiteSegundos = 0;
+let modoRelogio = 'none';
+let relogioBrancas = 300000;
+let relogioPretas = 300000;
+let relogioIntervalId = null;
 let timerIntervalId = null;
 let timerSegundosRestantes = 0;
-let aviso5sDisparado = false;
-let tempoLimiteSegundos = 0;
-
-let modoRelogio = 'none';
-let relogioBrancas = 0;
-let relogioPretas = 0;
-let relogioIntervalId = null;
-
-let lancesTotais = 0;
 let emPausa = false;
-
 let modoIA = false;
-let modoHotSeat = false;
+let modoHotSeat = true;
 let modoInternacional = false;
 let nivelIA = 3;
 let iaPensando = false;
-let hotSeatNome1 = 'Jogador 1';
-let hotSeatNome2 = 'Jogador 2';
 let hotSeatJogadorAtual = 'white';
-
-let ultimaJogadaDestino = null;
+let sfxPack = 'classic';
 let modoA11y = false;
 
-let salaCheckInterval = null;
-let heartbeatInterval = null;
-let monitorAdversarioInterval = null;
-let ultimaRespostaFirebase = 0;
-let connectionCheckInterval = null;
-let sfxPack = 'classic';
-
-// === CONQUISTAS ===
+// Conquistas
 const CONQUISTAS = [
     { id: 'primeira_vitoria', emoji: '🥇', nome: 'Primeira Vitória', desc: 'Ganhe sua primeira partida', check: (s) => s.vitorias >= 1 },
     { id: 'veterano', emoji: '🎖️', nome: 'Veterano', desc: 'Ganhe 5 partidas', check: (s) => s.vitorias >= 5 },
-    { id: 'lendario', emoji: '👑', nome: 'Lendário', desc: 'Ganhe 15 partidas', check: (s) => s.vitorias >= 15 },
-    { id: 'hotseat', emoji: '👥', nome: 'Hot-Seat', desc: 'Jogue em modo Hot-Seat', check: (s) => s.hotseatJogado >= 1 }
+    { id: 'lendario', emoji: '👑', nome: 'Lendário', desc: 'Ganhe 15 partidas', check: (s) => s.vitorias >= 15 }
 ];
 
 function carregarConquistas() {
     try {
         const raw = JSON.parse(localStorage.getItem('brain_damas_conquistas') || '{}');
-        return { unlocked: raw.unlocked || {}, stats: raw.stats || { vitorias: 0, derrotas: 0, hotseatJogado: 0 } };
+        return { unlocked: raw.unlocked || {}, stats: raw.stats || { vitorias: 0, derrotas: 0 } };
     } catch (_) {
-        return { unlocked: {}, stats: { vitorias: 0, derrotas: 0, hotseatJogado: 0 } };
+        return { unlocked: {}, stats: { vitorias: 0, derrotas: 0 } };
     }
 }
-function salvarConquistas(d) { localStorage.setItem('brain_damas_conquistas', JSON.stringify(d)); }
 function atualizarGridConquistas() {
     const grid = document.getElementById('ach-grid');
     if (!grid) return;
@@ -145,13 +81,9 @@ function atualizarGridConquistas() {
     document.getElementById('ach-resumo').textContent = `${desb} / ${CONQUISTAS.length} desbloqueadas`;
 }
 
-function vibrar(padrao = 30) {
-    if (!('vibrate' in navigator)) return;
-    try { navigator.vibrate(padrao); } catch (_) {}
-}
-
 function toast(mensagem, tipo = 'info') {
     const container = document.getElementById('toast-container');
+    if (!container) return;
     const el = document.createElement('div');
     el.className = `toast ${tipo}`; el.textContent = mensagem;
     container.appendChild(el);
@@ -188,10 +120,18 @@ function abrirPromptApelido({ primeiraVez = false, atual = '' } = {}) {
     apelido = val;
     localStorage.setItem('brain_damas_apelido', apelido);
     atualizarApelidoUI();
-    if (jogadorSessao) jogadorSessao.nome = apelido;
     toast(`✏️ Apelido: ${apelido}`, 'success');
 }
 
+function atualizarApelidoUI() {
+    const nome = apelido || 'Visitante';
+    const n1 = document.getElementById('lobby-nome');
+    const n2 = document.getElementById('display-nome');
+    if (n1) n1.textContent = nome;
+    if (n2) n2.textContent = nome;
+}
+
+// Notação
 function casaParaNotacao(r, c) { return String.fromCharCode(97 + c) + ((modoInternacional ? 10 : 8) - r); }
 function adicionarNotacao(cor, de, para, captura, isDama, caminhoCompleto) {
     let texto = '';
@@ -224,96 +164,7 @@ function renderizarNotacao() {
     panel.scrollTop = panel.scrollHeight;
 }
 
-async function calcularOffsetServidor() {
-    if (!firebaseDisponivel) { offsetServidor = 0; return; }
-    try {
-        const snap = await fns.get(fns.ref(db, '.info/serverTimeOffset'));
-        offsetServidor = snap.val() || 0;
-    } catch (_) { offsetServidor = 0; }
-}
-function agoraServidor() { return Date.now() + offsetServidor; }
-
-function salvarSessao() { if (idSalaAtual && minhaCor) localStorage.setItem('brain_damas_sessao', JSON.stringify({ sala: idSalaAtual })); }
-function limparSessao() {
-    localStorage.removeItem('brain_damas_sessao');
-    const url = new URL(window.location.href);
-    url.searchParams.delete('sala'); url.searchParams.delete('modo');
-    window.history.replaceState({}, '', url.pathname);
-    pararTimer(); pararRelogio();
-}
-
-function pararTimer() {
-    if (timerIntervalId) { clearInterval(timerIntervalId); timerIntervalId = null; }
-    document.getElementById('timer-bar-wrap')?.classList.add('hidden');
-    document.getElementById('timer-display')?.classList.add('hidden');
-}
-
-function iniciarTimer() {
-    pararTimer();
-    if (tempoLimiteSegundos <= 0 || jogoEncerrado || modoEspectador || emPausa) return;
-    const minhaVez = modoHotSeat ? true : (turnoAtual === minhaCor);
-    if (!minhaVez) return;
-
-    const barWrap = document.getElementById('timer-bar-wrap');
-    const display = document.getElementById('timer-display');
-    if (barWrap) barWrap.classList.remove('hidden');
-    if (display) display.classList.remove('hidden', 'warn', 'danger');
-
-    aviso5sDisparado = false;
-    timerIntervalId = setInterval(() => {
-        if (jogoEncerrado || emPausa) { pararTimer(); return; }
-        const decorrido = agoraServidor() - turnoInicioServidor;
-        timerSegundosRestantes = Math.max(0, tempoLimiteSegundos - Math.floor(decorrido / 1000));
-        if (timerSegundosRestantes === 5 && !aviso5sDisparado) {
-            aviso5sDisparado = true; SoundFX.alert5s(); toast('🔔 Faltam 5 segundos!', 'error'); vibrar([200, 100, 200]);
-        }
-        if (display) {
-            display.textContent = `⏱️ ${timerSegundosRestantes}s`;
-            display.classList.remove('warn', 'danger');
-            if (timerSegundosRestantes <= 10) display.classList.add('danger');
-        }
-        if (timerSegundosRestantes <= 0) {
-            pararTimer(); SoundFX.timeout(); tratarFimDeJogo(turnoAtual === 'white' ? 'red' : 'white', 'timeout');
-        }
-    }, 500);
-}
-
-function formatarTempo(ms) {
-    const totalSeg = Math.max(0, Math.floor(ms / 1000));
-    return `${Math.floor(totalSeg / 60)}:${(totalSeg % 60).toString().padStart(2, '0')}`;
-}
-function iniciarRelogio() {
-    pararRelogio();
-    if (modoRelogio === 'none' || modoHotSeat || jogoEncerrado || modoEspectador || emPausa) return;
-    relogioIntervalId = setInterval(() => {
-        if (jogoEncerrado || emPausa) return;
-        atualizarRelogioUI();
-    }, 200);
-}
-function pararRelogio() { if (relogioIntervalId) { clearInterval(relogioIntervalId); relogioIntervalId = null; } }
-function atualizarRelogioUI() {
-    const elW = document.getElementById('clock-white'), elR = document.getElementById('clock-red');
-    if (!elW || !elR) return;
-    document.getElementById('clock-white-txt').textContent = formatarTempo(relogioBrancas);
-    document.getElementById('clock-red-txt').textContent = formatarTempo(relogioPretas);
-}
-
-function carregarHistorico() {
-    try { historicoPartidas = JSON.parse(localStorage.getItem('brain_damas_historico') || '[]'); } catch (_) { historicoPartidas = []; }
-}
-function salvarHistorico() {
-    if (historicoPartidas.length > 20) historicoPartidas = historicoPartidas.slice(0, 20);
-    try { localStorage.setItem('brain_damas_historico', JSON.stringify(historicoPartidas)); } catch (_) {}
-}
-function adicionarAoHistorico(resultado, oponente) {
-    historicoPartidas.unshift({
-        id: 'P-' + Date.now().toString(36).toUpperCase(),
-        data: new Date().toISOString(),
-        resultado, oponente: oponente || 'Oponente', movimentos: historicoMovimentos.slice(), notacao: notacaoAtual.slice()
-    });
-    salvarHistorico();
-}
-
+// Placar e Histórico
 function carregarPlacarLocal() {
     try {
         const raw = JSON.parse(localStorage.getItem('brain_damas_placar') || '{}');
@@ -329,113 +180,181 @@ function atualizarPlacarUI() {
     if (vj) vj.textContent = placarSessao.vitorias; if (vop) vop.textContent = placarSessao.derrotas;
 }
 
-async function garantirAutenticacao() {
-    if (!firebaseDisponivel || !auth) return 'local_' + Math.random().toString(36).slice(2, 12);
-    if (auth.currentUser) return auth.currentUser.uid;
-    try { const cred = await fns.signInAnonymously(auth); return cred.user.uid; }
-    catch (_) { return 'local_' + Math.random().toString(36).slice(2, 12); }
+function carregarHistorico() {
+    try { historicoPartidas = JSON.parse(localStorage.getItem('brain_damas_historico') || '[]'); } catch (_) { historicoPartidas = []; }
+}
+function salvarHistorico() {
+    if (historicoPartidas.length > 20) historicoPartidas = historicoPartidas.slice(0, 20);
+    try { localStorage.setItem('brain_damas_historico', JSON.stringify(historicoPartidas)); } catch (_) {}
+}
+function adicionarAoHistorico(resultado, oponente) {
+    historicoPartidas.unshift({
+        id: 'P-' + Date.now().toString(36).toUpperCase(),
+        data: new Date().toISOString(),
+        resultado, oponente: oponente || 'Oponente', notacao: notacaoAtual.slice()
+    });
+    salvarHistorico();
 }
 
-// === INICIALIZAÇÃO ===
-(async function() {
-    carregarPlacarLocal(); carregarConquistas(); atualizarGridConquistas();
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+    carregarPlacarLocal();
+    carregarConquistas();
+    atualizarGridConquistas();
     carregarHistorico();
+
     apelido = localStorage.getItem('brain_damas_apelido') || '';
     if (localStorage.getItem('brain_damas_a11y') === 'on') aplicarA11y(true);
     const temaSalvo = localStorage.getItem('brain_damas_tema') || 'dark';
     document.documentElement.setAttribute('data-theme', temaSalvo);
+    atualizarSeletorTema();
     sfxPack = localStorage.getItem('brain_damas_sfx') || 'classic';
     SoundFX.setPack(sfxPack);
+    atualizarSeletorSfx();
 
-    await calcularOffsetServidor();
     if (!apelido) setTimeout(() => abrirPromptApelido({ primeiraVez: true }), 500);
-    else { atualizarApelidoUI(); await garantirAutenticacao(); }
-})();
+    else atualizarApelidoUI();
 
-function atualizarApelidoUI() {
-    const nome = apelido || 'Visitante';
-    document.getElementById('lobby-nome').textContent = nome;
-    document.getElementById('display-nome').textContent = nome;
-}
+    configurarOuvintesEventos();
+});
 
 function aplicarA11y(ativo) {
     modoA11y = ativo; document.documentElement.setAttribute('data-a11y', ativo ? 'on' : 'off');
     localStorage.setItem('brain_damas_a11y', ativo ? 'on' : 'off');
 }
 
-// === TABS DO LOBBY ===
-document.querySelectorAll('#lobby-tabs .tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        SoundFX.click();
-        document.querySelectorAll('#lobby-tabs .tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const tab = btn.dataset.tab;
-        ['jogo', 'historico', 'agenda', 'ranking', 'conquistas', 'config'].forEach(t => {
-            document.getElementById('tab-' + t)?.classList.toggle('hidden', t !== tab);
+// Configuração de Eventos e Menus
+function configurarOuvintesEventos() {
+    // Tabs do Lobby
+    document.querySelectorAll('#lobby-tabs .tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            SoundFX.click();
+            document.querySelectorAll('#lobby-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const tab = btn.dataset.tab;
+            ['jogo', 'historico', 'agenda', 'ranking', 'conquistas', 'config'].forEach(t => {
+                document.getElementById('tab-' + t)?.classList.toggle('hidden', t !== tab);
+            });
+            if (tab === 'conquistas') atualizarGridConquistas();
         });
-        if (tab === 'conquistas') atualizarGridConquistas();
     });
-});
 
-document.getElementById('menu-btn-hotseat').addEventListener('click', () => {
-    SoundFX.click(); document.getElementById('menu-inicial').classList.add('hidden'); document.getElementById('painel-hotseat').classList.remove('hidden');
-});
-document.getElementById('menu-btn-ia').addEventListener('click', () => {
-    SoundFX.click(); document.getElementById('menu-inicial').classList.add('hidden'); document.getElementById('painel-ia').classList.remove('hidden');
-});
-document.getElementById('menu-btn-internacional').addEventListener('click', () => {
-    SoundFX.click();
-    iniciarPartidaInternacional();
-});
-document.getElementById('menu-btn-online').addEventListener('click', () => {
-    SoundFX.click();
-    if (!firebaseDisponivel) { toast('Firebase indisponível.', 'warn'); return; }
-    document.getElementById('menu-inicial').classList.add('hidden'); document.getElementById('painel-online').classList.remove('hidden');
-});
-document.getElementById('btn-voltar-menu-1').addEventListener('click', () => { SoundFX.click(); document.getElementById('painel-ia').classList.add('hidden'); document.getElementById('menu-inicial').classList.remove('hidden'); });
-document.getElementById('btn-voltar-menu-2').addEventListener('click', () => { SoundFX.click(); document.getElementById('painel-hotseat').classList.add('hidden'); document.getElementById('menu-inicial').classList.remove('hidden'); });
-document.getElementById('btn-voltar-menu-3').addEventListener('click', () => { SoundFX.click(); document.getElementById('painel-online').classList.add('hidden'); document.getElementById('menu-inicial').classList.remove('hidden'); });
-
-document.querySelectorAll('#ia-selector .tipo-opt').forEach(btn => {
-    btn.addEventListener('click', () => {
-        SoundFX.click();
-        document.querySelectorAll('#ia-selector .tipo-opt').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active'); nivelIA = parseInt(btn.dataset.nivel);
+    // Menus de Modos
+    document.getElementById('menu-btn-hotseat')?.addEventListener('click', () => {
+        SoundFX.click(); document.getElementById('menu-inicial').classList.add('hidden'); document.getElementById('painel-hotseat').classList.remove('hidden');
     });
-});
-document.getElementById('btn-jogar-ia').addEventListener('click', () => jogarContraIA(nivelIA));
-document.getElementById('btn-iniciar-hotseat').addEventListener('click', () => {
-    iniciarHotSeat(document.getElementById('hotseat-nome-1').value.trim() || 'Jogador 1', document.getElementById('hotseat-nome-2').value.trim() || 'Jogador 2');
-});
+    document.getElementById('menu-btn-ia')?.addEventListener('click', () => {
+        SoundFX.click(); document.getElementById('menu-inicial').classList.add('hidden'); document.getElementById('painel-ia').classList.remove('hidden');
+    });
+    document.getElementById('menu-btn-internacional')?.addEventListener('click', () => {
+        SoundFX.click(); iniciarPartidaInternacional();
+    });
+    document.getElementById('menu-btn-online')?.addEventListener('click', () => {
+        SoundFX.click(); document.getElementById('menu-inicial').classList.add('hidden'); document.getElementById('painel-online').classList.remove('hidden');
+    });
 
+    // Botões Voltar
+    document.getElementById('btn-voltar-menu-1')?.addEventListener('click', () => { SoundFX.click(); document.getElementById('painel-ia').classList.add('hidden'); document.getElementById('menu-inicial').classList.remove('hidden'); });
+    document.getElementById('btn-voltar-menu-2')?.addEventListener('click', () => { SoundFX.click(); document.getElementById('painel-hotseat').classList.add('hidden'); document.getElementById('menu-inicial').classList.remove('hidden'); });
+    document.getElementById('btn-voltar-menu-3')?.addEventListener('click', () => { SoundFX.click(); document.getElementById('painel-online').classList.add('hidden'); document.getElementById('menu-inicial').classList.remove('hidden'); });
+
+    // Seletores IA e Hotseat
+    document.querySelectorAll('#ia-selector .tipo-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+            SoundFX.click();
+            document.querySelectorAll('#ia-selector .tipo-opt').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active'); nivelIA = parseInt(btn.dataset.nivel);
+        });
+    });
+    document.getElementById('btn-jogar-ia')?.addEventListener('click', () => jogarContraIA(nivelIA));
+    document.getElementById('btn-iniciar-hotseat')?.addEventListener('click', () => {
+        iniciarHotSeat(document.getElementById('hotseat-nome-1').value.trim() || 'Jogador 1', document.getElementById('hotseat-nome-2').value.trim() || 'Jogador 2');
+    });
+
+    // Botões Gerais de Jogo
+    document.getElementById('btn-sair')?.addEventListener('click', irParaInicio);
+    document.getElementById('btn-desistir')?.addEventListener('click', () => tratarFimDeJogo(minhaCor === 'white' ? 'red' : 'white', 'desistencia'));
+    document.getElementById('btn-som')?.addEventListener('click', () => {
+        const ativo = SoundFX.toggle(); document.getElementById('btn-som').textContent = ativo ? '🔊' : '🔇';
+    });
+    document.getElementById('btn-musica')?.addEventListener('click', () => {
+        const tocando = MusicaFundo.toggle(); document.getElementById('btn-musica').textContent = tocando ? '🎵' : '🔇';
+    });
+    document.getElementById('btn-a11y')?.addEventListener('click', () => aplicarA11y(!modoA11y));
+    document.getElementById('btn-alterar-apelido')?.addEventListener('click', () => abrirPromptApelido({ atual: apelido }));
+
+    // Fullscreen
+    document.getElementById('btn-fullscreen')?.addEventListener('click', toggleFullscreen);
+    document.getElementById('btn-fullscreen-game')?.addEventListener('click', toggleFullscreen);
+    document.getElementById('fs-exit')?.addEventListener('click', toggleFullscreen);
+
+    // Temas
+    document.querySelectorAll('#theme-selector .theme-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.documentElement.setAttribute('data-theme', btn.dataset.theme);
+            localStorage.setItem('brain_damas_tema', btn.dataset.theme);
+            atualizarSeletorTema();
+        });
+    });
+
+    // Sons
+    document.querySelectorAll('#sfx-selector .theme-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+            sfxPack = btn.dataset.sfx;
+            SoundFX.setPack(sfxPack);
+            localStorage.setItem('brain_damas_sfx', sfxPack);
+            atualizarSeletorSfx();
+        });
+    });
+}
+
+function atualizarSeletorTema() {
+    const atual = document.documentElement.getAttribute('data-theme') || 'dark';
+    document.querySelectorAll('#theme-selector .theme-opt').forEach(b => b.classList.toggle('active', b.dataset.theme === atual));
+}
+function atualizarSeletorSfx() {
+    document.querySelectorAll('#sfx-selector .theme-opt').forEach(b => b.classList.toggle('active', b.dataset.sfx === sfxPack));
+}
+
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+        document.body.classList.add('is-fullscreen');
+    } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        document.body.classList.remove('is-fullscreen');
+    }
+}
+
+// Iniciar Partidas
 function iniciarHotSeat(n1, n2) {
     SoundFX.click();
-    modoHotSeat = true; modoIA = false; modoInternacional = false; modoEspectador = false;
-    hotSeatNome1 = n1; hotSeatNome2 = n2; hotSeatJogadorAtual = 'white';
-    idSalaAtual = 'HS-' + Date.now().toString(36).toUpperCase(); minhaCor = 'white';
-    tabuleiro = criarTabuleiroInicial(); turnoAtual = 'white'; turnoInicioServidor = Date.now();
-    jogoEncerrado = false; desistenciaProcessada = false; lancesTotais = 0;
-    celulaSelecionada = null; movimentosValidos = []; emPausa = false; notacaoAtual = [];
-    historicoMovimentos = [{ tabuleiro: tabuleiroParaFirebase(tabuleiro), turno: 'white' }];
+    modoHotSeat = true; modoIA = false; modoInternacional = false;
+    tabuleiro = criarTabuleiroInicial(); turnoAtual = 'white'; jogoEncerrado = false;
+    notacaoAtual = []; celulaSelecionada = null; movimentosValidos = [];
     entrarInterfaceJogo(); toast(`👥 ${n1} vs ${n2}`, 'success');
 }
 
 function iniciarPartidaInternacional() {
-    modoInternacional = true; modoHotSeat = true; modoIA = false; modoEspectador = false;
-    idSalaAtual = 'INT-' + Date.now().toString(36).toUpperCase(); minhaCor = 'white';
-    tabuleiro = criarTabuleiroInternacional(); turnoAtual = 'white'; turnoInicioServidor = Date.now();
-    jogoEncerrado = false; desistenciaProcessada = false; celulaSelecionada = null; movimentosValidos = [];
-    emPausa = false; notacaoAtual = [];
+    modoInternacional = true; modoHotSeat = true; modoIA = false;
+    tabuleiro = criarTabuleiroInternacional(); turnoAtual = 'white'; jogoEncerrado = false;
+    notacaoAtual = []; celulaSelecionada = null; movimentosValidos = [];
     entrarInterfaceJogoInternacional(); toast('🌍 Damas Internacionais (100 Casas) iniciadas!', 'success');
+}
+
+function jogarContraIA(nivel) {
+    SoundFX.click(); modoIA = true; modoHotSeat = false; modoInternacional = false; nivelIA = nivel;
+    tabuleiro = criarTabuleiroInicial(); turnoAtual = 'white'; jogoEncerrado = false;
+    notacaoAtual = []; celulaSelecionada = null; movimentosValidos = [];
+    entrarInterfaceJogo(); toast(`🤖 ${IA.NIVEIS[nivel].nome}`, 'success');
 }
 
 function entrarInterfaceJogo() {
     modoInternacional = false;
     document.getElementById('lobby-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
-    document.getElementById('display-sala-tag').textContent = modoIA ? `🤖 ${IA.NIVEIS[nivelIA].nome}` : (modoHotSeat ? '👥 Hot-Seat' : `Sala: ${idSalaAtual}`);
+    document.getElementById('display-sala-tag').textContent = modoIA ? `🤖 ${IA.NIVEIS[nivelIA].nome}` : '👥 Hot-Seat';
     
-    // Remove classe internacional se houver
     document.getElementById('checkers-board').classList.remove('internacional');
     document.getElementById('labels-top').classList.remove('internacional');
     document.getElementById('labels-bottom').classList.remove('internacional');
@@ -443,7 +362,6 @@ function entrarInterfaceJogo() {
     document.getElementById('labels-right').classList.remove('internacional');
 
     renderizarTabuleiro(); renderizarNotacao();
-    iniciarTimer(); iniciarRelogio();
 }
 
 function entrarInterfaceJogoInternacional() {
@@ -459,35 +377,28 @@ function entrarInterfaceJogoInternacional() {
     document.getElementById('labels-right').classList.add('internacional');
 
     renderizarTabuleiroInternacional(); renderizarNotacao();
-    iniciarTimer(); iniciarRelogio();
 }
 
+// Renderização das Régua e Tabuleiro
 function renderizarReguas(tamanho = 8) {
-    const invertido = (minhaCor === 'red');
     const colunas = tamanho === 10 ? ['a','b','c','d','e','f','g','h','i','j'] : ['a','b','c','d','e','f','g','h'];
     const linhas = tamanho === 10 ? ['10','9','8','7','6','5','4','3','2','1'] : ['8','7','6','5','4','3','2','1'];
-    const topo = invertido ? linhas.slice().reverse() : linhas.slice();
-    const base = invertido ? linhas.slice() : linhas.slice().reverse();
-    const esquerda = invertido ? colunas.slice().reverse() : colunas.slice();
-    const direita = invertido ? colunas.slice() : colunas.slice().reverse();
     const build = (arr) => arr.map((v, i) => `<div class="coord${i === 0 || i === arr.length - 1 ? ' edge' : ''}">${v}</div>`).join('');
-    document.getElementById('labels-top').innerHTML = build(topo);
-    document.getElementById('labels-bottom').innerHTML = build(base);
-    document.getElementById('labels-left').innerHTML = build(esquerda);
-    document.getElementById('labels-right').innerHTML = build(direita);
+    document.getElementById('labels-top').innerHTML = build(linhas);
+    document.getElementById('labels-bottom').innerHTML = build(linhas.slice().reverse());
+    document.getElementById('labels-left').innerHTML = build(colunas);
+    document.getElementById('labels-right').innerHTML = build(colunas.slice().reverse());
 }
 
 function renderizarTabuleiro() {
     const grid = document.getElementById('checkers-board'); if (!grid) return;
     grid.innerHTML = '';
-    const invertido = (minhaCor === 'red'), corDaVez = turnoAtual;
-    const capsObrig = (!jogoEncerrado && !modoEspectador && !emPausa) ? capturasObrigatorias(tabuleiro, corDaVez) : [];
+    const capsObrig = (!jogoEncerrado && !emPausa) ? capturasObrigatorias(tabuleiro, turnoAtual) : [];
     const pecasObrigadas = new Set(capsObrig.map(o => `${o.r},${o.c}`));
     const temObrigatoria = pecasObrigadas.size > 0;
 
-    for (let vr = 0; vr < 8; vr++) {
-        for (let vc = 0; vc < 8; vc++) {
-            const r = invertido ? (7 - vr) : vr, c = invertido ? (7 - vc) : vc;
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
             const square = document.createElement('div');
             const isDark = (r + c) % 2 === 1;
             square.className = `square ${isDark ? 'dark' : 'light'}`;
@@ -502,9 +413,7 @@ function renderizarTabuleiro() {
                 pieceEl.className = `piece ${peca.startsWith('white') ? 'white' : 'red'}${peca.includes('king') ? ' king' : ''}`;
                 wrapper.appendChild(pieceEl); square.appendChild(wrapper);
             }
-            if (isDark && !modoEspectador && !emPausa) {
-                square.addEventListener('click', () => clicarCasa(r, c));
-            }
+            if (isDark && !emPausa) square.addEventListener('click', () => clicarCasa(r, c));
             grid.appendChild(square);
         }
     }
@@ -514,14 +423,12 @@ function renderizarTabuleiro() {
 function renderizarTabuleiroInternacional() {
     const grid = document.getElementById('checkers-board'); if (!grid) return;
     grid.innerHTML = '';
-    const invertido = (minhaCor === 'red'), corDaVez = turnoAtual;
-    const capsObrig = (!jogoEncerrado && !modoEspectador && !emPausa) ? capturasObrigatoriasInt(tabuleiro, corDaVez) : [];
+    const capsObrig = (!jogoEncerrado && !emPausa) ? capturasObrigatoriasInt(tabuleiro, turnoAtual) : [];
     const pecasObrigadas = new Set(capsObrig.map(o => `${o.r},${o.c}`));
     const temObrigatoria = pecasObrigadas.size > 0;
 
-    for (let vr = 0; vr < 10; vr++) {
-        for (let vc = 0; vc < 10; vc++) {
-            const r = invertido ? (9 - vr) : vr, c = invertido ? (9 - vc) : vc;
+    for (let r = 0; r < 10; r++) {
+        for (let c = 0; c < 10; c++) {
             const square = document.createElement('div');
             const isDark = (r + c) % 2 === 1;
             square.className = `square ${isDark ? 'dark' : 'light'}`;
@@ -536,9 +443,7 @@ function renderizarTabuleiroInternacional() {
                 pieceEl.className = `piece ${peca.startsWith('white') ? 'white' : 'red'}${peca.includes('king') ? ' king' : ''}`;
                 wrapper.appendChild(pieceEl); square.appendChild(wrapper);
             }
-            if (isDark && !modoEspectador && !emPausa) {
-                square.addEventListener('click', () => clicarCasaInternacional(r, c));
-            }
+            if (isDark && !emPausa) square.addEventListener('click', () => clicarCasaInternacional(r, c));
             grid.appendChild(square);
         }
     }
@@ -546,7 +451,7 @@ function renderizarTabuleiroInternacional() {
 }
 
 function clicarCasa(r, c) {
-    if (modoEspectador || emPausa || iaPensando || jogoEncerrado) return;
+    if (emPausa || iaPensando || jogoEncerrado) return;
     const peca = tabuleiro[r][c];
     if (peca && peca.startsWith(turnoAtual)) {
         const temObrigatoria = jogadorTemCapturaObrigatoria(tabuleiro, turnoAtual);
@@ -563,7 +468,7 @@ function clicarCasa(r, c) {
 }
 
 function clicarCasaInternacional(r, c) {
-    if (modoEspectador || emPausa || jogoEncerrado) return;
+    if (emPausa || jogoEncerrado) return;
     const peca = tabuleiro[r][c];
     if (peca && peca.startsWith(turnoAtual)) {
         const temObrigatoria = jogadorTemCapturaObrigatoriaInt(tabuleiro, turnoAtual);
@@ -579,7 +484,7 @@ function clicarCasaInternacional(r, c) {
     }
 }
 
-async function executarMovimento(deR, deC, paraR, paraC) {
+function executarMovimento(deR, deC, paraR, paraC) {
     const mov = movimentosValidos.find(m => m.r === paraR && m.c === paraC);
     if (!mov) return;
     const pecaMovida = tabuleiro[deR][deC], corPeca = pecaMovida.startsWith('white') ? 'white' : 'red';
@@ -609,13 +514,11 @@ async function executarMovimento(deR, deC, paraR, paraC) {
         jogoEncerrado = true; tratarFimDeJogo(corPeca, 'sem-pecas'); return;
     }
 
-    turnoAtual = turnoAtual === 'white' ? 'red' : 'white'; turnoInicioServidor = Date.now();
-    if (modoHotSeat) hotSeatJogadorAtual = turnoAtual;
-
-    if (modoIA && turnoAtual !== minhaCor) setTimeout(() => fazerJogadaIA(), 350);
+    turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
+    if (modoIA && turnoAtual !== 'white') setTimeout(() => fazerJogadaIA(), 350);
 }
 
-async function executarMovimentoInternacional(deR, deC, paraR, paraC) {
+function executarMovimentoInternacional(deR, deC, paraR, paraC) {
     const mov = movimentosValidos.find(m => m.r === paraR && m.c === paraC);
     if (!mov) return;
     const pecaMovida = tabuleiro[deR][deC], corPeca = pecaMovida.startsWith('white') ? 'white' : 'red';
@@ -645,85 +548,42 @@ async function executarMovimentoInternacional(deR, deC, paraR, paraC) {
         jogoEncerrado = true; tratarFimDeJogo(corPeca, 'sem-pecas'); return;
     }
 
-    turnoAtual = turnoAtual === 'white' ? 'red' : 'white'; turnoInicioServidor = Date.now();
-    hotSeatJogadorAtual = turnoAtual;
+    turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
 }
 
 function tratarFimDeJogo(vencedor, motivo) {
-    if (desistenciaProcessada) return;
-    desistenciaProcessada = true; pararTimer(); pararRelogio();
-    const euVenci = vencedor === hotSeatJogadorAtual || vencedor === minhaCor;
-    if (vencedor === 'empate') { SoundFX.empate(); toast('🤝 Empate!', 'info'); adicionarAoHistorico('empate', nomeOponente); }
-    else if (euVenci) { SoundFX.win(); placarSessao.vitorias++; salvarPlacarLocal(); atualizarPlacarUI(); toast('🏆 Você venceu!', 'success'); adicionarAoHistorico('vitoria', nomeOponente); }
-    else { SoundFX.lose(); placarSessao.derrotas++; salvarPlacarLocal(); atualizarPlacarUI(); toast('😢 Você perdeu.', 'error'); adicionarAoHistorico('derrota', nomeOponente); }
+    const euVenci = vencedor === 'white';
+    if (vencedor === 'empate') { SoundFX.empate(); toast('🤝 Empate!', 'info'); }
+    else if (euVenci) { SoundFX.win(); placarSessao.vitorias++; salvarPlacarLocal(); atualizarPlacarUI(); toast('🏆 Vitória!', 'success'); }
+    else { SoundFX.lose(); placarSessao.derrotas++; salvarPlacarLocal(); atualizarPlacarUI(); toast('😢 Derrota.', 'error'); }
 
-    setTimeout(() => {
-        abrirModal({
-            icon: vencedor === 'empate' ? '🤝' : (euVenci ? '🏆' : '💔'),
-            title: vencedor === 'empate' ? 'Empate!' : (euVenci ? 'Vitória!' : 'Derrota'),
-            message: 'Fim da partida. Deseja jogar novamente?',
-            actions: [
-                { label: 'Jogar Novamente', onClick: () => location.reload() },
-                { label: 'Início', onClick: irParaInicio, className: 'btn-secundario' }
-            ]
-        });
-    }, 600);
+    abrirModal({
+        icon: vencedor === 'empate' ? '🤝' : (euVenci ? '🏆' : '💔'),
+        title: vencedor === 'empate' ? 'Empate!' : (euVenci ? 'Vitória!' : 'Derrota'),
+        message: 'Fim da partida. Deseja jogar novamente?',
+        actions: [
+            { label: 'Jogar Novamente', onClick: () => location.reload() },
+            { label: 'Início', onClick: irParaInicio, className: 'btn-secundario' }
+        ]
+    });
 }
 
 async function fazerJogadaIA() {
-    if (!modoIA || jogoEncerrado || iaPensando || turnoAtual === minhaCor) return;
-    iaPensando = true; renderizarTabuleiro();
+    if (!modoIA || jogoEncerrado || iaPensando) return;
+    iaPensando = true;
     await new Promise(r => setTimeout(r, 400));
     const mov = IA.escolherMovimento(tabuleiro, 'red', nivelIA);
     if (!mov) { iaPensando = false; jogoEncerrado = true; tratarFimDeJogo('white', 'sem-movimentos'); return; }
+    
     const pecaMovida = tabuleiro[mov.de.r][mov.de.c];
-    let promoveu = false;
-    if (mov.caminho && mov.caminho.length > 0) {
-        let pos = { r: mov.de.r, c: mov.de.c };
-        for (const passo of mov.caminho) {
-            const pAqui = tabuleiro[pos.r][pos.c];
-            tabuleiro[passo.r][passo.c] = pAqui; tabuleiro[pos.r][pos.c] = null; tabuleiro[passo.capturada.r][passo.capturada.c] = null;
-            pos = { r: passo.r, c: passo.c };
-            if (!pAqui.includes('king') && pAqui === 'red' && pos.r === 7) { tabuleiro[pos.r][pos.c] = 'red-king'; promoveu = true; }
-        }
-        SoundFX.capture();
-    } else {
-        tabuleiro[mov.para.r][mov.para.c] = pecaMovida; tabuleiro[mov.de.r][mov.de.c] = null;
-        if (pecaMovida === 'red' && mov.para.r === 7) { tabuleiro[mov.para.r][mov.para.c] = 'red-king'; promoveu = true; }
-        SoundFX.move();
-    }
-    turnoAtual = 'white'; turnoInicioServidor = Date.now(); iaPensando = false; renderizarTabuleiro();
-    if (contarPecasDaCor(tabuleiro, 'white') === 0) { jogoEncerrado = true; tratarFimDeJogo('red', 'sem-pecas'); return; }
-    iniciarTimer(); iniciarRelogio();
-}
-
-function jogarContraIA(nivel) {
-    SoundFX.click(); modoIA = true; modoHotSeat = false; modoInternacional = false; nivelIA = nivel;
-    idSalaAtual = 'IA-' + Date.now().toString(36).toUpperCase(); minhaCor = 'white';
-    tabuleiro = criarTabuleiroInicial(); turnoAtual = 'white'; jogoEncerrado = false;
-    entrarInterfaceJogo(); toast(`🤖 ${IA.NIVEIS[nivel].nome}`, 'success');
+    tabuleiro[mov.para.r][mov.para.c] = pecaMovida; tabuleiro[mov.de.r][mov.de.c] = null;
+    if (pecaMovida === 'red' && mov.para.r === 7) tabuleiro[mov.para.r][mov.para.c] = 'red-king';
+    
+    SoundFX.move(); iaPensando = false; turnoAtual = 'white'; renderizarTabuleiro();
+    if (contarPecasDaCor(tabuleiro, 'white') === 0) { jogoEncerrado = true; tratarFimDeJogo('red', 'sem-pecas'); }
 }
 
 function irParaInicio() {
-    SoundFX.click(); limparSessao();
-    setTimeout(() => { window.location.href = window.location.pathname; }, 100);
+    SoundFX.click();
+    window.location.href = window.location.pathname;
 }
-
-// Ouvintes de botões gerais
-document.getElementById('btn-sair').addEventListener('click', irParaInicio);
-document.getElementById('btn-desistir').addEventListener('click', () => tratarFimDeJogo(minhaCor === 'white' ? 'red' : 'white', 'desistencia'));
-document.getElementById('btn-som').addEventListener('click', () => {
-    const ativo = SoundFX.toggle(); document.getElementById('btn-som').textContent = ativo ? '🔊' : '🔇';
-});
-document.getElementById('btn-musica').addEventListener('click', () => {
-    const tocando = MusicaFundo.toggle(); document.getElementById('btn-musica').textContent = tocando ? '🎵' : '🔇';
-});
-document.getElementById('btn-a11y').addEventListener('click', () => aplicarA11y(!modoA11y));
-document.getElementById('btn-alterar-apelido').addEventListener('click', () => abrirPromptApelido({ atual: apelido }));
-
-document.querySelectorAll('#theme-selector .theme-opt').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.documentElement.setAttribute('data-theme', btn.dataset.theme);
-        localStorage.setItem('brain_damas_tema', btn.dataset.theme);
-    });
-});
