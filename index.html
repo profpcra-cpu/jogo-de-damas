@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0a0e1a">
-    <title>Brain Damas v7.2 — Regras Brasileiras Oficiais</title>
+    <title>Brain Damas v7.2 — Regras Brasileiras e Internacionais</title>
 
     <!-- CSS na raiz -->
     <link rel="stylesheet" href="styles.css">
@@ -56,13 +56,20 @@
             <div id="tab-jogo">
                 <div id="menu-inicial" class="lobby-box">
                     <h3>🎯 Escolha o Modo de Jogo</h3>
-                    <p>Damas Brasileiras Oficiais (CBD) — captura obrigatória pela maioria, dama voadora, empates por regra.</p>
+                    <p>Selecione o estilo de regra e tabuleiro desejado para a sua partida.</p>
                     <div class="menu-inicial">
                         <button class="menu-btn" id="menu-btn-hotseat" type="button">
                             <span class="menu-emoji">👥</span>
                             <div class="menu-info">
-                                <span class="menu-titulo">Hot-Seat</span>
+                                <span class="menu-titulo">Hot-Seat (Brasileiras 8x8)</span>
                                 <span class="menu-desc">2 jogadores no mesmo aparelho</span>
+                            </div>
+                        </button>
+                        <button class="menu-btn" id="menu-btn-internacional" type="button" style="border-color: rgba(56, 189, 248, 0.4);">
+                            <span class="menu-emoji">🌍</span>
+                            <div class="menu-info">
+                                <span class="menu-titulo">Damas Internacionais (100 Casas)</span>
+                                <span class="menu-desc">Tabuleiro 10x10, peão captura para trás</span>
                             </div>
                         </button>
                         <button class="menu-btn" id="menu-btn-ia" type="button">
