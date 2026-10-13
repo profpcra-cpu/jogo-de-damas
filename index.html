@@ -713,43 +713,7 @@
         </div>
     </div>
 
-    <div class="toast-container" id="toast-container"></div>
-
-    <!-- ============================================================ -->
-    <!-- SCRIPT PRINCIPAL — v8.0 monolítico -->
-    <!-- ============================================================ -->
-    <script type="module">
-        // ============================================================
-        // IMPORTAÇÃO DO FIREBASE CONFIG (fica à parte)
-        // ============================================================
-        let db = null, auth = null;
-        let firebaseDisponivel = false;
-        try {
-            const fb = await import("./firebase-config.js");
-            db = fb.db; auth = fb.auth;
-            firebaseDisponivel = !!db;
-        } catch (e) {
-            console.warn('[Firebase] Não carregado — modo offline.', e.message);
-        }
-
-        let fns = {};
-        if (firebaseDisponivel) {
-            try {
-                const rtdb = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js");
-                const fbauth = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js");
-                fns = {
-                    ref: rtdb.ref, get: rtdb.get, set: rtdb.set, update: rtdb.update,
-                    onValue: rtdb.onValue, runTransaction: rtdb.runTransaction, push: rtdb.push,
-                    remove: rtdb.remove, serverTimestamp: rtdb.serverTimestamp,
-                    onDisconnect: rtdb.onDisconnect,
-                    signInAnonymously: fbauth.signInAnonymously,
-                    onAuthStateChanged: fbauth.onAuthStateChanged
-                };
-            } catch (e) { console.warn('[Firebase] SDK não carregado:', e.message); }
-        }
-    </script>
-
-        <script type="module">
+       <script type="module">
         // ============================================================
         // FIREBASE CONFIG (fica à parte — opcional)
         // ============================================================
