@@ -1,4 +1,4 @@
-// Inteligência Artificial (Minimax com Alpha-Beta)
+// Inteligência Artificial (Minimax com Alpha-Beta) - Corrigido
 
 export const IA = (() => {
     const NIVEIS = {
@@ -8,12 +8,15 @@ export const IA = (() => {
         4: { nome: '🐺 Difícil', profundidade: 5, aleatoriedade: 0.03, usaPosicao: true },
         5: { nome: '🐉 Mestre', profundidade: 7, aleatoriedade: 0.00, usaPosicao: true }
     };
+
     function clonarTabuleiro(t) { return t.map(r => r.slice()); }
+
     function explorarCapturasIA(r, c, cor, tab, capturadasSet = new Set(), profundidade = 0) {
         if (profundidade > 20) return [];
         const peca = tab[r][c]; if (!peca) return [];
         const isDama = peca.includes('king');
         const caminhos = []; const caps = [];
+
         if (isDama) {
             for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
                 let nr = r + dr, nc = c + dc;
@@ -39,24 +42,44 @@ export const IA = (() => {
                 }
             }
         }
+
         if (caps.length === 0) return [];
+
         for (const cap of caps) {
             const novaTab = tab.map(row => row.slice());
             const pecaAtual = novaTab[r][c];
-            novaTab[cap.r][cap.c] = pecaAtual; novaTab[r][c] = null; novaTab[cap.capturada.r][cap.capturada.c] = null;
+            novaTab[cap.r][cap.c] = pecaAtual; 
+            novaTab[r][c] = null; 
+            novaTab[cap.capturada.r][cap.capturada.c] = null;
+
             const isPeao = !pecaAtual.includes('king');
             const corDaPeca = pecaAtual.startsWith('white') ? 'white' : 'red';
-            if ((isPeao && corDaPeca === 'white' && cap.r === 0) || (isPeao && corDaPeca === 'red' && cap.r === 7)) {
+            const virouDamaAgora = (isPeao && corDaPeca === 'white' && cap.r === 0) || (isPeao && corDaPeca === 'red' && cap.r === 7);
+
+            if (virouDamaAgora) {
                 novaTab[cap.r][cap.c] = corDaPeca + '-king';
             }
+
             const novasCapturadas = new Set(capturadasSet);
             novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
-            const continuacoes = explorarCapturasIA(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
-            if (continuacoes.length === 0) caminhos.push([cap]);
-            else for (const cont of continuacoes) caminhos.push([cap, ...cont]);
+
+            // REGRA OFICIAL: Se o peão virou dama no meio do salto, cessa as capturas adicionais
+            let continuacoes = [];
+            if (!virouDamaAgora) {
+                continuacoes = explorarCapturasIA(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
+            }
+
+            if (continuacoes.length === 0) {
+                caminhos.push([cap]);
+            } else {
+                for (const cont of continuacoes) {
+                    caminhos.push([cap, ...cont]);
+                }
+            }
         }
         return caminhos;
     }
+
     function gerarMovimentos(tab, cor) {
         const movs = []; let maxCapt = 0;
         const capturasPorPeca = [];
@@ -103,26 +126,41 @@ export const IA = (() => {
         }
         return movs;
     }
+
     function aplicarMovimento(tab, mov) {
         const novo = clonarTabuleiro(tab);
-        const peca = novo[mov.de.r][mov.de.c];
         if (mov.caminho && mov.caminho.length > 0) {
-            let pos = { r: mov.de.r, c: mov.de.c };
+            let posAtual = { r: mov.de.r, c: mov.de.c };
+            let pecaEmTransito = novo[posAtual.r][posAtual.c];
+            novo[posAtual.r][posAtual.c] = null;
+
             for (const passo of mov.caminho) {
-                const pecaAqui = novo[pos.r][pos.c];
-                novo[passo.r][passo.c] = pecaAqui; novo[pos.r][pos.c] = null; novo[passo.capturada.r][passo.capturada.c] = null;
-                pos = { r: passo.r, c: passo.c };
-                const isPeao = pecaAqui && !pecaAqui.includes('king');
-                if (isPeao && pecaAqui === 'white' && pos.r === 0) novo[pos.r][pos.c] = 'white-king';
-                if (isPeao && pecaAqui === 'red' && pos.r === 7) novo[pos.r][pos.c] = 'red-king';
+                novo[passo.capturada.r][passo.capturada.c] = null;
+                posAtual = { r: passo.r, c: passo.c };
             }
+
+            const finalPasso = mov.caminho[mov.caminho.length - 1];
+            const isPeao = pecaEmTransito && !pecaEmTransito.includes('king');
+            const corPeca = pecaEmTransito.startsWith('white') ? 'white' : 'red';
+
+            if (isPeao && ((corPeca === 'white' && finalPasso.r === 0) || (corPeca === 'red' && finalPasso.r === 7))) {
+                pecaEmTransito = corPeca + '-king';
+            }
+            novo[finalPasso.r][finalPasso.c] = pecaEmTransito;
         } else {
-            novo[mov.para.r][mov.para.c] = peca; novo[mov.de.r][mov.de.c] = null;
-            if (peca === 'white' && mov.para.r === 0) novo[mov.para.r][mov.para.c] = 'white-king';
-            if (peca === 'red' && mov.para.r === 7) novo[mov.para.r][mov.para.c] = 'red-king';
+            const peca = novo[mov.de.r][mov.de.c];
+            novo[mov.de.r][mov.de.c] = null;
+            if (peca === 'white' && mov.para.r === 0) {
+                novo[mov.para.r][mov.para.c] = 'white-king';
+            } else if (peca === 'red' && mov.para.r === 7) {
+                novo[mov.para.r][mov.para.c] = 'red-king';
+            } else {
+                novo[mov.para.r][mov.para.c] = peca;
+            }
         }
         return novo;
     }
+
     function avaliar(tab, cor, usaPosicao) {
         const oponente = cor === 'white' ? 'red' : 'white';
         let score = 0;
@@ -139,6 +177,7 @@ export const IA = (() => {
         }
         return score;
     }
+
     function minimax(tab, prof, alpha, beta, corAtual, corIA, usaPosicao) {
         if (prof === 0) return avaliar(tab, corIA, usaPosicao);
         const movs = gerarMovimentos(tab, corAtual);
@@ -164,6 +203,7 @@ export const IA = (() => {
             return melhor;
         }
     }
+
     function escolherMovimento(tab, cor, nivel) {
         const cfg = NIVEIS[nivel] || NIVEIS[3];
         const movs = gerarMovimentos(tab, cor);
@@ -176,5 +216,6 @@ export const IA = (() => {
         }
         return melhorMov;
     }
+
     return { NIVEIS, escolherMovimento };
 })();
