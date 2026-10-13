@@ -1,4 +1,6 @@
+// ============================================================
 // Inteligência Artificial (Minimax com Alpha-Beta) - Corrigido
+// ============================================================
 
 export const IA = (() => {
     const NIVEIS = {
@@ -63,7 +65,7 @@ export const IA = (() => {
             const novasCapturadas = new Set(capturadasSet);
             novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
 
-            // REGRA OFICIAL: Se o peão virou dama no meio do salto, cessa as capturas adicionais
+            // Regra oficial: Se o peão virou dama no meio do salto, cessa as capturas adicionais
             let continuacoes = [];
             if (!virouDamaAgora) {
                 continuacoes = explorarCapturasIA(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
@@ -130,23 +132,26 @@ export const IA = (() => {
     function aplicarMovimento(tab, mov) {
         const novo = clonarTabuleiro(tab);
         if (mov.caminho && mov.caminho.length > 0) {
-            let posAtual = { r: mov.de.r, c: mov.de.c };
-            let pecaEmTransito = novo[posAtual.r][posAtual.c];
-            novo[posAtual.r][posAtual.c] = null;
+            const origem = mov.de;
+            const pecaEmTransito = novo[origem.r][origem.c];
+            novo[origem.r][origem.c] = null;
 
+            // Remove rigorosamente todas as peças capturadas ao longo do caminho
             for (const passo of mov.caminho) {
-                novo[passo.capturada.r][passo.capturada.c] = null;
-                posAtual = { r: passo.r, c: passo.c };
+                if (passo.capturada) {
+                    novo[passo.capturada.r][passo.capturada.c] = null;
+                }
             }
 
             const finalPasso = mov.caminho[mov.caminho.length - 1];
             const isPeao = pecaEmTransito && !pecaEmTransito.includes('king');
             const corPeca = pecaEmTransito.startsWith('white') ? 'white' : 'red';
 
+            let pecaFinal = pecaEmTransito;
             if (isPeao && ((corPeca === 'white' && finalPasso.r === 0) || (corPeca === 'red' && finalPasso.r === 7))) {
-                pecaEmTransito = corPeca + '-king';
+                pecaFinal = corPeca + '-king';
             }
-            novo[finalPasso.r][finalPasso.c] = pecaEmTransito;
+            novo[finalPasso.r][finalPasso.c] = pecaFinal;
         } else {
             const peca = novo[mov.de.r][mov.de.c];
             novo[mov.de.r][mov.de.c] = null;
