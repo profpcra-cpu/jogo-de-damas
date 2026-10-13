@@ -1,4 +1,4 @@
-// Motor de Jogo e Regras CBD (v7.2)
+// Motor de Jogo e Regras CBD (v7.3 - Corrigido)
 
 export function criarTabuleiroInicial() {
     const t = Array.from({ length: 8 }, () => Array(8).fill(null));
@@ -47,6 +47,7 @@ export function explorarCapturas(r, c, cor, tab, capturadasSet = new Set(), prof
     const peca = tab[r][c]; if (!peca) return [];
     const isDama = peca.includes('king');
     const caminhos = []; const caps = [];
+
     if (isDama) {
         for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
             let nr = r + dr, nc = c + dc;
@@ -72,21 +73,40 @@ export function explorarCapturas(r, c, cor, tab, capturadasSet = new Set(), prof
             }
         }
     }
+
     if (caps.length === 0) return [];
+
     for (const cap of caps) {
         const novaTab = tab.map(row => row.slice());
         const pecaAtual = novaTab[r][c];
-        novaTab[cap.r][cap.c] = pecaAtual; novaTab[r][c] = null; novaTab[cap.capturada.r][cap.capturada.c] = null;
+        novaTab[cap.r][cap.c] = pecaAtual; 
+        novaTab[r][c] = null; 
+        novaTab[cap.capturada.r][cap.capturada.c] = null;
+
         const isPeao = !pecaAtual.includes('king');
         const corDaPeca = pecaAtual.startsWith('white') ? 'white' : 'red';
-        if ((isPeao && corDaPeca === 'white' && cap.r === 0) || (isPeao && corDaPeca === 'red' && cap.r === 7)) {
+        const virouDamaAgora = (isPeao && corDaPeca === 'white' && cap.r === 0) || (isPeao && corDaPeca === 'red' && cap.r === 7);
+
+        if (virouDamaAgora) {
             novaTab[cap.r][cap.c] = corDaPeca + '-king';
         }
+
         const novasCapturadas = new Set(capturadasSet);
         novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
-        const continuacoes = explorarCapturas(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
-        if (continuacoes.length === 0) caminhos.push([cap]);
-        else for (const cont of continuacoes) caminhos.push([cap, ...cont]);
+
+        // REGRA OFICIAL: Se o peão virou dama no meio do salto, ele pára a captura por aqui (não continua saltando como dama no mesmo lance).
+        let continuacoes = [];
+        if (!virouDamaAgora) {
+            continuacoes = explorarCapturas(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
+        }
+
+        if (continuacoes.length === 0) {
+            caminhos.push([cap]);
+        } else {
+            for (const cont of continuacoes) {
+                caminhos.push([cap, ...cont]);
+            }
+        }
     }
     return caminhos;
 }
