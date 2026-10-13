@@ -49,8 +49,6 @@ export function explorarCapturasInt(r, c, cor, tab, capturadasSet = new Set(), p
     const peca = tab[r][c]; if (!peca) return [];
     const isDama = peca.includes('king');
     const caminhos = []; const caps = [];
-    
-    // Direções diagonais (4 direções)
     const dirs = [-1, +1];
     
     if (isDama) {
@@ -68,7 +66,6 @@ export function explorarCapturasInt(r, c, cor, tab, capturadasSet = new Set(), p
             }
         }
     } else {
-        // Nas internacionais, o peão comum captura para frente e para trás
         for (const dr of dirs) for (const dc of dirs) {
             const mr = r + dr, mc = c + dc;
             const jr = r + 2 * dr, jc = c + 2 * dc;
@@ -132,6 +129,10 @@ export function capturasObrigatoriasInt(tab, cor) {
     return out;
 }
 
+export function jogadorTemCapturaObrigatoriaInt(tab, cor) {
+    return capturasObrigatoriasInt(tab, cor).length > 0;
+}
+
 export function calcularMovimentosInt(tab, r, c, corDaVez) {
     const peca = tab[r][c]; if (!peca) return [];
     const cor = peca.startsWith('white') ? 'white' : 'red';
@@ -154,7 +155,7 @@ export function calcularMovimentosInt(tab, r, c, corDaVez) {
         }
     } else {
         const dirs = cor === 'white' ? [-1] : [+1];
-        for (const dr of dirs) for (const dc of [-1, +1]) {
+        for (const dr of dirs) for (const dc of dirs) {
             const nr = r + dr, nc = c + dc;
             if (nr >= 0 && nr < 10 && nc >= 0 && nc < 10 && !tab[nr][nc]) movs.push({ r: nr, c: nc });
         }
