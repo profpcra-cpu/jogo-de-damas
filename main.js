@@ -2246,3 +2246,4 @@ function irParaInicio() {
 }
 
 console.log('[Brain Damas v7.6] main.js carregado');
+ 
