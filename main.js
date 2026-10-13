@@ -1,28 +1,25 @@
 // ============================================================
-// Brain Damas v7.6 — Motor de Interface Principal (modular corrigido)
+// main.js — Brain Damas v7.6 (Interface Principal)
 // ============================================================
 
 import { db, auth } from "./firebase-config.js";
 import { SoundFX, MusicaFundo } from "./sound.js";
-import { IA } from "./ai.js";
 import {
     criarTabuleiroInicial,
     tabuleiroParaFirebase,
     firebaseParaTabuleiro,
     contarPecasDaCor,
-    jogadorTemAlgumMovimento,
     calcularMovimentos,
     capturasObrigatorias,
-    jogadorTemCapturaObrigatoria,
     executarMovimentoNoJogo,
-    verificarFimDeJogoCompleto
+    verificarFimDeJogoCompleto,
+    IA
 } from "./game-engine.js";
 import {
     criarTabuleiroInternacional,
     tabuleiroParaFirebaseInt,
     firebaseParaTabuleiroInt,
     contarPecasDaCorInt,
-    jogadorTemAlgumMovimentoInt,
     calcularMovimentosInt,
     capturasObrigatoriasInt,
     jogadorTemCapturaObrigatoriaInt,
@@ -30,7 +27,7 @@ import {
     verificarFimDeJogoCompletoInt
 } from "./game-engine-internacional.js";
 
-// Firebase RTDB / Auth via CDN
+// ---------- FIREBASE ----------
 let rtdb = null, fbauth = null;
 try {
     rtdb = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js");
@@ -100,14 +97,11 @@ let relogioIntervalId = null;
 let lancesDamasSemCaptura = 0;
 let lancesFinaisEspeciais = 0;
 let posicoesRepetidas = {};
-let tipoFinalEspecial = null;
 let lancesTotais = 0;
 
 let empatePendenteDe = null;
-let empateOferecidoPorMim = false;
 let emPausa = false;
 let pausaPendenteDe = null;
-let pausaSolicitadaPorMim = false;
 let senhaSalaAtual = null;
 
 let modoIA = false;
@@ -127,6 +121,7 @@ let monitorAdversarioInterval = null;
 let connectionCheckInterval = null;
 let ultimaRespostaFirebase = 0;
 let pedidoRevancheDe = null;
+let sfxPack = 'classic';
 
 const TEMPO_INATIVIDADE_SALA_MS = 30 * 60 * 1000;
 
@@ -137,21 +132,15 @@ const CONQUISTAS = [
     { id: 'primeira_vitoria', emoji: '🥇', nome: 'Primeira Vitória', desc: 'Ganhe sua primeira partida', check: (s) => s.vitorias >= 1 },
     { id: 'veterano', emoji: '🎖️', nome: 'Veterano', desc: 'Ganhe 5 partidas', check: (s) => s.vitorias >= 5 },
     { id: 'lendario', emoji: '👑', nome: 'Lendário', desc: 'Ganhe 15 partidas', check: (s) => s.vitorias >= 15 },
-    { id: 'streak3', emoji: '🔥', nome: '3 Seguidas', desc: '3 vitórias consecutivas', check: (s) => s.maiorStreak >= 3 },
-    { id: 'empate', emoji: '🤝', nome: 'Diplomata', desc: 'Faça um empate', check: (s) => s.empates >= 1 },
-    { id: 'hotseat', emoji: '👥', nome: 'Hot-Seat', desc: 'Jogue em modo Hot-Seat', check: (s) => s.hotseatJogado >= 1 },
-    { id: 'maratonista', emoji: '🎮', nome: 'Maratonista', desc: 'Jogue 10 partidas', check: (s) => (s.vitorias + s.derrotas) >= 10 }
+    { id: 'hotseat', emoji: '👥', nome: 'Hot-Seat', desc: 'Jogue em modo Hot-Seat', check: (s) => s.hotseatJogado >= 1 }
 ];
 
 function carregarConquistas() {
     try {
         const raw = JSON.parse(localStorage.getItem('brain_damas_conquistas') || '{}');
-        return {
-            unlocked: raw.unlocked || {},
-            stats: raw.stats || { vitorias: 0, derrotas: 0, empates: 0, maiorStreak: 0, streakAtual: 0, hotseatJogado: 0 }
-        };
+        return { unlocked: raw.unlocked || {}, stats: raw.stats || { vitorias: 0, derrotas: 0, hotseatJogado: 0 } };
     } catch (_) {
-        return { unlocked: {}, stats: { vitorias: 0, derrotas: 0, empates: 0, maiorStreak: 0, streakAtual: 0, hotseatJogado: 0 } };
+        return { unlocked: {}, stats: { vitorias: 0, derrotas: 0, hotseatJogado: 0 } };
     }
 }
 function salvarConquistas(d) { localStorage.setItem('brain_damas_conquistas', JSON.stringify(d)); }
@@ -163,9 +152,7 @@ function desbloquearConquistas() {
     });
     if (novas.length > 0) {
         salvarConquistas(data);
-        novas.forEach((c, i) => {
-            setTimeout(() => { toast(`🏅 ${c.emoji} ${c.nome}`, 'success'); SoundFX.achievement?.(); }, i * 900);
-        });
+        novas.forEach((c, i) => setTimeout(() => toast(`🏅 ${c.emoji} ${c.nome}`, 'success'), i * 900));
     }
     atualizarGridConquistas();
 }
@@ -179,9 +166,8 @@ function atualizarGridConquistas() {
             <span>${c.emoji}</span><span class="ach-label">${c.nome}</span>
         </div>`;
     }).join('');
-    const desb = Object.keys(data.unlocked).length;
     const resumo = document.getElementById('ach-resumo');
-    if (resumo) resumo.textContent = `${desb} / ${CONQUISTAS.length} desbloqueadas`;
+    if (resumo) resumo.textContent = `${Object.keys(data.unlocked).length} / ${CONQUISTAS.length} desbloqueadas`;
 }
 
 // ============================================================
@@ -252,14 +238,14 @@ async function calcularOffsetServidor() {
     } catch (_) { offsetServidor = 0; }
 }
 function agoraServidor() { return Date.now() + offsetServidor; }
-
 function gerarSenha() { return Math.floor(1000 + Math.random() * 9000).toString(); }
 
 // ============================================================
 // NOTAÇÃO
 // ============================================================
-function casaParaNotacao(r, c) { return String.fromCharCode(97 + c) + ((modoInternacional ? 10 : 8) - r); }
-
+function casaParaNotacao(r, c) {
+    return String.fromCharCode(97 + c) + ((modoInternacional ? 10 : 8) - r);
+}
 function adicionarNotacao(cor, de, para, captura, isDama, caminhoCompleto) {
     let texto = '';
     const prefixo = isDama ? 'D' : '';
@@ -281,11 +267,10 @@ function renderizarNotacao() {
     }
     let html = ''; let num = 1;
     for (let i = 0; i < notacaoAtual.length; i += 2) {
-        const brancas = notacaoAtual[i];
-        const pretas = notacaoAtual[i + 1];
+        const b = notacaoAtual[i], p = notacaoAtual[i + 1];
         html += `<span class="mov-num">${num}.</span> `;
-        if (brancas) html += `<span class="mov-branca ${brancas.texto.includes('x') ? 'mov-captura' : ''}">${brancas.texto}</span> `;
-        if (pretas) html += `<span class="mov-preta ${pretas.texto.includes('x') ? 'mov-captura' : ''}">${pretas.texto}</span>`;
+        if (b) html += `<span class="mov-branca ${b.texto.includes('x') ? 'mov-captura' : ''}">${b.texto}</span> `;
+        if (p) html += `<span class="mov-preta ${p.texto.includes('x') ? 'mov-captura' : ''}">${p.texto}</span>`;
         html += '<br>'; num++;
     }
     panel.innerHTML = html;
@@ -370,7 +355,7 @@ async function garantirAutenticacao() {
 }
 
 // ============================================================
-// RESET DE ESTADO ENTRE PARTIDAS
+// RESET DE ESTADO
 // ============================================================
 function resetarEstadoPartida() {
     celulaSelecionada = null;
@@ -383,18 +368,13 @@ function resetarEstadoPartida() {
     lancesDamasSemCaptura = 0;
     lancesFinaisEspeciais = 0;
     posicoesRepetidas = {};
-    tipoFinalEspecial = null;
     lancesTotais = 0;
     emPausa = false;
     pausaPendenteDe = null;
-    pausaSolicitadaPorMim = false;
     empatePendenteDe = null;
-    empateOferecidoPorMim = false;
     iaPensando = false;
     pedidoRevancheDe = null;
-    euPronto = false;
-    adversarioPronto = false;
-    ambosProntos = false;
+    euPronto = false; adversarioPronto = false; ambosProntos = false;
     pararTimer();
     pararRelogio();
 }
@@ -429,8 +409,6 @@ function resetarEstadoPartida() {
     await inicializarSessao();
     configurarOuvintesEventos();
 })();
-
-let sfxPack = 'classic';
 
 async function inicializarSessao() {
     const entrouPeloLink = await processarEntradaViaLink();
@@ -805,7 +783,7 @@ function aplicarA11y(ativo) {
 }
 
 // ============================================================
-// INICIAR PARTIDAS (hot-seat, IA, internacional)
+// INICIAR PARTIDAS
 // ============================================================
 function iniciarHotSeat(n1, n2) {
     SoundFX.click?.();
@@ -971,13 +949,15 @@ function entrarInterfaceJogo() {
         pausaBtn?.classList.add('hidden');
         recBtn?.classList.add('hidden');
         empateBtn?.classList.add('hidden');
-        document.getElementById('info-minha-cor-wrap').style.display = 'none';
+        const w = document.getElementById('info-minha-cor-wrap');
+        if (w) w.style.display = 'none';
         document.getElementById('display-avatar').textContent = '👁️';
         document.getElementById('display-nome').textContent = 'Espectador';
         if (chatBar) { chatBar.style.opacity = '0.5'; chatBar.style.pointerEvents = 'none'; }
     } else if (modoIA) {
         badgeIA?.classList.remove('hidden');
-        document.getElementById('info-minha-cor-wrap').style.display = '';
+        const w = document.getElementById('info-minha-cor-wrap');
+        if (w) w.style.display = '';
         document.getElementById('info-minha-cor').textContent = '⚪ Brancas';
         document.getElementById('display-avatar').textContent = '😀';
         document.getElementById('display-nome').textContent = apelido;
@@ -991,7 +971,8 @@ function entrarInterfaceJogo() {
         document.getElementById('div-whatsapp')?.classList.add('hidden');
     } else if (modoHotSeat) {
         badgeHS?.classList.remove('hidden');
-        document.getElementById('info-minha-cor-wrap').style.display = '';
+        const w = document.getElementById('info-minha-cor-wrap');
+        if (w) w.style.display = '';
         atualizarCorHotSeat();
         document.getElementById('display-avatar').textContent = '👥';
         document.getElementById('display-nome').textContent = 'Hot-Seat';
@@ -1003,7 +984,8 @@ function entrarInterfaceJogo() {
         if (chatBar) { chatBar.style.opacity = '0.4'; chatBar.style.pointerEvents = 'none'; }
         document.getElementById('div-whatsapp')?.classList.add('hidden');
     } else {
-        document.getElementById('info-minha-cor-wrap').style.display = '';
+        const w = document.getElementById('info-minha-cor-wrap');
+        if (w) w.style.display = '';
         document.getElementById('info-minha-cor').textContent = minhaCor === 'white' ? '⚪ Brancas' : '🔴 Vermelhas';
         if (desistirBtn) desistirBtn.textContent = '🏳️ Desistir';
         pausaBtn?.classList.remove('hidden');
@@ -1042,8 +1024,12 @@ function renderizarTabuleiroAtual() {
 
 function renderizarReguas(tamanho = 8) {
     const invertido = (minhaCor === 'red');
-    const colunas = tamanho === 10 ? ['a','b','c','d','e','f','g','h','i','j'] : ['a','b','c','d','e','f','g','h'];
-    const linhas = tamanho === 10 ? ['10','9','8','7','6','5','4','3','2','1'] : ['8','7','6','5','4','3','2','1'];
+    const colunas = tamanho === 10
+        ? ['a','b','c','d','e','f','g','h','i','j']
+        : ['a','b','c','d','e','f','g','h'];
+    const linhas = tamanho === 10
+        ? ['10','9','8','7','6','5','4','3','2','1']
+        : ['8','7','6','5','4','3','2','1'];
     const topo = invertido ? linhas.slice().reverse() : linhas.slice();
     const base = invertido ? linhas.slice() : linhas.slice().reverse();
     const esq = invertido ? colunas.slice().reverse() : colunas.slice();
@@ -1238,7 +1224,7 @@ function clicarCasaInternacional(r, c) {
 }
 
 // ============================================================
-// EXECUTAR MOVIMENTO — usa o motor (nunca duplica lógica)
+// EXECUTAR MOVIMENTO (brasileiro)
 // ============================================================
 async function executarMovimento(deR, deC, paraR, paraC) {
     const mov = movimentosValidos.find(m => m.r === paraR && m.c === paraC);
@@ -1249,7 +1235,6 @@ async function executarMovimento(deR, deC, paraR, paraC) {
     const corPeca = pecaOriginal.startsWith('white') ? 'white' : 'red';
     const isDamaOriginal = pecaOriginal.includes('king');
 
-    // Aplicar movimento via motor
     const movimentoMotor = {
         de: { r: deR, c: deC },
         para: { r: paraR, c: paraC },
@@ -1262,12 +1247,10 @@ async function executarMovimento(deR, deC, paraR, paraC) {
     tabuleiro = novoTab;
     ultimaJogadaDestino = { r: paraR, c: paraC };
 
-    // Sons
     if (mov.captura) { SoundFX.capture?.(); vibrar(60); }
     else { SoundFX.move?.(); vibrar(20); }
     if (promoveu) SoundFX.king?.();
 
-    // Histórico e notação
     historicoMovimentos.push({
         tabuleiro: tabuleiroParaFirebase(tabuleiro),
         turno: turnoAtual, cor: corPeca,
@@ -1276,7 +1259,6 @@ async function executarMovimento(deR, deC, paraR, paraC) {
     });
     adicionarNotacao(corPeca, { r: deR, c: deC }, { r: paraR, c: paraC }, !!mov.captura, isDamaOriginal || promoveu, mov.caminhoCompleto);
 
-    // Contadores
     lancesTotais++;
     if (mov.captura) lancesDamasSemCaptura = 0;
 
@@ -1284,7 +1266,6 @@ async function executarMovimento(deR, deC, paraR, paraC) {
     movimentosValidos = [];
     renderizarTabuleiro();
 
-    // Muda turno
     turnoAtual = turnoAtual === 'white' ? 'red' : 'white';
     turnoInicioServidor = Date.now();
     if (modoHotSeat) {
@@ -1293,30 +1274,25 @@ async function executarMovimento(deR, deC, paraR, paraC) {
     }
     aplicarIncremento(corPeca);
 
-    // Verificação de fim (via motor)
     const fim = verificarFimDeJogoCompleto(tabuleiro, turnoAtual, {
         lancesDamasSemCaptura, lancesFinaisEspeciais, posicoesRepetidas, lancesTotais
     });
     if (fim) {
         jogoEncerrado = true;
-        pararTimer();
-        pararRelogio();
+        pararTimer(); pararRelogio();
         if (fim.tipo === 'empate') tratarFimDeJogo('empate', fim.motivo || 'empate');
         else tratarFimDeJogo(fim.vencedor, fim.motivo || 'fim');
         return;
     }
 
-    // IA
     if (modoIA && turnoAtual === 'red') {
         setTimeout(() => fazerJogadaIA(), 350);
         return;
     }
-    // Hot-seat
     if (modoHotSeat) {
         setTimeout(() => { iniciarTimer(); iniciarRelogio(); }, 300);
         return;
     }
-    // Online: transação atómica
     if (firebaseDisponivel && idSalaAtual && !modoIA && !modoHotSeat) {
         try {
             await fns.runTransaction(fns.ref(db, `salas_damas/${idSalaAtual}`), (atual) => {
@@ -1337,6 +1313,9 @@ async function executarMovimento(deR, deC, paraR, paraC) {
     }
 }
 
+// ============================================================
+// EXECUTAR MOVIMENTO (internacional)
+// ============================================================
 async function executarMovimentoInternacional(deR, deC, paraR, paraC) {
     const mov = movimentosValidos.find(m => m.r === paraR && m.c === paraC);
     if (!mov) return;
@@ -1389,8 +1368,7 @@ async function executarMovimentoInternacional(deR, deC, paraR, paraC) {
     });
     if (fim) {
         jogoEncerrado = true;
-        pararTimer();
-        pararRelogio();
+        pararTimer(); pararRelogio();
         if (fim.tipo === 'empate') tratarFimDeJogo('empate', fim.motivo || 'empate');
         else tratarFimDeJogo(fim.vencedor, fim.motivo || 'fim');
         return;
@@ -1456,8 +1434,7 @@ async function fazerJogadaIA() {
     });
     if (fim) {
         jogoEncerrado = true;
-        pararTimer();
-        pararRelogio();
+        pararTimer(); pararRelogio();
         if (fim.tipo === 'empate') tratarFimDeJogo('empate', fim.motivo || 'empate');
         else tratarFimDeJogo(fim.vencedor, fim.motivo || 'fim');
         return;
@@ -1477,13 +1454,9 @@ function tratarFimDeJogo(vencedor, motivo) {
 
     const empate = (vencedor === 'empate');
     let euVenci;
-    if (modoHotSeat) {
-        euVenci = (vencedor === hotSeatJogadorAtual);
-    } else if (modoEspectador) {
-        euVenci = false;
-    } else {
-        euVenci = (vencedor === minhaCor);
-    }
+    if (modoHotSeat) euVenci = (vencedor === hotSeatJogadorAtual);
+    else if (modoEspectador) euVenci = false;
+    else euVenci = (vencedor === minhaCor);
 
     if (empate) {
         SoundFX.empate?.();
@@ -1508,7 +1481,6 @@ function tratarFimDeJogo(vencedor, motivo) {
         if (!modoHotSeat) adicionarAoHistorico('derrota', nomeOponente);
     }
 
-    // Conquistas
     const cData = carregarConquistas();
     if (empate) cData.stats.empates = (cData.stats.empates || 0) + 1;
     else if (euVenci) {
@@ -1798,13 +1770,6 @@ function marcarFirebaseVivo() {
     document.getElementById('connection-status')?.classList.add('hidden');
 }
 
-function marcarAtividadeSala() {
-    if (!firebaseDisponivel || !idSalaAtual) return;
-    fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), {
-        ultimaAtividade: fns.serverTimestamp ? fns.serverTimestamp() : Date.now()
-    }).catch(() => {});
-}
-
 // ============================================================
 // ESCUTA FIREBASE
 // ============================================================
@@ -1822,7 +1787,6 @@ function escutarFirebase() {
         const dados = snapshot.val();
         const turnoAnterior = turnoAtual;
         const statusAnteriorEncerrado = jogoEncerrado;
-
         const versaoRemota = dados.versao || 0;
         if (versaoRemota > versaoLocalSala) versaoLocalSala = versaoRemota;
 
@@ -1937,10 +1901,10 @@ function resetarParaNovaPartida(dados) {
     movimentosValidos = [];
     jogoEncerrado = false;
     euPronto = false; adversarioPronto = false; ambosProntos = false;
-    emPausa = false; pausaPendenteDe = null; pausaSolicitadaPorMim = false;
-    empatePendenteDe = null; empateOferecidoPorMim = false;
+    emPausa = false; pausaPendenteDe = null;
+    empatePendenteDe = null;
     lancesDamasSemCaptura = 0; lancesFinaisEspeciais = 0; lancesTotais = 0;
-    posicoesRepetidas = {}; tipoFinalEspecial = null;
+    posicoesRepetidas = {};
     notacaoAtual = []; ultimaJogadaDestino = null;
     tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
     turnoAtual = dados.turno || 'white';
@@ -2017,13 +1981,12 @@ function mostrarBalao(conteudo, nome, isTexto) {
 }
 
 // ============================================================
-// PAUSA / EMPATE / REVANCHE / DESISTÊNCIA
+// PAUSA / EMPATE / REVANCHE
 // ============================================================
 function pedirPausa() {
     if (modoEspectador || jogoEncerrado || emPausa) return;
     if (modoIA || modoHotSeat) { toast('Pausa indisponível.', 'info'); return; }
     SoundFX.click?.();
-    pausaSolicitadaPorMim = true;
     updateSeguro(`salas_damas/${idSalaAtual}`, {
         pausaPedido: { de: jogadorSessao.chave, nome: apelido, em: Date.now() }
     });
@@ -2032,8 +1995,7 @@ function pedirPausa() {
 function ativarPausaLocal(porQuem) {
     if (emPausa) return;
     emPausa = true;
-    pararTimer();
-    pararRelogio();
+    pararTimer(); pararRelogio();
     document.getElementById('board-wrapper-el')?.classList.add('paused');
     document.getElementById('badge-pausa')?.classList.remove('hidden');
     const btnPausa = document.getElementById('btn-pausa');
@@ -2043,7 +2005,7 @@ function ativarPausaLocal(porQuem) {
 }
 function retomarPausaLocal() {
     if (!emPausa) return;
-    emPausa = false; pausaSolicitadaPorMim = false; pausaPendenteDe = null;
+    emPausa = false; pausaPendenteDe = null;
     document.getElementById('board-wrapper-el')?.classList.remove('paused');
     document.getElementById('badge-pausa')?.classList.add('hidden');
     document.getElementById('div-pausa-pendente')?.classList.add('hidden');
@@ -2102,7 +2064,6 @@ function pedirEmpate() {
         });
         return;
     }
-    empateOferecidoPorMim = true;
     updateSeguro(`salas_damas/${idSalaAtual}`, {
         empatePedido: { de: jogadorSessao.chave, nome: apelido, em: Date.now() }
     });
@@ -2110,7 +2071,8 @@ function pedirEmpate() {
 }
 function avaliarPosicaoSimples() {
     let score = 0;
-    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+    const n = tabuleiro.length;
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
         const p = tabuleiro[r][c]; if (!p) continue;
         const v = p.includes('king') ? 5 : 1;
         if (p.startsWith('red')) score += v; else score -= v;
@@ -2219,7 +2181,7 @@ async function aceitarRevanche() {
             status: 'jogando', turno: 'white',
             tabuleiro: tabuleiroParaFirebase(criarTabuleiroInicial()),
             turnoInicio: Date.now(), turnoNumero: 1, versao: 1,
-            vencedor: null, motivoFim: null, desistente: null,
+            vencedor: null, motivoFim: null,
             pedidoRevanche: null, empatePedido: null, jogadores: novasCores,
             pausaAtiva: null, pausaPedido: null, ultimaAtividade: Date.now()
         });
@@ -2232,9 +2194,6 @@ async function recusarRevanche() {
     toast('Recusada.', 'info');
 }
 
-// ============================================================
-// UTIL — UPDATE SEGURO
-// ============================================================
 async function updateSeguro(path, dados) {
     if (!firebaseDisponivel) return { ok: false };
     try { await fns.update(fns.ref(db, path), dados); return { ok: true }; }
@@ -2260,7 +2219,10 @@ async function sairTelaCheia() {
     } catch (_) {}
     document.body.classList.remove('is-fullscreen');
 }
-function alternarTelaCheia() { if (isFullscreen() || document.body.classList.contains('is-fullscreen')) sairTelaCheia(); else entrarTelaCheia(); }
+function alternarTelaCheia() {
+    if (isFullscreen() || document.body.classList.contains('is-fullscreen')) sairTelaCheia();
+    else entrarTelaCheia();
+}
 
 // ============================================================
 // NAVEGAÇÃO
