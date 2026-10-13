@@ -2,20 +2,400 @@
 <html lang="pt" data-theme="dark" data-board-theme="default">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0e1a">
     <title>Brain Damas v7.2 — Regras Brasileiras Oficiais</title>
-    <!-- Importa o CSS separado -->
+
     <link rel="stylesheet" href="css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Todo o HTML dos menus, tabuleiro, modais e painéis mantém-se aqui -->
-    <div class="container" id="main-container">
-        <!-- ... estrutura HTML ... -->
+
+    <div id="connection-status" class="connection-status hidden">
+        <span>📡</span>
+        <span id="connection-msg">Reconectando…</span>
     </div>
 
-    <!-- Ponto de entrada JavaScript modular -->
+    <button class="fs-exit-btn" id="fs-exit" type="button">✕</button>
+
+    <div class="container" id="main-container">
+        <div class="top-bar">
+            <button id="btn-sair" class="btn-small" type="button">🏠 Início</button>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
+                <button id="btn-musica" class="btn-small" type="button" title="Música">🎵</button>
+                <button id="btn-som" class="btn-small" type="button" title="Som">🔊</button>
+                <button id="btn-a11y" class="btn-small" type="button" title="Acessibilidade">🔍</button>
+                <button id="btn-fullscreen" class="btn-small" type="button">⛶</button>
+            </div>
+        </div>
+
+        <div id="lobby-screen">
+            <div class="user-header" style="justify-content: center;">
+                <div class="user-info-left">
+                    <span id="lobby-avatar" class="user-avatar-display">⏳</span>
+                    <strong id="lobby-nome">A carregar…</strong>
+                </div>
+            </div>
+
+            <div class="tabs" id="lobby-tabs">
+                <button class="tab-btn active" data-tab="jogo" type="button">🎮 Jogo</button>
+                <button class="tab-btn" data-tab="historico" type="button">📜 Hist.</button>
+                <button class="tab-btn" data-tab="agenda" type="button">📅 Agenda</button>
+                <button class="tab-btn" data-tab="ranking" type="button">🌐 Rank</button>
+                <button class="tab-btn" data-tab="conquistas" type="button">🏅 Prémios</button>
+                <button class="tab-btn" data-tab="config" type="button">⚙️ Config</button>
+            </div>
+
+            <div id="tab-jogo">
+                <div id="menu-inicial" class="lobby-box">
+                    <h3>🎯 Escolha o Modo de Jogo</h3>
+                    <p>Damas Brasileiras Oficiais (CBD) — captura obrigatória pela maioria, dama voadora, empates por regra.</p>
+                    <div class="menu-inicial">
+                        <button class="menu-btn" id="menu-btn-hotseat" type="button">
+                            <span class="menu-emoji">👥</span>
+                            <div class="menu-info">
+                                <span class="menu-titulo">Hot-Seat</span>
+                                <span class="menu-desc">2 jogadores no mesmo aparelho</span>
+                            </div>
+                        </button>
+                        <button class="menu-btn" id="menu-btn-ia" type="button">
+                            <span class="menu-emoji">🤖</span>
+                            <div class="menu-info">
+                                <span class="menu-titulo">Contra o Computador</span>
+                                <span class="menu-desc">5 níveis, do Iniciante ao Mestre</span>
+                            </div>
+                        </button>
+                        <button class="menu-btn" id="menu-btn-online" type="button">
+                            <span class="menu-emoji">🌐</span>
+                            <div class="menu-info">
+                                <span class="menu-titulo">Multiplayer Online</span>
+                                <span class="menu-desc">Salas com código e convite WhatsApp</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="painel-ia" class="lobby-box hidden">
+                    <h3>🤖 Nível da IA</h3>
+                    <div class="tipo-selector" id="ia-selector">
+                        <button class="tipo-opt ia-opt" data-nivel="1" type="button">🐣 Iniciante</button>
+                        <button class="tipo-opt ia-opt" data-nivel="2" type="button">🐤 Fácil</button>
+                        <button class="tipo-opt ia-opt active" data-nivel="3" type="button">🦊 Médio</button>
+                        <button class="tipo-opt ia-opt" data-nivel="4" type="button">🐺 Difícil</button>
+                        <button class="tipo-opt ia-opt" data-nivel="5" type="button">🐉 Mestre</button>
+                    </div>
+                    <button id="btn-jogar-ia" type="button" style="margin-top:10px; background: linear-gradient(135deg, #7c3aed, #a855f7);">▶️ Iniciar Partida</button>
+                    <button id="btn-voltar-menu-1" type="button" class="btn-secundario" style="margin-top:6px;">↩️ Voltar</button>
+                </div>
+
+                <div id="painel-hotseat" class="lobby-box hidden">
+                    <h3>👥 Hot-Seat</h3>
+                    <label style="font-size:12.5px; color:var(--text-muted); display:block; margin-bottom:4px;">Jogador 1 (Brancas):</label>
+                    <input type="text" id="hotseat-nome-1" placeholder="Jogador 1" style="margin-bottom:8px;">
+                    <label style="font-size:12.5px; color:var(--text-muted); display:block; margin-bottom:4px;">Jogador 2 (Vermelhas):</label>
+                    <input type="text" id="hotseat-nome-2" placeholder="Jogador 2" style="margin-bottom:10px;">
+                    <button id="btn-iniciar-hotseat" type="button" style="background: linear-gradient(135deg, #0891b2, #06b6d4);">▶️ Iniciar</button>
+                    <button id="btn-voltar-menu-2" type="button" class="btn-secundario" style="margin-top:6px;">↩️ Voltar</button>
+                </div>
+
+                <div id="painel-online" class="lobby-box hidden">
+                    <h3>🌐 Multiplayer Online</h3>
+                    <button id="btn-criar-sala" type="button">🚀 Criar Sala</button>
+                    <button id="btn-criar-sala-senha" type="button" class="btn-secundario" style="margin-top:6px;">🔒 Criar com Senha</button>
+                    <div style="display:flex; gap:6px; margin-top:6px;">
+                        <button id="btn-criar-torneio3" type="button" class="btn-secundario">🏆 MD3</button>
+                        <button id="btn-criar-torneio5" type="button" class="btn-secundario">🏆 MD5</button>
+                    </div>
+                    <div style="display: flex; gap: 6px; margin-top:10px;">
+                        <input type="text" id="input-codigo-sala" placeholder="Código" style="font-family: monospace;">
+                        <button id="btn-entrar-sala" type="button" style="width: 120px;">Entrar</button>
+                    </div>
+                    <button id="btn-assistir-sala" type="button" class="btn-secundario" style="margin-top:6px;">👁️ Assistir</button>
+                    <button id="btn-voltar-menu-3" type="button" class="btn-secundario" style="margin-top:10px;">↩️ Voltar</button>
+                </div>
+
+                <div class="lobby-box">
+                    <h3>⏱️ Modo de Tempo</h3>
+                    <div class="tempo-selector" id="tempo-selector">
+                        <button class="tempo-opt active" data-tempo="0" type="button">∞ Sem tempo</button>
+                        <button class="tempo-opt" data-tempo="20" type="button">20s/lance</button>
+                        <button class="tempo-opt" data-tempo="40" type="button">40s/lance</button>
+                        <button class="tempo-opt" data-tempo="60" type="button">60s/lance</button>
+                    </div>
+                    <p style="margin-top:10px; margin-bottom:4px;"><strong>Relógio acumulado</strong>:</p>
+                    <div class="tempo-selector" id="clock-selector">
+                        <button class="tempo-opt clock-opt active" data-clock="none" type="button">Desligado</button>
+                        <button class="tempo-opt clock-opt" data-clock="fischer-180-2" type="button">Fischer 3min+2s</button>
+                        <button class="tempo-opt clock-opt" data-clock="fischer-300-3" type="button">Fischer 5min+3s</button>
+                    </div>
+                </div>
+
+                <div class="lobby-box" style="margin-bottom: 0;">
+                    <h3>📈 Placar da Sessão</h3>
+                    <div class="placar-bar" style="margin:0;">
+                        <div class="placar-item">
+                            <span class="placar-emoji">🏆</span><span>Você:</span>
+                            <span class="placar-num" id="placar-vitorias">0</span>
+                        </div>
+                        <div class="placar-item">
+                            <span class="placar-emoji">💔</span><span>Derrotas:</span>
+                            <span class="placar-num" id="placar-derrotas">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-historico" class="hidden">
+                <div class="lobby-box" style="margin-bottom:0;">
+                    <h3>📜 Histórico</h3>
+                    <div id="historico-list"><div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">Nenhuma partida registada.</div></div>
+                    <button id="btn-limpar-historico" type="button" class="btn-secundario" style="margin-top:10px;">🗑️ Limpar</button>
+                </div>
+            </div>
+
+            <div id="tab-agenda" class="hidden">
+                <div class="lobby-box">
+                    <h3>📅 Agendar Torneio</h3>
+                    <input type="text" id="agenda-titulo" placeholder="Nome" style="margin-bottom:6px;">
+                    <input type="datetime-local" id="agenda-data" style="margin-bottom:6px;">
+                    <select id="agenda-md" style="margin-bottom:6px;">
+                        <option value="3">MD3</option>
+                        <option value="5">MD5</option>
+                    </select>
+                    <select id="agenda-tempo" style="margin-bottom:6px;">
+                        <option value="40">40s</option>
+                        <option value="20">20s</option>
+                        <option value="60">60s</option>
+                        <option value="0">∞</option>
+                    </select>
+                    <button id="btn-criar-agenda" type="button">📅 Agendar</button>
+                </div>
+                <div class="lobby-box" style="margin-bottom:0;">
+                    <h3>🗓️ Torneios</h3>
+                    <div id="agenda-list"><div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">Nenhum torneio.</div></div>
+                </div>
+            </div>
+
+            <div id="tab-ranking" class="hidden">
+                <div class="lobby-box" style="margin-bottom:0;">
+                    <h3>🌐 Ranking</h3>
+                    <div id="ranking-list"><div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">A carregar…</div></div>
+                </div>
+            </div>
+
+            <div id="tab-conquistas" class="hidden">
+                <div class="lobby-box" style="margin-bottom:0;">
+                    <h3>🏅 Conquistas</h3>
+                    <p id="ach-resumo">Desbloqueie medalhas!</p>
+                    <div class="ach-grid" id="ach-grid"></div>
+                </div>
+            </div>
+
+            <div id="tab-config" class="hidden">
+                <div class="lobby-box">
+                    <h3>🎨 Tema</h3>
+                    <div class="theme-selector" id="theme-selector">
+                        <button class="theme-opt" data-theme="dark" type="button">🌙 Escuro</button>
+                        <button class="theme-opt" data-theme="light" type="button">☀️ Claro</button>
+                        <button class="theme-opt" data-theme="neon" type="button">💜 Neon</button>
+                        <button class="theme-opt" data-theme="madeira" type="button">🪵 Madeira</button>
+                        <button class="theme-opt" data-theme="minimal" type="button">◾ Minimal</button>
+                        <button class="theme-opt" data-theme="contrast" type="button">🔲 Alto Contraste</button>
+                        <button class="theme-opt" data-theme="daltonico" type="button">🌗 Daltónico</button>
+                    </div>
+                </div>
+                <div class="lobby-box">
+                    <h3>🔊 Sons</h3>
+                    <div class="theme-selector" id="sfx-selector">
+                        <button class="theme-opt" data-sfx="classic" type="button">🎻 Clássico</button>
+                        <button class="theme-opt" data-sfx="arcade" type="button">🕹️ Arcade</button>
+                        <button class="theme-opt" data-sfx="suave" type="button">🌊 Suave</button>
+                    </div>
+                </div>
+                <div class="lobby-box" style="margin-bottom:0;">
+                    <h3>👤 Apelido</h3>
+                    <button id="btn-alterar-apelido" type="button" class="btn-secundario">✏️ Alterar Apelido</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-screen" class="hidden">
+            <div class="user-header">
+                <div class="user-info-left">
+                    <span id="display-avatar" class="user-avatar-display">😀</span>
+                    <strong id="display-nome"></strong>
+                    <span id="oponente-status" class="status-dot"></span>
+                    <span id="badge-ia" class="ia-badge hidden">🤖 IA</span>
+                    <span id="badge-hotseat" class="hotseat-badge hidden">👥 HOT-SEAT</span>
+                    <span id="badge-espectador" class="espectador-badge hidden">👁️ ASSISTINDO</span>
+                    <span id="badge-rec" class="rec-badge hidden">🔴 REC</span>
+                    <span id="badge-pausa" class="pausa-badge hidden">⏸️ EM PAUSA</span>
+                </div>
+                <span id="display-sala-tag" style="font-size: 11px; color: var(--c-blue);">Sala</span>
+            </div>
+
+            <div id="torneio-bar" class="torneio-bar hidden">
+                <span>🏆 MD<span id="torneio-melhor-de">3</span></span>
+                <div class="torneio-placar">
+                    <span class="torneio-num" id="torneio-eu">0</span>
+                    <span class="torneio-sep">—</span>
+                    <span class="torneio-num" id="torneio-op">0</span>
+                </div>
+            </div>
+
+            <div class="match-info-bar">
+                <span id="info-minha-cor-wrap">Peça: <strong id="info-minha-cor" style="color: var(--c-blue);">--</strong></span>
+                <span id="turno-status">Aguardando...</span>
+                <span id="badge-obrigatoria" class="obrigatoria-badge hidden">⚡ OBRIGATÓRIA</span>
+                <span id="timer-display" class="timer-display hidden">⏱️ 40s</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button id="btn-pausa" class="btn-small btn-pausa hidden" type="button" style="padding: 6px 12px; font-size: 11px; min-height: 36px;">⏸️ Pausa</button>
+                    <button id="btn-empate" class="btn-small btn-empate hidden" type="button" style="padding: 6px 12px; font-size: 11px; min-height: 36px;">🤝 Empate</button>
+                    <button id="btn-desistir" class="btn-small" type="button" style="padding: 6px 12px; font-size: 11px; min-height: 36px;">🏳️ Desistir</button>
+                    <button id="btn-rec" class="btn-small hidden" type="button" style="padding: 6px 12px; font-size: 11px; min-height: 36px;">🎥 Rec</button>
+                    <button id="btn-fullscreen-game" class="btn-small" type="button" style="padding: 6px 12px; font-size: 11px; min-height: 36px;">⛶</button>
+                </div>
+            </div>
+
+            <div id="aviso-desconexao" class="aviso-desconexao hidden">
+                <span>⚠️ Adversário desconectado — a aguardar reconexão…</span>
+            </div>
+
+            <div id="clock-display" class="clock-display hidden">
+                <div class="clock-player" id="clock-white">⚪ <span id="clock-white-txt">5:00</span></div>
+                <div style="color: var(--text-subtle);">|</div>
+                <div class="clock-player" id="clock-red">🔴 <span id="clock-red-txt">5:00</span></div>
+            </div>
+
+            <div id="div-empate-pendente" class="empate-pedido hidden">
+                <span>🤝 <strong id="empate-msg">Adversário</strong> oferece empate!</span>
+                <div style="display:flex; gap:6px;">
+                    <button id="btn-aceitar-empate" type="button" style="width:auto; padding:8px 14px; font-size:12px; background: linear-gradient(135deg, #16a34a, #22c55e);">✅ Aceitar</button>
+                    <button id="btn-recusar-empate" type="button" style="width:auto; padding:8px 14px; font-size:12px;" class="btn-secundario">❌ Recusar</button>
+                </div>
+            </div>
+
+            <div id="div-pausa-pendente" class="pausa-pedido hidden">
+                <span>⏸️ <strong id="pausa-msg">Adversário</strong> pediu pausa!</span>
+                <div style="display:flex; gap:6px;">
+                    <button id="btn-aceitar-pausa" type="button" style="width:auto; padding:8px 14px; font-size:12px; background: linear-gradient(135deg, #16a34a, #22c55e);">✅ Aceitar</button>
+                    <button id="btn-recusar-pausa" type="button" style="width:auto; padding:8px 14px; font-size:12px;" class="btn-secundario">❌ Recusar</button>
+                </div>
+            </div>
+
+            <div id="div-handshake" class="handshake-bar hidden">
+                <span id="handshake-msg">⏳ A aguardar adversário…</span>
+            </div>
+
+            <div id="timer-bar-wrap" class="timer-bar-wrap hidden">
+                <div id="timer-bar-fill" class="timer-bar-fill"></div>
+            </div>
+
+            <div class="placar-bar">
+                <div class="placar-item">
+                    <span class="placar-emoji">🏆</span>
+                    <span id="placar-nome-eu">Você</span>
+                    <span class="placar-num" id="placar-vitorias-jogo">0</span>
+                </div>
+                <div class="placar-item">
+                    <span class="placar-emoji">⚔️</span>
+                    <span id="placar-nome-op">Oponente</span>
+                    <span class="placar-num" id="placar-vitorias-op">0</span>
+                </div>
+            </div>
+
+            <p class="instructions" id="info-instrucao">Toque em sua peça e depois na casa de destino válida.</p>
+
+            <div class="board-wrapper" id="board-wrapper-el">
+                <div class="bubble-layer" id="bubble-layer"></div>
+                <div class="board-ruler board-ruler-top" id="labels-top"></div>
+                <div class="board-ruler board-ruler-bottom" id="labels-bottom"></div>
+                <div class="board-ruler board-ruler-left" id="labels-left"></div>
+                <div class="board-ruler board-ruler-right" id="labels-right"></div>
+                <div class="checkers-grid" id="checkers-board"></div>
+            </div>
+
+            <div style="display: flex; gap:6px; align-items: center; margin-bottom: 6px;">
+                <strong style="font-size: 12.5px; color: var(--c-blue);">📝 Notação</strong>
+                <button class="notacao-copy-btn" id="btn-copiar-notacao" type="button">📋 Copiar</button>
+            </div>
+            <div class="notacao-panel" id="notacao-panel">
+                <span class="notacao-vazia">A partida ainda não começou…</span>
+            </div>
+
+            <div id="chat-bar" class="chat-bar">
+                <button class="emoji-btn" data-emoji="👍" type="button">👍</button>
+                <button class="emoji-btn" data-emoji="😄" type="button">😄</button>
+                <button class="emoji-btn" data-emoji="🔥" type="button">🔥</button>
+                <button class="emoji-btn" data-emoji="😅" type="button">😅</button>
+                <button class="emoji-btn" data-emoji="😱" type="button">😱</button>
+                <button class="emoji-btn" data-emoji="🤔" type="button">🤔</button>
+                <button class="emoji-btn" data-emoji="😎" type="button">😎</button>
+                <button class="emoji-btn" data-emoji="👏" type="button">👏</button>
+                <button class="emoji-btn" data-emoji="😂" type="button">😂</button>
+                <button class="emoji-btn" data-emoji="💪" type="button">💪</button>
+                <div class="chat-input-row" style="display:flex; gap:6px; margin-top:6px; width:100%;">
+                    <input type="text" id="chat-input" placeholder="Mensagem..." maxlength="120" style="flex:1; padding:8px 12px; font-size:13px;">
+                    <button id="chat-send" type="button" style="width:auto; padding:8px 14px; font-size:13px;">Enviar</button>
+                </div>
+            </div>
+
+            <div id="div-pos-jogo" class="hidden" style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+                <button id="btn-jogar-novamente" type="button" style="flex:1; min-width:120px; background: linear-gradient(135deg, #16a34a, #22c55e);">🔄 Jogar Novamente</button>
+                <button id="btn-sair-pos-jogo" type="button" style="flex:1; min-width:100px;" class="btn-secundario">🏠 Início</button>
+            </div>
+
+            <div id="div-revanche-pendente" class="hidden" style="margin-top:8px; padding:10px 12px; background: var(--input-bg); border:1px solid var(--border-color); border-radius: var(--radius-md); font-size:13px; text-align:center;">
+                <span id="revanche-msg">Aguardando...</span>
+                <div id="revanche-actions" style="display:none; gap:8px; margin-top:8px;">
+                    <button id="btn-aceitar-revanche" type="button" style="flex:1; background: linear-gradient(135deg, #16a34a, #22c55e); padding:8px 12px;">✅ Aceitar</button>
+                    <button id="btn-recusar-revanche" type="button" style="flex:1; padding:8px 12px;" class="btn-secundario">❌ Recusar</button>
+                </div>
+            </div>
+
+            <div id="div-whatsapp" class="hidden">
+                <button id="btn-whatsapp" class="btn-whatsapp" type="button">💬 Convidar pelo WhatsApp</button>
+                <button id="btn-whatsapp-assistir" class="btn-whatsapp" type="button" style="background: linear-gradient(135deg, #d97706, #f59e0b);">👁️ Convidar Espectador</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-card">
+            <div style="font-size: 40px; margin-bottom: 10px;" id="modal-icon">ℹ️</div>
+            <h2 id="modal-title" style="margin: 0 0 10px; font-size: 18px;">Título</h2>
+            <p id="modal-message" style="color: var(--text-muted); font-size: 13.5px; margin-bottom: 15px; white-space: pre-line;"></p>
+            <div class="modal-actions" id="modal-actions"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="replay-overlay">
+        <div class="modal-card" style="max-width: 460px;">
+            <div style="font-size: 32px; margin-bottom: 8px;">📜</div>
+            <h2 style="margin: 0 0 8px; font-size: 16px;">Replay</h2>
+            <div id="replay-info" class="replay-move-info">Passo 0 / 0</div>
+            <div class="replay-board" id="replay-board"></div>
+            <div class="replay-controls">
+                <button id="replay-first" type="button" class="btn-secundario" style="padding:6px 12px;">⏮️</button>
+                <button id="replay-prev" type="button" class="btn-secundario" style="padding:6px 12px;">◀️</button>
+                <button id="replay-play" type="button" style="padding:6px 14px;">▶️ Play</button>
+                <button id="replay-next" type="button" class="btn-secundario" style="padding:6px 12px;">▶️</button>
+                <button id="replay-last" type="button" class="btn-secundario" style="padding:6px 12px;">⏭️</button>
+            </div>
+            <div class="modal-actions" style="margin-top:12px;">
+                <button id="replay-close" type="button" class="btn-secundario">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Ponto de entrada modular -->
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
