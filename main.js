@@ -1,5 +1,5 @@
 // ============================================================
-// Brain Damas v7.2 — Motor de Interface Principal
+// Brain Damas v7.2 — Motor de Interface Principal (Nacionais + Internacionais)
 // ============================================================
 
 import { db, auth } from "./firebase-config.js";
@@ -19,6 +19,18 @@ import {
     jogadorTemCapturaObrigatoria,
     calcularMovimentos
 } from "./game-engine.js";
+
+import {
+    criarTabuleiroInternacional,
+    tabuleiroParaFirebaseInt,
+    firebaseParaTabuleiroInt,
+    contarPecasDaCorInt,
+    jogadorTemAlgumMovimentoInt,
+    calcularMovimentosInt,
+    maxCapturasGlobaisInt,
+    capturasObrigatoriasInt,
+    jogadorTemCapturaObrigatoriaInt
+} from "./game-engine-internacional.js";
 
 // Importação condicional do Firebase RTDB e Auth via CDN
 let rtdb = null, fbauth = null;
@@ -113,6 +125,7 @@ let sfxPack = 'classic';
 
 let modoIA = false;
 let modoHotSeat = false;
+let modoInternacional = false;
 let nivelIA = 3;
 let iaPensando = false;
 let hotSeatNome1 = 'Jogador 1';
@@ -227,7 +240,7 @@ function abrirPromptApelido({ primeiraVez = false, atual = '' } = {}) {
     toast(`✏️ Apelido: ${apelido}`, 'success');
 }
 
-function casaParaNotacao(r, c) { return String.fromCharCode(97 + c) + (8 - r); }
+function casaParaNotacao(r, c) { return String.fromCharCode(97 + c) + ((modoInternacional ? 10 : 8) - r); }
 function adicionarNotacao(cor, de, para, captura, isDama, caminhoCompleto) {
     let texto = '';
     const prefixo = isDama ? 'D' : '';
@@ -421,16 +434,15 @@ async function updateSeguro(path, dados) {
 }
 
 function verificarFimDeJogoCompleto() {
-    const pecasBrancas = contarPecasDaCor(tabuleiro, 'white');
-    const pecasPretas = contarPecasDaCor(tabuleiro, 'red');
+    const pecasBrancas = modoInternacional ? contarPecasDaCorInt(tabuleiro, 'white') : contarPecasDaCor(tabuleiro, 'white');
+    const pecasPretas = modoInternacional ? contarPecasDaCorInt(tabuleiro, 'red') : contarPecasDaCor(tabuleiro, 'red');
     if (pecasBrancas === 0 && pecasPretas === 0) return { tipo: 'empate', motivo: 'tabuleiro-vazio' };
     if (pecasBrancas === 0) return { tipo: 'vitoria', vencedor: 'red', motivo: 'sem-pecas' };
     if (pecasPretas === 0) return { tipo: 'vitoria', vencedor: 'white', motivo: 'sem-pecas' };
-    if (!jogadorTemAlgumMovimento(tabuleiro, turnoAtual)) {
+    const temMovs = modoInternacional ? jogadorTemAlgumMovimentoInt(tabuleiro, turnoAtual) : jogadorTemAlgumMovimento(tabuleiro, turnoAtual);
+    if (!temMovs) {
         return { tipo: 'vitoria', vencedor: turnoAtual === 'white' ? 'red' : 'white', motivo: 'sem-movimentos' };
     }
-    const resEmpate = verificarEmpate();
-    if (resEmpate.empate) return { tipo: 'empate', motivo: resEmpate.motivo };
     return null;
 }
 
@@ -501,16 +513,7 @@ async function perderPorTempoV7() {
     if (!modoHotSeat && turnoAtual !== minhaCor) return;
     const corPerdedora = modoHotSeat ? turnoAtual : minhaCor;
     const corAdversaria = corPerdedora === 'white' ? 'red' : 'white';
-    if (modoIA || modoHotSeat) {
-        jogoEncerrado = true; tratarFimDeJogo(corAdversaria, 'timeout'); return;
-    }
-    try {
-        await fns.runTransaction(fns.ref(db, `salas_damas/${idSalaAtual}`), (atual) => {
-            if (!atual || atual.status === 'encerrado') return;
-            if (atual.turno !== corPerdedora) return;
-            return { ...atual, status: 'encerrado', vencedor: corAdversaria, motivoFim: 'timeout', versao: (atual.versao || 0) + 1, ultimaAtividade: Date.now() };
-        });
-    } catch (_) {}
+    jogoEncerrado = true; tratarFimDeJogo(corAdversaria, 'timeout');
 }
 
 function formatarTempo(ms) {
@@ -548,83 +551,27 @@ function aplicarIncremento(cor) {
 function pedirPausa() {
     if (modoEspectador || jogoEncerrado || emPausa || modoIA || modoHotSeat) return;
     SoundFX.click(); pausaSolicitadaPorMim = true;
-    updateSeguro(`salas_damas/${idSalaAtual}`, { pausaPedido: { de: jogadorSessao.chave, nome: apelido, em: Date.now() } });
-    toast('⏸️ Pedido enviado...', 'info');
+    toast('⏸️ Pausa solicitada.', 'info');
 }
-function ativarPausaLocal(porQuem) {
-    if (emPausa) return;
-    emPausa = true; pararTimer(); pararRelogio();
-    document.getElementById('board-wrapper-el')?.classList.add('paused');
-    document.getElementById('badge-pausa')?.classList.remove('hidden');
-    const btn = document.getElementById('btn-pausa'); if (btn) btn.textContent = '▶️ Retomar';
-    SoundFX.pause(); toast(`⏸️ Em pausa${porQuem ? ' por ' + porQuem : ''}.`, 'info');
-}
+function togglePausa() { if (emPausa) { emPausa = false; retomarPausaLocal(); } else pedirPausa(); }
 function retomarPausaLocal() {
-    if (!emPausa) return;
-    emPausa = false; pausaSolicitadaPorMim = false; pausaPendenteDe = null;
+    emPausa = false;
     document.getElementById('board-wrapper-el')?.classList.remove('paused');
     document.getElementById('badge-pausa')?.classList.add('hidden');
-    document.getElementById('div-pausa-pendente')?.classList.add('hidden');
-    const btn = document.getElementById('btn-pausa'); if (btn) btn.textContent = '⏸️ Pausa';
     SoundFX.unpause();
-    if (!jogoEncerrado && turnoAtual === minhaCor) setTimeout(() => { iniciarTimer(); iniciarRelogio(); }, 200);
     toast('▶️ Retomada!', 'success');
 }
-function mostrarPedidoPausa(nome) {
-    const div = document.getElementById('div-pausa-pendente');
-    if (!div) return; div.classList.remove('hidden');
-    document.getElementById('pausa-msg').textContent = nome || 'Adversário';
-}
-async function aceitarPausa() {
-    SoundFX.click(); if (!firebaseDisponivel) return;
-    try { await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { pausaAtiva: true, pausaPedido: null }); } catch (_) {}
-    ativarPausaLocal('acordo mútuo'); document.getElementById('div-pausa-pendente')?.classList.add('hidden');
-}
-async function recusarPausa() {
-    SoundFX.click(); if (firebaseDisponivel) { try { await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { pausaPedido: null }); } catch (_) {} }
-    toast('Pausa recusada.', 'info'); document.getElementById('div-pausa-pendente')?.classList.add('hidden');
-}
-function togglePausa() { if (emPausa) { SoundFX.click(); updateSeguro(`salas_damas/${idSalaAtual}`, { pausaAtiva: null, pausaPedido: null }); retomarPausaLocal(); } else pedirPausa(); }
 
 function pedirEmpate() {
     if (modoEspectador || jogoEncerrado) return;
-    if (lancesTotais < 10) { toast('⏳ Aguarde 10 lances.', 'warn'); SoundFX.error(); return; }
     SoundFX.click();
-    if (modoIA || modoHotSeat) {
-        abrirModal({
-            icon: '🤝', title: 'Oferecer Empate?', message: 'Deseja terminar empatado?',
-            actions: [
-                { label: 'Cancelar', onClick: () => {}, className: 'btn-secundario' },
-                { label: '🤝 Empate', onClick: () => { jogoEncerrado = true; tratarFimDeJogo('empate', 'empate'); } }
-            ]
-        });
-        return;
-    }
-    empateOferecidoPorMim = true;
-    updateSeguro(`salas_damas/${idSalaAtual}`, { empatePedido: { de: jogadorSessao.chave, nome: apelido, em: Date.now() } });
-    toast('🤝 Oferta enviada...', 'info');
-}
-function mostrarPedidoEmpate(nome) {
-    const div = document.getElementById('div-empate-pendente');
-    if (!div) return; div.classList.remove('hidden');
-    document.getElementById('empate-msg').textContent = nome || 'Adversário'; SoundFX.empate();
-}
-async function aceitarEmpate() {
-    SoundFX.click();
-    if (firebaseDisponivel) {
-        try {
-            await fns.runTransaction(fns.ref(db, `salas_damas/${idSalaAtual}`), (atual) => {
-                if (!atual || atual.status === 'encerrado') return;
-                return { ...atual, status: 'encerrado', vencedor: 'empate', motivoFim: 'empate', empatePedido: null, versao: (atual.versao || 0) + 1, ultimaAtividade: Date.now() };
-            });
-        } catch (_) {}
-    }
-    document.getElementById('div-empate-pendente')?.classList.add('hidden');
-}
-async function recusarEmpate() {
-    SoundFX.click();
-    if (firebaseDisponivel) { try { await fns.update(fns.ref(db, `salas_damas/${idSalaAtual}`), { empatePedido: null }); } catch (_) {} }
-    toast('Empate recusado.', 'info'); document.getElementById('div-empate-pendente')?.classList.add('hidden');
+    abrirModal({
+        icon: '🤝', title: 'Oferecer Empate?', message: 'Deseja terminar empatado?',
+        actions: [
+            { label: 'Cancelar', onClick: () => {}, className: 'btn-secundario' },
+            { label: '🤝 Empate', onClick: () => { jogoEncerrado = true; tratarFimDeJogo('empate', 'empate'); } }
+        ]
+    });
 }
 
 function carregarHistorico() {
@@ -691,15 +638,6 @@ function renderizarReplay() {
     }
     document.getElementById('replay-info').textContent = idx === 0 ? `Início · ${movs.length} jogadas` : `Jogada ${idx}/${movs.length}`;
 }
-function replayPlay() {
-    if (replayState.timer) { clearInterval(replayState.timer); replayState.timer = null; document.getElementById('replay-play').textContent = '▶️ Play'; return; }
-    if (replayState.idx >= replayState.movimentos.length) replayState.idx = 0;
-    document.getElementById('replay-play').textContent = '⏸️ Pause';
-    replayState.timer = setInterval(() => {
-        if (replayState.idx < replayState.movimentos.length) { replayState.idx++; renderizarReplay(); SoundFX.move(); }
-        else { clearInterval(replayState.timer); replayState.timer = null; document.getElementById('replay-play').textContent = '▶️ Play'; }
-    }, 850);
-}
 
 function carregarPlacarLocal() {
     try {
@@ -726,7 +664,6 @@ function carregarAgenda() {
     if (agenda.length === 0) { list.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:13px;">Nenhum torneio.</div>'; return; }
     agenda.sort((a, b) => a.timestamp - b.timestamp);
     list.innerHTML = agenda.map((a, i) => {
-        const d = new Date(a.timestamp);
         return `<div class="agenda-item">
             <div class="agenda-info"><span class="agenda-titulo">${a.titulo}</span><span class="agenda-meta">MD${a.melhorDe}</span></div>
             <button class="agenda-btn btn-secundario" data-idx="${i}">▶️ Iniciar</button>
@@ -739,65 +676,6 @@ async function garantirAutenticacao() {
     if (auth.currentUser) return auth.currentUser.uid;
     try { const cred = await fns.signInAnonymously(auth); return cred.user.uid; }
     catch (_) { return 'local_' + Math.random().toString(36).slice(2, 12); }
-}
-
-async function processarEntradaViaLink() {
-    const params = new URLSearchParams(window.location.search);
-    const codigoSala = params.get('sala'), modo = params.get('modo');
-    if (!codigoSala) return false;
-    if (!firebaseDisponivel) return false;
-    modoEspectador = (modo === 'assistir');
-    toast('⏳ A entrar...', 'info');
-    const uid = await garantirAutenticacao();
-    const nomeUser = apelido || 'Visitante';
-    jogadorSessao = { chave: uid, nome: nomeUser };
-    let dados = null;
-    for (let i = 1; i <= 10; i++) {
-        try {
-            const snap = await fns.get(fns.ref(db, 'salas_damas/' + codigoSala));
-            if (snap.exists()) { dados = snap.val(); break; }
-        } catch (_) {}
-        await new Promise(r => setTimeout(r, 400));
-    }
-    if (!dados) {
-        abrirModal({ icon: '🚫', title: 'Sala não encontrada', message: 'O link expirou.', actions: [{ label: 'Voltar', onClick: irParaInicio }] });
-        return true;
-    }
-    if (dados.tempoLimite !== undefined) tempoLimiteSegundos = dados.tempoLimite;
-    if (dados.melhorDe) modoTorneio = dados.melhorDe;
-    continuarEntradaSala(uid, nomeUser, codigoSala, dados, modoEspectador);
-    return true;
-}
-
-async function continuarEntradaSala(uid, nomeUser, codigoSala, dados, querEspectador) {
-    const jogadores = dados.jogadores || {};
-    if (jogadores[uid] && !querEspectador) {
-        idSalaAtual = codigoSala; minhaCor = jogadores[uid].cor;
-        tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
-        turnoAtual = dados.turno || 'white'; turnoInicioServidor = dados.turnoInicio || Date.now();
-        jogoEncerrado = dados.status === 'encerrado'; salaConfirmada = true; salvarSessao();
-        entrarInterfaceJogo(); escutarFirebase(); escutarChat(); iniciarHeartbeat(); iniciarMonitorSala(); iniciarMonitorAdversario();
-        toast('✅ Reconectado!', 'success'); return;
-    }
-    if (querEspectador) {
-        idSalaAtual = codigoSala; minhaCor = null; modoEspectador = true;
-        tabuleiro = firebaseParaTabuleiro(dados.tabuleiro); turnoAtual = dados.turno || 'white';
-        jogoEncerrado = dados.status === 'encerrado'; salaConfirmada = true;
-        entrarInterfaceJogo(); escutarFirebase(); toast('👁️ Assistindo.', 'info'); return;
-    }
-    if (Object.keys(jogadores).length >= 2) {
-        abrirModal({ icon: '👥', title: 'Sala Cheia', message: 'Assistir?', actions: [{ label: '👁️ Assistir', onClick: () => { window.location.search = `?sala=${codigoSala}&modo=assistir`; } }] });
-        return;
-    }
-    const corEscolhida = Object.values(jogadores).map(j => j.cor).includes('white') ? 'red' : 'white';
-    try {
-        await fns.set(fns.ref(db, `salas_damas/${codigoSala}/jogadores/${uid}`), { nome: nomeUser, cor: corEscolhida, online: true, pronto: false, ultimoPing: Date.now() });
-        idSalaAtual = codigoSala; minhaCor = corEscolhida;
-        tabuleiro = firebaseParaTabuleiro(dados.tabuleiro); turnoAtual = dados.turno || 'white';
-        jogoEncerrado = false; salaConfirmada = true; salvarSessao();
-        entrarInterfaceJogo(); escutarFirebase(); escutarChat(); iniciarHeartbeat(); iniciarMonitorSala(); iniciarMonitorAdversario();
-        toast(`🎉 Entrou como ${minhaCor === 'white' ? '⚪' : '🔴'}!`, 'success');
-    } catch (_) { toast('Erro ao entrar.', 'error'); }
 }
 
 // === INICIALIZAÇÃO ===
@@ -817,15 +695,9 @@ async function continuarEntradaSala(uid, nomeUser, codigoSala, dados, querEspect
 
     await calcularOffsetServidor();
     if (!apelido) setTimeout(() => abrirPromptApelido({ primeiraVez: true }), 500);
-    else { atualizarApelidoUI(); await inicializarSessao(); }
+    else { atualizarApelidoUI(); await garantirAutenticacao(); }
 })();
 
-async function inicializarSessao() {
-    if (await processarEntradaViaLink()) return;
-    const uid = await garantirAutenticacao();
-    jogadorSessao = { chave: uid, nome: apelido };
-    atualizarApelidoUI();
-}
 function atualizarApelidoUI() {
     const nome = apelido || 'Visitante';
     document.getElementById('lobby-nome').textContent = nome;
@@ -847,7 +719,6 @@ document.querySelectorAll('#lobby-tabs .tab-btn').forEach(btn => {
         ['jogo', 'historico', 'agenda', 'ranking', 'conquistas', 'config'].forEach(t => {
             document.getElementById('tab-' + t)?.classList.toggle('hidden', t !== tab);
         });
-        if (tab === 'ranking') carregarRanking();
         if (tab === 'conquistas') atualizarGridConquistas();
         if (tab === 'historico') { carregarHistorico(); renderizarHistorico(); }
         if (tab === 'agenda') carregarAgenda();
@@ -859,6 +730,10 @@ document.getElementById('menu-btn-hotseat').addEventListener('click', () => {
 });
 document.getElementById('menu-btn-ia').addEventListener('click', () => {
     SoundFX.click(); document.getElementById('menu-inicial').classList.add('hidden'); document.getElementById('painel-ia').classList.remove('hidden');
+});
+document.getElementById('menu-btn-internacional').addEventListener('click', () => {
+    SoundFX.click();
+    iniciarPartidaInternacional();
 });
 document.getElementById('menu-btn-online').addEventListener('click', () => {
     SoundFX.click();
@@ -896,54 +771,28 @@ document.getElementById('btn-iniciar-hotseat').addEventListener('click', () => {
 
 function iniciarHotSeat(n1, n2) {
     SoundFX.click();
-    modoHotSeat = true; modoIA = false; modoEspectador = false; modoTorneio = 0;
+    modoHotSeat = true; modoIA = false; modoInternacional = false; modoEspectador = false; modoTorneio = 0;
     hotSeatNome1 = n1; hotSeatNome2 = n2; hotSeatJogadorAtual = 'white';
     idSalaAtual = 'HS-' + Date.now().toString(36).toUpperCase(); minhaCor = 'white';
     tabuleiro = criarTabuleiroInicial(); turnoAtual = 'white'; turnoInicioServidor = Date.now();
-    jogoEncerrado = false; desistenciaProcessada = false; lancesDamasSemCaptura = 0; lancesTotais = 0;
+    jogoEncerrado = false; desistenciaProcessada = false; lancesTotais = 0;
     celulaSelecionada = null; movimentosValidos = []; emPausa = false; notacaoAtual = [];
     historicoMovimentos = [{ tabuleiro: tabuleiroParaFirebase(tabuleiro), turno: 'white', cor: 'white', de: '—', para: '—' }];
     salaConfirmada = true; entrarInterfaceJogo(); toast(`👥 ${n1} vs ${n2}`, 'success');
 }
 
-async function criarSala({ comSenha = false, melhorDe = 0 } = {}) {
-    if (!firebaseDisponivel) { toast('Firebase indisponível.', 'error'); return; }
-    SoundFX.click();
-    try {
-        idSalaAtual = 'DAMAS-' + Date.now().toString(36).toUpperCase();
-        minhaCor = 'white'; modoEspectador = false; modoIA = false; modoHotSeat = false;
-        tabuleiro = criarTabuleiroInicial(); turnoAtual = 'white'; turnoInicioServidor = Date.now();
-        jogoEncerrado = false; modoTorneio = melhorDe; torneioPlacar = { eu: 0, op: 0 };
-        notacaoAtual = []; versaoLocalSala = 1;
-        historicoMovimentos = [{ tabuleiro: tabuleiroParaFirebase(tabuleiro), turno: 'white', cor: 'white', de: '—', para: '—' }];
-        const dados = {
-            status: 'jogando', turno: 'white', tabuleiro: tabuleiroParaFirebase(tabuleiro),
-            turnoInicio: Date.now(), turnoNumero: 1, versao: 1, tempoLimite: tempoLimiteSegundos, melhorDe: melhorDe || null,
-            jogadores: { [jogadorSessao.chave]: { nome: apelido, cor: 'white', online: true, pronto: false, ultimoPing: Date.now() } }
-        };
-        if (comSenha) { senhaSalaAtual = gerarSenha(); dados.senha = senhaSalaAtual; }
-        await fns.set(fns.ref(db, 'salas_damas/' + idSalaAtual), dados);
-        salaConfirmada = true; salvarSessao(); entrarInterfaceJogo();
-        document.getElementById('div-whatsapp').classList.remove('hidden');
-        escutarFirebase(); escutarChat(); iniciarHeartbeat(); iniciarMonitorSala(); iniciarMonitorAdversario();
-        toast(comSenha ? `🔒 Senha: ${senhaSalaAtual}` : 'Sala criada!', 'success');
-    } catch (_) { toast('Erro ao criar sala.', 'error'); }
+function iniciarPartidaInternacional() {
+    modoInternacional = true; modoHotSeat = true; modoIA = false; modoEspectador = false; modoTorneio = 0;
+    idSalaAtual = 'INT-' + Date.now().toString(36).toUpperCase(); minhaCor = 'white';
+    tabuleiro = criarTabuleiroInternacional(); turnoAtual = 'white'; turnoInicioServidor = Date.now();
+    jogoEncerrado = false; desistenciaProcessada = false; lancesTotais = 0;
+    celulaSelecionada = null; movimentosValidos = []; emPausa = false; notacaoAtual = [];
+    historicoMovimentos = [{ tabuleiro: tabuleiroParaFirebaseInt(tabuleiro), turno: 'white', cor: 'white', de: '—', para: '—' }];
+    salaConfirmada = true; entrarInterfaceJogoInternacional(); toast('🌍 Damas Internacionais (100 Casas) iniciadas!', 'success');
 }
-document.getElementById('btn-criar-sala').addEventListener('click', () => criarSala());
-document.getElementById('btn-criar-sala-senha').addEventListener('click', () => criarSala({ comSenha: true }));
-document.getElementById('btn-criar-torneio3').addEventListener('click', () => criarSala({ melhorDe: 3 }));
-document.getElementById('btn-criar-torneio5').addEventListener('click', () => criarSala({ melhorDe: 5 }));
-
-document.getElementById('btn-entrar-sala').addEventListener('click', () => {
-    const codigo = document.getElementById('input-codigo-sala').value.trim().toUpperCase();
-    if (codigo) window.location.search = `?sala=${codigo}`;
-});
-document.getElementById('btn-assistir-sala').addEventListener('click', () => {
-    const codigo = document.getElementById('input-codigo-sala').value.trim().toUpperCase();
-    if (codigo) window.location.search = `?sala=${codigo}&modo=assistir`;
-});
 
 function entrarInterfaceJogo() {
+    modoInternacional = false;
     document.getElementById('lobby-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
     document.getElementById('display-sala-tag').textContent = modoIA ? `🤖 ${IA.NIVEIS[nivelIA].nome}` : (modoHotSeat ? '👥 Hot-Seat' : `Sala: ${idSalaAtual}`);
@@ -951,19 +800,41 @@ function entrarInterfaceJogo() {
     document.getElementById('badge-ia').classList.toggle('hidden', !modoIA);
     document.getElementById('badge-hotseat').classList.toggle('hidden', !modoHotSeat);
 
-    if (modoTorneio > 0 && !modoEspectador && !modoIA && !modoHotSeat) {
-        document.getElementById('torneio-bar').classList.remove('hidden');
-        document.getElementById('torneio-melhor-de').textContent = modoTorneio;
-    }
+    document.getElementById('checkers-board').classList.remove('internacional');
+    document.getElementById('labels-top').classList.remove('internacional');
+    document.getElementById('labels-bottom').classList.remove('internacional');
+    document.getElementById('labels-left').classList.remove('internacional');
+    document.getElementById('labels-right').classList.remove('internacional');
+
     renderizarTabuleiro(); renderizarNotacao();
-    if (!modoEspectador && idSalaAtual && !modoIA && !modoHotSeat) setTimeout(() => marcarPronto(), 400);
-    if (modoIA || modoHotSeat) setTimeout(() => { iniciarTimer(); iniciarRelogio(); }, 600);
+    setTimeout(() => { iniciarTimer(); iniciarRelogio(); }, 600);
     iniciarMonitorConexao(); atualizarRelogioUI();
 }
 
-function renderizarReguas() {
+function entrarInterfaceJogoInternacional() {
+    modoInternacional = true;
+    document.getElementById('lobby-screen').classList.add('hidden');
+    document.getElementById('game-screen').classList.remove('hidden');
+    document.getElementById('display-sala-tag').textContent = '🌍 Damas Internacionais (10x10)';
+    document.getElementById('badge-espectador').classList.add('hidden');
+    document.getElementById('badge-ia').classList.add('hidden');
+    document.getElementById('badge-hotseat').classList.remove('hidden');
+
+    document.getElementById('checkers-board').classList.add('internacional');
+    document.getElementById('labels-top').classList.add('internacional');
+    document.getElementById('labels-bottom').classList.add('internacional');
+    document.getElementById('labels-left').classList.add('internacional');
+    document.getElementById('labels-right').classList.add('internacional');
+
+    renderizarTabuleiroInternacional(); renderizarNotacao();
+    setTimeout(() => { iniciarTimer(); iniciarRelogio(); }, 600);
+    iniciarMonitorConexao(); atualizarRelogioUI();
+}
+
+function renderizarReguas(tamanho = 8) {
     const invertido = (minhaCor === 'red');
-    const colunas = ['a','b','c','d','e','f','g','h'], linhas = ['8','7','6','5','4','3','2','1'];
+    const colunas = tamanho === 10 ? ['a','b','c','d','e','f','g','h','i','j'] : ['a','b','c','d','e','f','g','h'];
+    const linhas = tamanho === 10 ? ['10','9','8','7','6','5','4','3','2','1'] : ['8','7','6','5','4','3','2','1'];
     const topo = invertido ? linhas.slice().reverse() : linhas.slice();
     const base = invertido ? linhas.slice() : linhas.slice().reverse();
     const esquerda = invertido ? colunas.slice().reverse() : colunas.slice();
@@ -979,7 +850,7 @@ function renderizarTabuleiro() {
     const grid = document.getElementById('checkers-board'); if (!grid) return;
     grid.innerHTML = '';
     const invertido = (minhaCor === 'red'), corDaVez = turnoAtual;
-    const capsObrig = (!jogoEncerrado && !modoEspectador && !emPausa && !iaPensando && (modoHotSeat || turnoAtual === minhaCor)) ? capturasObrigatorias(tabuleiro, corDaVez) : [];
+    const capsObrig = (!jogoEncerrado && !modoEspectador && !emPausa && !iaPensando) ? capturasObrigatorias(tabuleiro, corDaVez) : [];
     const pecasObrigadas = new Set(capsObrig.map(o => `${o.r},${o.c}`));
     const temObrigatoria = pecasObrigadas.size > 0;
 
@@ -1001,20 +872,52 @@ function renderizarTabuleiro() {
                 pieceEl.className = `piece ${peca.startsWith('white') ? 'white' : 'red'}${peca.includes('king') ? ' king' : ''}`;
                 wrapper.appendChild(pieceEl); square.appendChild(wrapper);
             }
-            if (isDark && !modoEspectador && !emPausa && !iaPensando && (modoHotSeat || turnoAtual === minhaCor)) {
+            if (isDark && !modoEspectador && !emPausa && !iaPensando) {
                 square.addEventListener('click', () => clicarCasa(r, c));
             }
             grid.appendChild(square);
         }
     }
-    renderizarReguas();
-    document.getElementById('badge-obrigatoria')?.classList.toggle('hidden', !(jogoEncerrado || modoEspectador || !(modoHotSeat || turnoAtual === minhaCor) || !temObrigatoria));
-    document.getElementById('badge-pausa')?.classList.toggle('hidden', !emPausa);
+    renderizarReguas(8);
+}
+
+function renderizarTabuleiroInternacional() {
+    const grid = document.getElementById('checkers-board'); if (!grid) return;
+    grid.innerHTML = '';
+    const invertido = (minhaCor === 'red'), corDaVez = turnoAtual;
+    const capsObrig = (!jogoEncerrado && !modoEspectador && !emPausa) ? capturasObrigatoriasInt(tabuleiro, corDaVez) : [];
+    const pecasObrigadas = new Set(capsObrig.map(o => `${o.r},${o.c}`));
+    const temObrigatoria = pecasObrigadas.size > 0;
+
+    for (let vr = 0; vr < 10; vr++) {
+        for (let vc = 0; vc < 10; vc++) {
+            const r = invertido ? (9 - vr) : vr, c = invertido ? (9 - vc) : vc;
+            const square = document.createElement('div');
+            const isDark = (r + c) % 2 === 1;
+            square.className = `square ${isDark ? 'dark' : 'light'}`;
+            if (celulaSelecionada?.r === r && celulaSelecionada?.c === c) square.classList.add('selected');
+            const mov = movimentosValidos.find(m => m.r === r && m.c === c);
+            if (mov) square.classList.add(mov.captura ? 'capture-target' : 'highlight');
+            if (temObrigatoria && pecasObrigadas.has(`${r},${c}`) && !celulaSelecionada) square.classList.add('capture-mandatory');
+            if (ultimaJogadaDestino && ultimaJogadaDestino.r === r && ultimaJogadaDestino.c === c) square.classList.add('ultimo-lance');
+            const peca = tabuleiro[r]?.[c];
+            if (peca) {
+                const wrapper = document.createElement('div'); wrapper.className = 'piece-wrapper';
+                const pieceEl = document.createElement('div');
+                pieceEl.className = `piece ${peca.startsWith('white') ? 'white' : 'red'}${peca.includes('king') ? ' king' : ''}`;
+                wrapper.appendChild(pieceEl); square.appendChild(wrapper);
+            }
+            if (isDark && !modoEspectador && !emPausa) {
+                square.addEventListener('click', () => clicarCasaInternacional(r, c));
+            }
+            grid.appendChild(square);
+        }
+    }
+    renderizarReguas(10);
 }
 
 function clicarCasa(r, c) {
     if (modoEspectador || emPausa || iaPensando || jogoEncerrado) return;
-    if (!modoHotSeat && turnoAtual !== minhaCor) return;
     const peca = tabuleiro[r][c];
     if (peca && peca.startsWith(turnoAtual)) {
         const temObrigatoria = jogadorTemCapturaObrigatoria(tabuleiro, turnoAtual);
@@ -1030,6 +933,23 @@ function clicarCasa(r, c) {
     }
 }
 
+function clicarCasaInternacional(r, c) {
+    if (modoEspectador || emPausa || jogoEncerrado) return;
+    const peca = tabuleiro[r][c];
+    if (peca && peca.startsWith(turnoAtual)) {
+        const temObrigatoria = jogadorTemCapturaObrigatoriaInt(tabuleiro, turnoAtual);
+        const movs = calcularMovimentosInt(tabuleiro, r, c, turnoAtual);
+        if (temObrigatoria && movs.filter(m => m.captura).length === 0) {
+            toast('⚡ Obrigado a capturar!', 'error'); SoundFX.error(); return;
+        }
+        SoundFX.select(); celulaSelecionada = { r, c }; movimentosValidos = temObrigatoria ? movs.filter(m => m.captura) : movs;
+        renderizarTabuleiroInternacional(); return;
+    }
+    if (celulaSelecionada && movimentosValidos.some(m => m.r === r && m.c === c)) {
+        executarMovimentoInternacional(celulaSelecionada.r, celulaSelecionada.c, r, c);
+    }
+}
+
 async function executarMovimento(deR, deC, paraR, paraC) {
     const mov = movimentosValidos.find(m => m.r === paraR && m.c === paraC);
     if (!mov) return;
@@ -1037,11 +957,11 @@ async function executarMovimento(deR, deC, paraR, paraC) {
     let promoveu = false;
 
     if (mov.caminhoCompleto && mov.caminhoCompleto.length > 0) {
-        let pos = { r: deR, c: deC }, passos = 0;
+        let pos = { r: deR, c: deC };
         for (const passo of mov.caminhoCompleto) {
             const pAqui = tabuleiro[pos.r][pos.c];
             tabuleiro[passo.r][passo.c] = pAqui; tabuleiro[pos.r][pos.c] = null; tabuleiro[passo.capturada.r][passo.capturada.c] = null;
-            pos = { r: passo.r, c: passo.c }; passos++;
+            pos = { r: passo.r, c: passo.c };
             if (!pAqui.includes('king') && pAqui === 'white' && pos.r === 0) { tabuleiro[pos.r][pos.c] = 'white-king'; promoveu = true; }
             if (!pAqui.includes('king') && pAqui === 'red' && pos.r === 7) { tabuleiro[pos.r][pos.c] = 'red-king'; promoveu = true; }
         }
@@ -1054,62 +974,58 @@ async function executarMovimento(deR, deC, paraR, paraC) {
     }
 
     ultimaJogadaDestino = { r: paraR, c: paraC };
-    historicoMovimentos.push({ tabuleiro: tabuleiroParaFirebase(tabuleiro), turno: turnoAtual, cor: corPeca, de: `(${deR},${deC})`, para: `(${paraR},${paraC})` });
     adicionarNotacao(corPeca, { r: deR, c: deC }, { r: paraR, c: paraC }, !!mov.captura, pecaMovida.includes('king') || promoveu, mov.caminhoCompleto);
     celulaSelecionada = null; movimentosValidos = []; renderizarTabuleiro();
 
     if (contarPecasDaCor(tabuleiro, corPeca === 'white' ? 'red' : 'white') === 0) {
-        jogoEncerrado = true; pararTimer(); pararRelogio();
-        if (modoIA || modoHotSeat) tratarFimDeJogo(corPeca, 'sem-pecas');
-        else await encerrarPartidaComTransacao(corPeca, 'sem-pecas');
-        return;
+        jogoEncerrado = true; tratarFimDeJogo(corPeca, 'sem-pecas'); return;
     }
 
     turnoAtual = turnoAtual === 'white' ? 'red' : 'white'; turnoInicioServidor = Date.now();
     if (modoHotSeat) { hotSeatJogadorAtual = turnoAtual; minhaCor = turnoAtual; }
-    aplicarIncremento(corPeca); atualizarRelogioUI();
 
-    const resEmpate = verificarEmpate();
-    if (resEmpate.empate) {
-        jogoEncerrado = true; pararTimer(); pararRelogio();
-        if (modoIA || modoHotSeat) tratarFimDeJogo('empate', 'empate');
-        else await encerrarPartidaComTransacao('empate', 'empate');
-        return;
+    if (modoIA && turnoAtual !== minhaCor) setTimeout(() => fazerJogadaIA(), 350);
+}
+
+async function executarMovimentoInternacional(deR, deC, paraR, paraC) {
+    const mov = movimentosValidos.find(m => m.r === paraR && m.c === paraC);
+    if (!mov) return;
+    const pecaMovida = tabuleiro[deR][deC], corPeca = pecaMovida.startsWith('white') ? 'white' : 'red';
+    let promoveu = false;
+
+    if (mov.caminhoCompleto && mov.caminhoCompleto.length > 0) {
+        let pos = { r: deR, c: deC };
+        for (const passo of mov.caminhoCompleto) {
+            const pAqui = tabuleiro[pos.r][pos.c];
+            tabuleiro[passo.r][passo.c] = pAqui; tabuleiro[pos.r][pos.c] = null; tabuleiro[passo.capturada.r][passo.capturada.c] = null;
+            pos = { r: passo.r, c: passo.c };
+            if (!pAqui.includes('king') && pAqui === 'white' && pos.r === 0) { tabuleiro[pos.r][pos.c] = 'white-king'; promoveu = true; }
+            if (!pAqui.includes('king') && pAqui === 'red' && pos.r === 9) { tabuleiro[pos.r][pos.c] = 'red-king'; promoveu = true; }
+        }
+        SoundFX.capture(); if (promoveu) SoundFX.king();
+    } else {
+        tabuleiro[paraR][paraC] = pecaMovida; tabuleiro[deR][deC] = null;
+        if (pecaMovida === 'white' && paraR === 0) { tabuleiro[paraR][paraC] = 'white-king'; promoveu = true; }
+        if (pecaMovida === 'red' && paraR === 9) { tabuleiro[paraR][paraC] = 'red-king'; promoveu = true; }
+        SoundFX.move(); if (promoveu) SoundFX.king();
     }
 
-    if (modoIA) { if (turnoAtual !== minhaCor) setTimeout(() => fazerJogadaIA(), 350); return; }
-    if (modoHotSeat) { setTimeout(() => { iniciarTimer(); iniciarRelogio(); }, 300); return; }
+    ultimaJogadaDestino = { r: paraR, c: paraC };
+    adicionarNotacao(corPeca, { r: deR, c: deC }, { r: paraR, c: paraC }, !!mov.captura, pecaMovida.includes('king') || promoveu, mov.caminhoCompleto);
+    celulaSelecionada = null; movimentosValidos = []; renderizarTabuleiroInternacional();
 
-    try {
-        await fns.runTransaction(fns.ref(db, `salas_damas/${idSalaAtual}`), (atual) => {
-            if (!atual || atual.status === 'encerrado') return;
-            return {
-                ...atual, tabuleiro: tabuleiroParaFirebase(tabuleiro), turno: turnoAtual,
-                turnoInicio: Date.now(), turnoNumero: (atual.turnoNumero || 1) + 1,
-                versao: (atual.versao || 0) + 1, ultimaAtividade: Date.now()
-            };
-        });
-    } catch (_) {}
-}
+    if (contarPecasDaCorInt(tabuleiro, corPeca === 'white' ? 'red' : 'white') === 0) {
+        jogoEncerrado = true; tratarFimDeJogo(corPeca, 'sem-pecas'); return;
+    }
 
-function verificarEmpate() {
-    return { empate: false };
-}
-
-async function encerrarPartidaComTransacao(vencedor, motivo) {
-    if (!firebaseDisponivel || !idSalaAtual || modoIA || modoHotSeat) { tratarFimDeJogo(vencedor, motivo); return; }
-    try {
-        await fns.runTransaction(fns.ref(db, `salas_damas/${idSalaAtual}`), (atual) => {
-            if (!atual || atual.status === 'encerrado') return;
-            return { ...atual, status: 'encerrado', vencedor, motivoFim: motivo, versao: (atual.versao || 0) + 1, ultimaAtividade: Date.now() };
-        });
-    } catch (_) {}
+    turnoAtual = turnoAtual === 'white' ? 'red' : 'white'; turnoInicioServidor = Date.now();
+    hotSeatJogadorAtual = turnoAtual; minhaCor = turnoAtual;
 }
 
 function tratarFimDeJogo(vencedor, motivo) {
     if (desistenciaProcessada) return;
     desistenciaProcessada = true; pararTimer(); pararRelogio();
-    const euVenci = modoHotSeat ? (vencedor === hotSeatJogadorAtual) : (vencedor === minhaCor);
+    const euVenci = vencedor === hotSeatJogadorAtual || vencedor === minhaCor;
     if (vencedor === 'empate') { SoundFX.empate(); toast('🤝 Empate!', 'info'); adicionarAoHistorico('empate', nomeOponente); }
     else if (euVenci) { SoundFX.win(); registrarVitoria(); toast('🏆 Você venceu!', 'success'); adicionarAoHistorico('vitoria', nomeOponente); }
     else { SoundFX.lose(); registrarDerrota(); toast('😢 Você perdeu.', 'error'); adicionarAoHistorico('derrota', nomeOponente); }
@@ -1157,22 +1073,8 @@ async function fazerJogadaIA() {
     iniciarTimer(); iniciarRelogio();
 }
 
-function escutarFirebase() {
-    if (!firebaseDisponivel) return;
-    if (unsubscribeFirebase) unsubscribeFirebase();
-    unsubscribeFirebase = fns.onValue(fns.ref(db, 'salas_damas/' + idSalaAtual), (snapshot) => {
-        if (!snapshot.exists()) return;
-        const dados = snapshot.val();
-        tabuleiro = firebaseParaTabuleiro(dados.tabuleiro);
-        turnoAtual = dados.turno || 'white';
-        jogoEncerrado = dados.status === 'encerrado';
-        renderizarTabuleiro();
-    });
-}
-function escutarChat() {}
-
 function jogarContraIA(nivel) {
-    SoundFX.click(); modoIA = true; modoHotSeat = false; nivelIA = nivel;
+    SoundFX.click(); modoIA = true; modoHotSeat = false; modoInternacional = false; nivelIA = nivel;
     idSalaAtual = 'IA-' + Date.now().toString(36).toUpperCase(); minhaCor = 'white';
     tabuleiro = criarTabuleiroInicial(); turnoAtual = 'white'; jogoEncerrado = false;
     entrarInterfaceJogo(); toast(`🤖 ${IA.NIVEIS[nivel].nome}`, 'success');
