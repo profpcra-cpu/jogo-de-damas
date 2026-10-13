@@ -569,3 +569,14 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
         transition-duration: 0.01ms !important;
     }
 }
+
+.checkers-grid.internacional {
+    grid-template-columns: repeat(10, 1fr) !important;
+    grid-template-rows: repeat(10, 1fr) !important;
+}
+.board-ruler-top.internacional, .board-ruler-bottom.internacional {
+    grid-template-columns: repeat(10, 1fr) !important;
+}
+.board-ruler-left.internacional, .board-ruler-right.internacional {
+    grid-template-rows: repeat(10, 1fr) !important;
+}
