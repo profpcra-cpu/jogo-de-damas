@@ -1,5 +1,5 @@
 // ============================================================
-// Motor de Jogo e Regras Internacionais (100 casas / 10x10)
+// Motor de Jogo e Regras Internacionais (100 casas / 10x10) - Corrigido
 // ============================================================
 
 export function criarTabuleiroInternacional() {
@@ -54,15 +54,22 @@ export function explorarCapturasInt(r, c, cor, tab, capturadasSet = new Set(), p
     if (isDama) {
         for (const dr of dirs) for (const dc of dirs) {
             let nr = r + dr, nc = c + dc;
-            while (nr >= 0 && nr < 10 && nc >= 0 && nc < 10 && !tab[nr][nc]) { nr += dr; nc += dc; }
+            // Procura pela primeira peça adversária na diagonal
+            while (nr >= 0 && nr < 10 && nc >= 0 && nc < 10 && !tab[nr][nc]) { 
+                nr += dr; 
+                nc += dc; 
+            }
             if (nr < 0 || nr >= 10 || nc < 0 || nc >= 10) continue;
             const alvo = tab[nr][nc];
             if (!alvo || alvo.startsWith(cor)) continue;
             if (capturadasSet.has(`${nr},${nc}`)) continue;
+
+            // A partir da peça adversária, recolhe todas as casas vazias onde a dama pode pousar
             let tr = nr + dr, tc = nc + dc;
             while (tr >= 0 && tr < 10 && tc >= 0 && tc < 10 && !tab[tr][tc]) {
                 caps.push({ r: tr, c: tc, capturada: { r: nr, c: nc } });
-                tr += dr; tc += dc;
+                tr += dr; 
+                tc += dc;
             }
         }
     } else {
@@ -76,21 +83,40 @@ export function explorarCapturasInt(r, c, cor, tab, capturadasSet = new Set(), p
             }
         }
     }
+
     if (caps.length === 0) return [];
+
     for (const cap of caps) {
         const novaTab = tab.map(row => row.slice());
         const pecaAtual = novaTab[r][c];
-        novaTab[cap.r][cap.c] = pecaAtual; novaTab[r][c] = null; novaTab[cap.capturada.r][cap.capturada.c] = null;
+        novaTab[cap.r][cap.c] = pecaAtual; 
+        novaTab[r][c] = null; 
+        novaTab[cap.capturada.r][cap.capturada.c] = null;
+
         const isPeao = !pecaAtual.includes('king');
         const corDaPeca = pecaAtual.startsWith('white') ? 'white' : 'red';
-        if ((isPeao && corDaPeca === 'white' && cap.r === 0) || (isPeao && corDaPeca === 'red' && cap.r === 9)) {
+        const virouDamaAgora = (isPeao && corDaPeca === 'white' && cap.r === 0) || (isPeao && corDaPeca === 'red' && cap.r === 9);
+
+        if (virouDamaAgora) {
             novaTab[cap.r][cap.c] = corDaPeca + '-king';
         }
+
         const novasCapturadas = new Set(capturadasSet);
         novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
-        const continuacoes = explorarCapturasInt(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
-        if (continuacoes.length === 0) caminhos.push([cap]);
-        else for (const cont of continuacoes) caminhos.push([cap, ...cont]);
+
+        // REGRA OFICIAL: Se o peão virou dama no meio do salto, ele cessa as capturas adicionais neste turno
+        let continuacoes = [];
+        if (!virouDamaAgora) {
+            continuacoes = explorarCapturasInt(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
+        }
+
+        if (continuacoes.length === 0) {
+            caminhos.push([cap]);
+        } else {
+            for (const cont of continuacoes) {
+                caminhos.push([cap, ...cont]);
+            }
+        }
     }
     return caminhos;
 }
