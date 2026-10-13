@@ -1,7 +1,9 @@
 // ============================================================
-// Motor de Jogo, Regras CBD e Inteligência Artificial (v7.4 - Completo e Corrigido)
+// Motor de Jogo, Regras CBD e Inteligência Artificial
+// v7.6 — Completo e Corrigido (brasileiro 8x8)
 // ============================================================
 
+// ---------- TABULEIRO ----------
 export function criarTabuleiroInicial() {
     const t = Array.from({ length: 8 }, () => Array(8).fill(null));
     for (let r = 0; r < 3; r++) for (let c = 0; c < 8; c++) if ((r + c) % 2 === 1) t[r][c] = 'red';
@@ -32,18 +34,7 @@ export function contarPecasDaCor(tab, cor) {
     return n;
 }
 
-export function jogadorTemAlgumMovimento(tab, cor) {
-    for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-            const p = tab[r][c];
-            if (p && p.startsWith(cor)) {
-                if (calcularMovimentos(tab, r, c, cor).length > 0) return true;
-            }
-        }
-    }
-    return false;
-}
-
+// ---------- EXPLORAÇÃO DE CAPTURAS ----------
 export function explorarCapturas(r, c, cor, tab, capturadasSet = new Set(), profundidade = 0) {
     if (profundidade > 20) return [];
     const peca = tab[r][c]; if (!peca) return [];
@@ -81,33 +72,27 @@ export function explorarCapturas(r, c, cor, tab, capturadasSet = new Set(), prof
     for (const cap of caps) {
         const novaTab = tab.map(row => row.slice());
         const pecaAtual = novaTab[r][c];
-        novaTab[cap.r][cap.c] = pecaAtual; 
-        novaTab[r][c] = null; 
+        novaTab[cap.r][cap.c] = pecaAtual;
+        novaTab[r][c] = null;
         novaTab[cap.capturada.r][cap.capturada.c] = null;
 
         const isPeao = !pecaAtual.includes('king');
         const corDaPeca = pecaAtual.startsWith('white') ? 'white' : 'red';
         const virouDamaAgora = (isPeao && corDaPeca === 'white' && cap.r === 0) || (isPeao && corDaPeca === 'red' && cap.r === 7);
 
-        if (virouDamaAgora) {
-            novaTab[cap.r][cap.c] = corDaPeca + '-king';
-        }
+        if (virouDamaAgora) novaTab[cap.r][cap.c] = corDaPeca + '-king';
 
         const novasCapturadas = new Set(capturadasSet);
         novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
 
+        // Regra CBD: promoção no meio do salto interrompe a captura múltipla
         let continuacoes = [];
         if (!virouDamaAgora) {
             continuacoes = explorarCapturas(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
         }
 
-        if (continuacoes.length === 0) {
-            caminhos.push([cap]);
-        } else {
-            for (const cont of continuacoes) {
-                caminhos.push([cap, ...cont]);
-            }
-        }
+        if (continuacoes.length === 0) caminhos.push([cap]);
+        else for (const cont of continuacoes) caminhos.push([cap, ...cont]);
     }
     return caminhos;
 }
@@ -148,9 +133,12 @@ export function capturasObrigatorias(tab, cor) {
 
 export function jogadorTemCapturaObrigatoria(tab, cor) { return maxCapturasGlobais(tab, cor) > 0; }
 
+// ---------- MOVIMENTOS VÁLIDOS ----------
 export function calcularMovimentos(tab, r, c, corDaVez) {
     const peca = tab[r][c]; if (!peca) return [];
     const cor = peca.startsWith('white') ? 'white' : 'red';
+
+    // Se há captura obrigatória GLOBAL para essa cor
     const obrig = capturasObrigatorias(tab, cor);
     if (obrig.length > 0) {
         const estaObrig = obrig.find(o => o.r === r && o.c === c);
@@ -161,12 +149,17 @@ export function calcularMovimentos(tab, r, c, corDaVez) {
             return { r: destino.r, c: destino.c, captura: cam[0].capturada, caminhoCompleto: cam };
         });
     }
+
+    // Sem captura obrigatória: movimentos simples
     const movs = [];
     const isDama = peca.includes('king');
     if (isDama) {
         for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
             let nr = r + dr, nc = c + dc;
-            while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tab[nr][nc]) { movs.push({ r: nr, c: nc }); nr += dr; nc += dc; }
+            while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tab[nr][nc]) {
+                movs.push({ r: nr, c: nc });
+                nr += dr; nc += dc;
+            }
         }
     } else {
         const dirs = cor === 'white' ? [-1] : [+1];
@@ -178,33 +171,145 @@ export function calcularMovimentos(tab, r, c, corDaVez) {
     return movs;
 }
 
-// Função utilitária para aplicar o movimento no jogo/Firebase limpando corretamente as capturas
+// ---------- FIM DE JOGO ----------
+/**
+ * Verifica se o jogador `cor` tem ALGUM movimento válido.
+ * ✔️ CORRIGIDO: versão rápida — não chama calcularMovimentos (que é caro).
+ * Verifica primeiro se há capturas obrigatórias; se sim, testa só as peças obrigadas.
+ * Se não, testa deslocamentos simples.
+ */
+export function jogadorTemAlgumMovimento(tab, cor) {
+    // 1) Se há captura obrigatória para esta cor, tem movimento se houver peça obrigada
+    const obrig = capturasObrigatorias(tab, cor);
+    if (obrig.length > 0) return true;
+
+    // 2) Senão, procura qualquer deslocamento simples
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const p = tab[r][c];
+            if (!p || !p.startsWith(cor)) continue;
+            const isDama = p.includes('king');
+            if (isDama) {
+                for (const dr of [-1, +1]) for (const dc of [-1, +1]) {
+                    const nr = r + dr, nc = c + dc;
+                    if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tab[nr][nc]) return true;
+                }
+            } else {
+                const dr = cor === 'white' ? -1 : +1;
+                for (const dc of [-1, +1]) {
+                    const nr = r + dr, nc = c + dc;
+                    if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && !tab[nr][nc]) return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+/**
+ * ✅ NOVO: verificação completa de fim de jogo (ordem CBD)
+ * Retorna null (jogo continua) ou objeto com { tipo, vencedor?, motivo }
+ */
+export function verificarFimDeJogoCompleto(tab, turno, contadores = {}) {
+    const pecasBrancas = contarPecasDaCor(tab, 'white');
+    const pecasPretas = contarPecasDaCor(tab, 'red');
+
+    // 1) Captura total
+    if (pecasBrancas === 0 && pecasPretas === 0) {
+        return { tipo: 'empate', motivo: 'tabuleiro-vazio' };
+    }
+    if (pecasBrancas === 0) return { tipo: 'vitoria', vencedor: 'red', motivo: 'sem-pecas' };
+    if (pecasPretas === 0) return { tipo: 'vitoria', vencedor: 'white', motivo: 'sem-pecas' };
+
+    // 2) Imobilização
+    if (!jogadorTemAlgumMovimento(tab, turno)) {
+        return {
+            tipo: 'vitoria',
+            vencedor: turno === 'white' ? 'red' : 'white',
+            motivo: 'sem-movimentos'
+        };
+    }
+
+    // 3) Empates por contadores
+    const lancesSemCaptura = contadores.lancesDamasSemCaptura || 0;
+    if (lancesSemCaptura >= 20) {
+        return { tipo: 'empate', motivo: '20-lances-dama-sem-captura' };
+    }
+
+    const repeticoes = contadores.posicoesRepetidas || {};
+    const chave = JSON.stringify(tab) + '|' + turno;
+    const count = (repeticoes[chave] || 0) + 1;
+    if (count >= 3) {
+        return { tipo: 'empate', motivo: 'posicao-repetida-3x' };
+    }
+
+    return null;
+}
+
+/**
+ * ✅ NOVO: deteta finais específicos (2v2 damas, etc.) — para a UI avisar
+ */
+export function detectarFinalEspecial(tab) {
+    const contar = (cor) => {
+        let pedras = 0, damas = 0;
+        for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+            const p = tab[r][c];
+            if (p && p.startsWith(cor)) {
+                if (p.includes('king')) damas++; else pedras++;
+            }
+        }
+        return { pedras, damas };
+    };
+    const b = contar('white');
+    const p = contar('red');
+    if (b.damas + b.pedras === 0 || p.damas + p.pedras === 0) return null;
+    if (b.damas === 2 && p.damas === 2 && b.pedras === 0 && p.pedras === 0) return '2v2damas';
+    if (b.damas === 2 && p.damas === 1 && b.pedras === 0 && p.pedras === 0) return '2v1dama';
+    if (b.damas === 1 && p.damas === 2 && b.pedras === 0 && p.pedras === 0) return '1v2dama';
+    if (b.damas === 1 && p.damas === 1 && b.pedras === 0 && p.pedras === 0) return '1v1dama';
+    if (b.damas === 3 && p.damas === 1 && b.pedras === 0 && p.pedras === 0) return '3v1dama';
+    if (b.damas === 1 && p.damas === 3 && b.pedras === 0 && p.pedras === 0) return '1v3dama';
+    return null;
+}
+
+// ---------- APLICAR MOVIMENTO ----------
+/**
+ * Aplica um movimento ao tabuleiro. Fonte ÚNICA de verdade.
+ * Usado pelo main.js, pela IA e pelos replays.
+ */
 export function executarMovimentoNoJogo(tabuleiroAtual, movimento) {
     const novoTabuleiro = tabuleiroAtual.map(row => row.slice());
+
     if (movimento.caminho && movimento.caminho.length > 0) {
         const origem = movimento.de;
-        const peca = novoTabuleiro[origem.r][origem.c];
+        const pecaOriginal = novoTabuleiro[origem.r][origem.c];
+        if (!pecaOriginal) return novoTabuleiro;
+
         novoTabuleiro[origem.r][origem.c] = null;
 
+        // Remover TODAS as capturadas primeiro
         for (const passo of movimento.caminho) {
             if (passo.capturada) {
                 novoTabuleiro[passo.capturada.r][passo.capturada.c] = null;
             }
         }
 
+        // Colocar peça no destino final (com possível promoção)
         const ultimoPasso = movimento.caminho[movimento.caminho.length - 1];
-        let pecaFinal = peca;
-        const isPeao = peca && !peca.includes('king');
-        const corPeca = peca.startsWith('white') ? 'white' : 'red';
+        let pecaFinal = pecaOriginal;
+        const isPeao = !pecaOriginal.includes('king');
+        const corPeca = pecaOriginal.startsWith('white') ? 'white' : 'red';
         if (isPeao && ((corPeca === 'white' && ultimoPasso.r === 0) || (corPeca === 'red' && ultimoPasso.r === 7))) {
             pecaFinal = corPeca + '-king';
         }
         novoTabuleiro[ultimoPasso.r][ultimoPasso.c] = pecaFinal;
     } else {
         const peca = novoTabuleiro[movimento.de.r][movimento.de.c];
+        if (!peca) return novoTabuleiro;
+
         novoTabuleiro[movimento.de.r][movimento.de.c] = null;
         let pecaFinal = peca;
-        const isPeao = peca && !peca.includes('king');
+        const isPeao = !peca.includes('king');
         const corPeca = peca.startsWith('white') ? 'white' : 'red';
         if (isPeao && ((corPeca === 'white' && movimento.para.r === 0) || (corPeca === 'red' && movimento.para.r === 7))) {
             pecaFinal = corPeca + '-king';
@@ -215,9 +320,8 @@ export function executarMovimentoNoJogo(tabuleiroAtual, movimento) {
 }
 
 // ============================================================
-// Inteligência Artificial (Minimax com Alpha-Beta)
+// INTELIGÊNCIA ARTIFICIAL — Minimax com Alpha-Beta
 // ============================================================
-
 export const IA = (() => {
     const NIVEIS = {
         1: { nome: '🐣 Iniciante', profundidade: 1, aleatoriedade: 0.60, usaPosicao: false },
@@ -227,11 +331,12 @@ export const IA = (() => {
         5: { nome: '🐉 Mestre', profundidade: 7, aleatoriedade: 0.00, usaPosicao: true }
     };
 
-    function clonarTabuleiro(t) { return t.map(r => r.slice()); }
-
+    // ---------- GERAÇÃO DE MOVIMENTOS ----------
     function gerarMovimentos(tab, cor) {
-        const movs = []; let maxCapt = 0;
+        const movs = [];
+        let maxCapt = 0;
         const capturasPorPeca = [];
+
         for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
             const p = tab[r][c]; if (!p || !p.startsWith(cor)) continue;
             const caminhos = explorarCapturas(r, c, cor, tab);
@@ -241,17 +346,24 @@ export const IA = (() => {
                 capturasPorPeca.push({ r, c, caminhos, max });
             }
         }
+
         if (maxCapt > 0) {
             for (const cp of capturasPorPeca) {
                 if (cp.max !== maxCapt) continue;
                 for (const cam of cp.caminhos) {
                     if (cam.length !== maxCapt) continue;
                     const dest = cam[cam.length - 1];
-                    movs.push({ de: { r: cp.r, c: cp.c }, para: { r: dest.r, c: dest.c }, caminho: cam, captura: true });
+                    movs.push({
+                        de: { r: cp.r, c: cp.c },
+                        para: { r: dest.r, c: dest.c },
+                        caminho: cam,
+                        captura: true
+                    });
                 }
             }
             return movs;
         }
+
         for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
             const p = tab[r][c]; if (!p || !p.startsWith(cor)) continue;
             const isDama = p.includes('king');
@@ -276,68 +388,59 @@ export const IA = (() => {
         return movs;
     }
 
+    // ---------- APLICAR MOVIMENTO (delega ao motor) ----------
+    // ✅ CORRIGIDO: usa a mesma função do jogo. Zero divergência.
     function aplicarMovimentoIA(tab, mov) {
-        const novo = clonarTabuleiro(tab);
-        if (mov.caminho && mov.caminho.length > 0) {
-            const origem = mov.de;
-            const pecaEmTransito = novo[origem.r][origem.c];
-            novo[origem.r][origem.c] = null;
-
-            for (const passo of mov.caminho) {
-                if (passo.capturada) {
-                    novo[passo.capturada.r][passo.capturada.c] = null;
-                }
-            }
-
-            const finalPasso = mov.caminho[mov.caminho.length - 1];
-            const isPeao = pecaEmTransito && !pecaEmTransito.includes('king');
-            const corPeca = pecaEmTransito.startsWith('white') ? 'white' : 'red';
-
-            let pecaFinal = pecaEmTransito;
-            if (isPeao && ((corPeca === 'white' && finalPasso.r === 0) || (corPeca === 'red' && finalPasso.r === 7))) {
-                pecaFinal = corPeca + '-king';
-            }
-            novo[finalPasso.r][finalPasso.c] = pecaFinal;
-        } else {
-            const peca = novo[mov.de.r][mov.de.c];
-            novo[mov.de.r][mov.de.c] = null;
-            if (peca === 'white' && mov.para.r === 0) {
-                novo[mov.para.r][mov.para.c] = 'white-king';
-            } else if (peca === 'red' && mov.para.r === 7) {
-                novo[mov.para.r][mov.para.c] = 'red-king';
-            } else {
-                novo[mov.para.r][mov.para.c] = peca;
-            }
-        }
-        return novo;
+        return executarMovimentoNoJogo(tab, mov);
     }
 
+    // ---------- AVALIAÇÃO ----------
     function avaliar(tab, cor, usaPosicao) {
         const oponente = cor === 'white' ? 'red' : 'white';
         let score = 0;
         for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
             const p = tab[r][c]; if (!p) continue;
-            const isDama = p.includes('king'); const valor = isDama ? 5 : 1;
+            const isDama = p.includes('king');
+            const valor = isDama ? 5 : 1;
             if (p.startsWith(cor)) {
                 score += valor;
-                if (usaPosicao) { if (!isDama) score += (cor === 'white' ? (7 - r) : r) * 0.08; if (c >= 2 && c <= 5) score += 0.05; }
+                if (usaPosicao) {
+                    if (!isDama) score += (cor === 'white' ? (7 - r) : r) * 0.08;
+                    if (c >= 2 && c <= 5) score += 0.05;
+                }
             } else {
                 score -= valor;
-                if (usaPosicao) { if (!isDama) score -= (oponente === 'white' ? (7 - r) : r) * 0.08; if (c >= 2 && c <= 5) score -= 0.05; }
+                if (usaPosicao) {
+                    if (!isDama) score -= (oponente === 'white' ? (7 - r) : r) * 0.08;
+                    if (c >= 2 && c <= 5) score -= 0.05;
+                }
             }
         }
         return score;
     }
 
+    // ---------- MINIMAX ----------
     function minimax(tab, prof, alpha, beta, corAtual, corIA, usaPosicao) {
         if (prof === 0) return avaliar(tab, corIA, usaPosicao);
+
         const movs = gerarMovimentos(tab, corAtual);
-        if (movs.length === 0) return corAtual === corIA ? -1000 : 1000;
+
+        // ✅ CORRIGIDO: valores terminais escalonados por profundidade
+        // Vitória em menos lances vale mais; derrota em menos lances vale menos.
+        if (movs.length === 0) {
+            return corAtual === corIA ? (-10000 - prof) : (10000 + prof);
+        }
+
         const maximizando = (corAtual === corIA);
         if (maximizando) {
             let melhor = -Infinity;
             for (const mov of movs) {
-                const val = minimax(aplicarMovimentoIA(tab, mov), prof - 1, alpha, beta, corAtual === 'white' ? 'red' : 'white', corIA, usaPosicao);
+                const val = minimax(
+                    aplicarMovimentoIA(tab, mov),
+                    prof - 1, alpha, beta,
+                    corAtual === 'white' ? 'red' : 'white',
+                    corIA, usaPosicao
+                );
                 if (val > melhor) melhor = val;
                 if (melhor > alpha) alpha = melhor;
                 if (beta <= alpha) break;
@@ -346,7 +449,12 @@ export const IA = (() => {
         } else {
             let melhor = Infinity;
             for (const mov of movs) {
-                const val = minimax(aplicarMovimentoIA(tab, mov), prof - 1, alpha, beta, corAtual === 'white' ? 'red' : 'white', corIA, usaPosicao);
+                const val = minimax(
+                    aplicarMovimentoIA(tab, mov),
+                    prof - 1, alpha, beta,
+                    corAtual === 'white' ? 'red' : 'white',
+                    corIA, usaPosicao
+                );
                 if (val < melhor) melhor = val;
                 if (melhor < beta) beta = melhor;
                 if (beta <= alpha) break;
@@ -355,15 +463,31 @@ export const IA = (() => {
         }
     }
 
+    // ---------- ESCOLHA DO MOVIMENTO ----------
     function escolherMovimento(tab, cor, nivel) {
         const cfg = NIVEIS[nivel] || NIVEIS[3];
         const movs = gerarMovimentos(tab, cor);
         if (movs.length === 0) return null;
-        if (Math.random() < cfg.aleatoriedade) return movs[Math.floor(Math.random() * movs.length)];
-        let melhorMov = movs[0]; let melhorVal = -Infinity;
+
+        // Aleatoriedade (para níveis baixos)
+        if (Math.random() < cfg.aleatoriedade) {
+            return movs[Math.floor(Math.random() * movs.length)];
+        }
+
+        let melhorMov = movs[0];
+        let melhorVal = -Infinity;
         for (const mov of movs) {
-            const val = minimax(aplicarMovimentoIA(tab, mov), cfg.profundidade - 1, -Infinity, Infinity, cor === 'white' ? 'red' : 'white', cor, cfg.usaPosicao);
-            if (val > melhorVal) { melhorVal = val; melhorMov = mov; }
+            const val = minimax(
+                aplicarMovimentoIA(tab, mov),
+                cfg.profundidade - 1,
+                -Infinity, Infinity,
+                cor === 'white' ? 'red' : 'white',
+                cor, cfg.usaPosicao
+            );
+            if (val > melhorVal) {
+                melhorVal = val;
+                melhorMov = mov;
+            }
         }
         return melhorMov;
     }
