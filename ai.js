@@ -1,5 +1,5 @@
 // ============================================================
-// Motor de Jogo, Regras CBD e Inteligência Artificial (v7.5 - Corrigido)
+// Motor de Jogo, Regras CBD e Inteligência Artificial (v7.4 - Completo e Corrigido)
 // ============================================================
 
 export function criarTabuleiroInicial() {
@@ -32,9 +32,6 @@ export function contarPecasDaCor(tab, cor) {
     return n;
 }
 
-/**
- * ✅ CORRIGIDO: usar diretamente calcularMovimentos (que já valida obrigatoriedade)
- */
 export function jogadorTemAlgumMovimento(tab, cor) {
     for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
@@ -84,8 +81,8 @@ export function explorarCapturas(r, c, cor, tab, capturadasSet = new Set(), prof
     for (const cap of caps) {
         const novaTab = tab.map(row => row.slice());
         const pecaAtual = novaTab[r][c];
-        novaTab[cap.r][cap.c] = pecaAtual;
-        novaTab[r][c] = null;
+        novaTab[cap.r][cap.c] = pecaAtual; 
+        novaTab[r][c] = null; 
         novaTab[cap.capturada.r][cap.capturada.c] = null;
 
         const isPeao = !pecaAtual.includes('king');
@@ -99,7 +96,6 @@ export function explorarCapturas(r, c, cor, tab, capturadasSet = new Set(), prof
         const novasCapturadas = new Set(capturadasSet);
         novasCapturadas.add(`${cap.capturada.r},${cap.capturada.c}`);
 
-        // ✅ Regra CBD: promoção a dama TERMINA a jogada (não pode continuar a capturar)
         let continuacoes = [];
         if (!virouDamaAgora) {
             continuacoes = explorarCapturas(cap.r, cap.c, cor, novaTab, novasCapturadas, profundidade + 1);
@@ -155,8 +151,6 @@ export function jogadorTemCapturaObrigatoria(tab, cor) { return maxCapturasGloba
 export function calcularMovimentos(tab, r, c, corDaVez) {
     const peca = tab[r][c]; if (!peca) return [];
     const cor = peca.startsWith('white') ? 'white' : 'red';
-
-    // ✅ CORRIGIDO: A regra de obrigatoriedade é GLOBAL por cor, não por corDaVez
     const obrig = capturasObrigatorias(tab, cor);
     if (obrig.length > 0) {
         const estaObrig = obrig.find(o => o.r === r && o.c === c);
@@ -184,46 +178,33 @@ export function calcularMovimentos(tab, r, c, corDaVez) {
     return movs;
 }
 
-/**
- * ✅ CORRIGIDO: agora resolve o "caminhoCompleto" corretamente, tratando captura em cadeia
- * Garante que as peças capturadas sejam removidas SEM colidir com a peça em trânsito.
- */
+// Função utilitária para aplicar o movimento no jogo/Firebase limpando corretamente as capturas
 export function executarMovimentoNoJogo(tabuleiroAtual, movimento) {
     const novoTabuleiro = tabuleiroAtual.map(row => row.slice());
-
     if (movimento.caminho && movimento.caminho.length > 0) {
         const origem = movimento.de;
-        const pecaOriginal = novoTabuleiro[origem.r][origem.c];
-        if (!pecaOriginal) return novoTabuleiro; // sanity check
-
-        // Remover a peça da origem ANTES de mexer nas capturadas
+        const peca = novoTabuleiro[origem.r][origem.c];
         novoTabuleiro[origem.r][origem.c] = null;
 
-        // ✅ Remover TODAS as peças capturadas pelo caminho primeiro
         for (const passo of movimento.caminho) {
             if (passo.capturada) {
                 novoTabuleiro[passo.capturada.r][passo.capturada.c] = null;
             }
         }
 
-        // ✅ Colocar a peça no destino final, com possível promoção
         const ultimoPasso = movimento.caminho[movimento.caminho.length - 1];
-        let pecaFinal = pecaOriginal;
-        const isPeao = !pecaOriginal.includes('king');
-        const corPeca = pecaOriginal.startsWith('white') ? 'white' : 'red';
-
-        // Promoção só conta no destino FINAL do caminho (regra CBD)
+        let pecaFinal = peca;
+        const isPeao = peca && !peca.includes('king');
+        const corPeca = peca.startsWith('white') ? 'white' : 'red';
         if (isPeao && ((corPeca === 'white' && ultimoPasso.r === 0) || (corPeca === 'red' && ultimoPasso.r === 7))) {
             pecaFinal = corPeca + '-king';
         }
         novoTabuleiro[ultimoPasso.r][ultimoPasso.c] = pecaFinal;
     } else {
         const peca = novoTabuleiro[movimento.de.r][movimento.de.c];
-        if (!peca) return novoTabuleiro; // sanity check
-
         novoTabuleiro[movimento.de.r][movimento.de.c] = null;
         let pecaFinal = peca;
-        const isPeao = !peca.includes('king');
+        const isPeao = peca && !peca.includes('king');
         const corPeca = peca.startsWith('white') ? 'white' : 'red';
         if (isPeao && ((corPeca === 'white' && movimento.para.r === 0) || (corPeca === 'red' && movimento.para.r === 7))) {
             pecaFinal = corPeca + '-king';
@@ -295,11 +276,40 @@ export const IA = (() => {
         return movs;
     }
 
-    /**
-     * ✅ CORRIGIDO: usar a mesma lógica de executarMovimentoNoJogo (consistência)
-     */
     function aplicarMovimentoIA(tab, mov) {
-        return executarMovimentoNoJogo(tab, mov);
+        const novo = clonarTabuleiro(tab);
+        if (mov.caminho && mov.caminho.length > 0) {
+            const origem = mov.de;
+            const pecaEmTransito = novo[origem.r][origem.c];
+            novo[origem.r][origem.c] = null;
+
+            for (const passo of mov.caminho) {
+                if (passo.capturada) {
+                    novo[passo.capturada.r][passo.capturada.c] = null;
+                }
+            }
+
+            const finalPasso = mov.caminho[mov.caminho.length - 1];
+            const isPeao = pecaEmTransito && !pecaEmTransito.includes('king');
+            const corPeca = pecaEmTransito.startsWith('white') ? 'white' : 'red';
+
+            let pecaFinal = pecaEmTransito;
+            if (isPeao && ((corPeca === 'white' && finalPasso.r === 0) || (corPeca === 'red' && finalPasso.r === 7))) {
+                pecaFinal = corPeca + '-king';
+            }
+            novo[finalPasso.r][finalPasso.c] = pecaFinal;
+        } else {
+            const peca = novo[mov.de.r][mov.de.c];
+            novo[mov.de.r][mov.de.c] = null;
+            if (peca === 'white' && mov.para.r === 0) {
+                novo[mov.para.r][mov.para.c] = 'white-king';
+            } else if (peca === 'red' && mov.para.r === 7) {
+                novo[mov.para.r][mov.para.c] = 'red-king';
+            } else {
+                novo[mov.para.r][mov.para.c] = peca;
+            }
+        }
+        return novo;
     }
 
     function avaliar(tab, cor, usaPosicao) {
@@ -322,14 +332,7 @@ export const IA = (() => {
     function minimax(tab, prof, alpha, beta, corAtual, corIA, usaPosicao) {
         if (prof === 0) return avaliar(tab, corIA, usaPosicao);
         const movs = gerarMovimentos(tab, corAtual);
-
-        // ✅ CORRIGIDO: valor terminal ajustado por profundidade para preferir vitórias rápidas
-        if (movs.length === 0) {
-            // Se é a vez da IA e não tem movimentos, ela perde.
-            // Se é a vez do oponente e não tem movimentos, a IA ganha.
-            return corAtual === corIA ? (-10000 - prof) : (10000 + prof);
-        }
-
+        if (movs.length === 0) return corAtual === corIA ? -1000 : 1000;
         const maximizando = (corAtual === corIA);
         if (maximizando) {
             let melhor = -Infinity;
